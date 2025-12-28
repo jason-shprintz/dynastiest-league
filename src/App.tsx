@@ -1,18 +1,41 @@
 import { useState } from 'react'
 import './App.css'
 
+type Section = 'home' | 'records' | 'champion' | 'constitution'
+
+interface ChampionRecord {
+  year: string
+  champion: string
+  record: string
+  points: number
+}
+
+interface CurrentChampion {
+  team: string
+  owner: string
+  year: string
+  record: string
+  points: number
+  playoffRun: string
+}
+
+interface ConstitutionSection {
+  title: string
+  content: string
+}
+
 function App() {
-  const [activeSection, setActiveSection] = useState('home')
+  const [activeSection, setActiveSection] = useState<Section>('home')
 
   // Sample data - can be replaced with real data later
-  const hallOfRecords = [
+  const hallOfRecords: ChampionRecord[] = [
     { year: '2023', champion: 'Team Thunder', record: '12-2', points: 1847 },
     { year: '2022', champion: 'Dynasty Kings', record: '11-3', points: 1789 },
     { year: '2021', champion: 'Grid Iron Giants', record: '10-4', points: 1723 },
     { year: '2020', champion: 'Team Thunder', record: '13-1', points: 1891 },
   ]
 
-  const currentChampion = {
+  const currentChampion: CurrentChampion = {
     team: 'Team Thunder',
     owner: 'Mike Johnson',
     year: '2023',
@@ -21,7 +44,7 @@ function App() {
     playoffRun: 'Won semifinals 145-132, Won finals 168-143'
   }
 
-  const constitutionSections = [
+  const constitutionSections: ConstitutionSection[] = [
     {
       title: '1. League Structure',
       content: 'The Dynastiest League is a 10-team dynasty fantasy football league. Each team maintains a roster year-over-year with an annual rookie draft.'

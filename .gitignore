@@ -75,3 +75,9 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Vite
+dist
+dist-ssr
+*.local
+*.tsbuildinfo

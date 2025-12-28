@@ -4,7 +4,7 @@ The Official Page for the Dynastiest League
 
 ## About
 
-A fantasy football league landing page built with Vite and React. Features include:
+A fantasy football league landing page built with Vite, React, and TypeScript. Features include:
 
 - Hall of Records showcasing past champions
 - Current Champion spotlight
@@ -33,6 +33,7 @@ npm run lint
 ## Tech Stack
 
 - React 19
+- TypeScript 5
 - Vite 7
 - CSS3 with responsive design
 - ESLint for code quality
