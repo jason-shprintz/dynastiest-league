@@ -1,4 +1,14 @@
 import { CurrentChampion } from "../../types";
+import {
+  ChampionSection,
+  ChampionCard,
+  ChampionBadge,
+  ChampionTeam,
+  ChampionOwner,
+  ChampionStats,
+  ChampionStat,
+  PlayoffRun,
+} from "./Champion.styles";
 
 const currentChampion: CurrentChampion = {
   team: "Team Thunder",
@@ -11,31 +21,31 @@ const currentChampion: CurrentChampion = {
 
 const Champion = () => {
   return (
-    <section className="champion-section">
-      <div className="champion-card">
-        <div className="champion-badge">👑 Reigning Champion</div>
-        <h2 className="champion-team">{currentChampion.team}</h2>
-        <p className="champion-owner">Owner: {currentChampion.owner}</p>
-        <div className="champion-stats">
-          <div className="champion-stat">
+    <ChampionSection>
+      <ChampionCard>
+        <ChampionBadge>👑 Reigning Champion</ChampionBadge>
+        <ChampionTeam>{currentChampion.team}</ChampionTeam>
+        <ChampionOwner>Owner: {currentChampion.owner}</ChampionOwner>
+        <ChampionStats>
+          <ChampionStat>
             <span className="label">Championship Year:</span>
             <span className="value">{currentChampion.year}</span>
-          </div>
-          <div className="champion-stat">
+          </ChampionStat>
+          <ChampionStat>
             <span className="label">Regular Season:</span>
             <span className="value">{currentChampion.record}</span>
-          </div>
-          <div className="champion-stat">
+          </ChampionStat>
+          <ChampionStat>
             <span className="label">Total Points:</span>
             <span className="value">{currentChampion.points}</span>
-          </div>
-        </div>
-        <div className="playoff-run">
+          </ChampionStat>
+        </ChampionStats>
+        <PlayoffRun>
           <h3>Championship Run</h3>
           <p>{currentChampion.playoffRun}</p>
-        </div>
-      </div>
-    </section>
+        </PlayoffRun>
+      </ChampionCard>
+    </ChampionSection>
   );
 };
 

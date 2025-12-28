@@ -1,3 +1,5 @@
+import { FooterContainer } from "./Footer.styles";
+
 /**
  * Renders the site footer with a copyright notice for The Dynastiest League.
  *
@@ -8,12 +10,12 @@
  */
 const Footer = () => {
   return (
-    <footer className="footer">
+    <FooterContainer>
       <p>
         &copy; 2020-{new Date().getFullYear()} The Dynastiest League. All rights
         reserved.
       </p>
-    </footer>
+    </FooterContainer>
   );
 };
 

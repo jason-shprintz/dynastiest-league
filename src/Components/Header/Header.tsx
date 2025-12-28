@@ -1,4 +1,12 @@
 import { Section } from "../../types";
+import {
+  HeaderContainer,
+  HeaderContent,
+  LeagueTitle,
+  LeagueSubtitle,
+  Navigation,
+  NavButton,
+} from "./Header.styles";
 
 interface IHeaderProps {
   activeSection: Section;
@@ -7,40 +15,38 @@ interface IHeaderProps {
 
 const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   return (
-    <header className="header">
-      <div className="header-content">
-        <h1 className="league-title">🏆 The Dynastiest League</h1>
-        <p className="league-subtitle">Est. 2020 • Dynasty Fantasy Football</p>
-      </div>
-      <nav className="navigation">
-        <button
-          className={`nav-btn ${activeSection === "home" ? "active" : ""}`}
+    <HeaderContainer>
+      <HeaderContent>
+        <LeagueTitle>🏆 The Dynastiest League</LeagueTitle>
+        <LeagueSubtitle>Est. 2020 • Dynasty Fantasy Football</LeagueSubtitle>
+      </HeaderContent>
+      <Navigation>
+        <NavButton
+          $isActive={activeSection === "home"}
           onClick={() => setActiveSection("home")}
         >
           Home
-        </button>
-        <button
-          className={`nav-btn ${activeSection === "records" ? "active" : ""}`}
+        </NavButton>
+        <NavButton
+          $isActive={activeSection === "records"}
           onClick={() => setActiveSection("records")}
         >
           Hall of Records
-        </button>
-        <button
-          className={`nav-btn ${activeSection === "champion" ? "active" : ""}`}
+        </NavButton>
+        <NavButton
+          $isActive={activeSection === "champion"}
           onClick={() => setActiveSection("champion")}
         >
           Current Champion
-        </button>
-        <button
-          className={`nav-btn ${
-            activeSection === "constitution" ? "active" : ""
-          }`}
+        </NavButton>
+        <NavButton
+          $isActive={activeSection === "constitution"}
           onClick={() => setActiveSection("constitution")}
         >
           Constitution
-        </button>
-      </nav>
-    </header>
+        </NavButton>
+      </Navigation>
+    </HeaderContainer>
   );
 };
 
