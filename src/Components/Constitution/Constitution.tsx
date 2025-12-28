@@ -1,6 +1,5 @@
 import { constitutionSections } from "./data";
 
-
 const Constitution = () => {
   return (
     <section className="constitution-section">
