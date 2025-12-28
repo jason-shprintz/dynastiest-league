@@ -5,6 +5,7 @@ The Official Page for the Dynastiest League
 ## About
 
 A fantasy football league landing page built with Vite and React. Features include:
+
 - Hall of Records showcasing past champions
 - Current Champion spotlight
 - League Constitution with rules and regulations
