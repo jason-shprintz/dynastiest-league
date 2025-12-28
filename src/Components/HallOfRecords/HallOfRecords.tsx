@@ -1,27 +1,38 @@
 import { hallOfRecords } from "./data";
+import {
+  RecordsSection,
+  SectionDescription,
+  RecordsTable,
+  TableHeader,
+  TableRow,
+  Year,
+  ChampionName,
+  Record,
+  Points,
+} from "./HallOfRecords.styles";
 
 const HallOfRecords = () => {
   return (
-    <section className="records-section">
+    <RecordsSection>
       <h2>Hall of Records</h2>
-      <p className="section-description">Champions throughout the years</p>
-      <div className="records-table">
-        <div className="table-header">
+      <SectionDescription>Champions throughout the years</SectionDescription>
+      <RecordsTable>
+        <TableHeader>
           <div>Year</div>
           <div>Champion</div>
           <div>Record</div>
           <div>Points</div>
-        </div>
+        </TableHeader>
         {hallOfRecords.map((record) => (
-          <div key={record.year} className="table-row">
-            <div className="year">{record.year}</div>
-            <div className="champion-name">{record.champion}</div>
-            <div className="record">{record.record}</div>
-            <div className="points">{record.points}</div>
-          </div>
+          <TableRow key={record.year}>
+            <Year>{record.year}</Year>
+            <ChampionName>{record.champion}</ChampionName>
+            <Record>{record.record}</Record>
+            <Points>{record.points}</Points>
+          </TableRow>
         ))}
-      </div>
-    </section>
+      </RecordsTable>
+    </RecordsSection>
   );
 };
 

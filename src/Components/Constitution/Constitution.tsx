@@ -1,21 +1,27 @@
 import { constitutionSections } from "./data";
+import {
+  ConstitutionSection,
+  SectionDescription,
+  ConstitutionContent,
+  ConstitutionItem,
+} from "./Constitution.styles";
 
 const Constitution = () => {
   return (
-    <section className="constitution-section">
+    <ConstitutionSection>
       <h2>League Constitution</h2>
-      <p className="section-description">
+      <SectionDescription>
         Rules and regulations of the Dynastiest League
-      </p>
-      <div className="constitution-content">
+      </SectionDescription>
+      <ConstitutionContent>
         {constitutionSections.map((section) => (
-          <div key={section.title} className="constitution-item">
+          <ConstitutionItem key={section.title}>
             <h3>{section.title}</h3>
             <p>{section.content}</p>
-          </div>
+          </ConstitutionItem>
         ))}
-      </div>
-    </section>
+      </ConstitutionContent>
+    </ConstitutionSection>
   );
 };
 
