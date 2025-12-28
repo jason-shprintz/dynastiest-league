@@ -9,7 +9,7 @@ const Constitution = () => {
       </p>
       <div className="constitution-content">
         {constitutionSections.map((section, index) => (
-          <div key={index} className="constitution-item">
+          <div key={section.title} className="constitution-item">
             <h3>{section.title}</h3>
             <p>{section.content}</p>
           </div>
