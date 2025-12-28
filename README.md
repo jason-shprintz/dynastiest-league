@@ -30,6 +30,16 @@ npm run preview
 npm run lint
 ```
 
+### macOS `._*` files (AppleDouble)
+
+On macOS (especially when working from an external drive), Finder can create `._*` “AppleDouble” metadata files alongside real files. If these get picked up by build tooling (Metro/Xcode/Gradle) or accidentally committed, they can cause confusing build/runtime issues.
+
+This repo ignores them via `.gitignore`, and also includes a cleanup script to remove any that already exist:
+
+```sh
+npm run clean:appledouble
+```
+
 ## Tech Stack
 
 - React 19
