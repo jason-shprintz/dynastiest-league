@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const ChampionSection = styled.section`
   animation: fadeIn 0.5s ease-in;

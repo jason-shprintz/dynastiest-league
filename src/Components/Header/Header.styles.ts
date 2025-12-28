@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const HeaderContainer = styled.header`
   background: rgba(0, 0, 0, 0.4);
@@ -62,9 +62,9 @@ export const Navigation = styled.nav`
 
 export const NavButton = styled.button<{ $isActive?: boolean }>`
   padding: 0.75rem 1.5rem;
-  background: ${props => props.$isActive ? '#0f3460' : 'transparent'};
-  border: 2px solid ${props => props.$isActive ? '#ffd700' : '#0f3460'};
-  color: ${props => props.$isActive ? '#ffd700' : '#a8b2d1'};
+  background: ${(props) => (props.$isActive ? "#0f3460" : "transparent")};
+  border: 2px solid ${(props) => (props.$isActive ? "#ffd700" : "#0f3460")};
+  color: ${(props) => (props.$isActive ? "#ffd700" : "#a8b2d1")};
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
