@@ -10,39 +10,11 @@ export const HeaderContainer = styled.header`
 `;
 
 export const HeaderContent = styled.div`
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
 
   @media (max-width: 480px) {
     padding: 1rem;
-  }
-`;
-
-export const LeagueTitle = styled.h1`
-  font-size: 2.5rem;
-  margin-bottom: 0.25rem;
-  background: linear-gradient(45deg, #ffd700, #ffed4e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 800;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 1.5rem;
-  }
-`;
-
-export const LeagueSubtitle = styled.p`
-  font-size: 1rem;
-  color: #a8b2d1;
-  font-weight: 300;
-
-  @media (max-width: 480px) {
-    font-size: 0.85rem;
   }
 `;
 

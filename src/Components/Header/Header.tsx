@@ -2,8 +2,6 @@ import { Section } from "../../types";
 import {
   HeaderContainer,
   HeaderContent,
-  LeagueTitle,
-  LeagueSubtitle,
   Navigation,
   NavButton,
 } from "./Header.styles";
@@ -17,8 +15,16 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   return (
     <HeaderContainer>
       <HeaderContent>
-        <LeagueTitle>🏆 The Dynastiest League</LeagueTitle>
-        <LeagueSubtitle>Est. 2020 • Dynasty Fantasy Football</LeagueSubtitle>
+        <img
+          src="/Hero.png"
+          alt="Dynastiest League Hero"
+          style={{
+            width: "50%",
+            maxWidth: "300px",
+            height: "auto",
+            borderRadius: "12px",
+          }}
+        />
       </HeaderContent>
       <Navigation>
         <NavButton
