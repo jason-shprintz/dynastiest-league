@@ -7,6 +7,15 @@ import {
 } from "./Constitution.styles";
 import renderContentWithLinks from "../../helper/renderContentWithLinks";
 
+/**
+ * Constitution component that displays the league's rules and regulations.
+ *
+ * Renders a structured view of the Dynastiest League constitution,
+ * iterating through predefined constitution sections and displaying
+ * each section's title and content with clickable links.
+ *
+ * @returns A React component containing the formatted league constitution
+ */
 const Constitution = () => {
   return (
     <ConstitutionSection>

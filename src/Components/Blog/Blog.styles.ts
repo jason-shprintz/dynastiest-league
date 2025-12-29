@@ -44,7 +44,7 @@ export const BlogPostItem = styled.div`
 
   &:hover {
     background: rgba(15, 52, 96, 0.5);
-    transform: translateX(5px);
+    transform: translateY(-5px);
   }
 
   h3 {

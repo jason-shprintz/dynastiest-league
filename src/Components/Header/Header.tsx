@@ -11,6 +11,14 @@ interface IHeaderProps {
   setActiveSection: React.Dispatch<React.SetStateAction<Section>>;
 }
 
+/**
+ * Header component that displays the league hero image and navigation menu.
+ *
+ * @param props - The component props
+ * @param props.activeSection - The currently active navigation section
+ * @param props.setActiveSection - Callback function to update the active section
+ * @returns A header element containing the hero image and navigation buttons
+ */
 const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   return (
     <HeaderContainer>
