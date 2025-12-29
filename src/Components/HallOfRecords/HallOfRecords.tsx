@@ -9,6 +9,9 @@ import {
   SecondName,
   ThirdName,
   TableTitle,
+  CustomMedalHeader,
+  CustomMedalRow,
+  CustomMedalTable,
 } from "./HallOfRecords.styles";
 
 const HallOfRecords = () => {
@@ -60,24 +63,24 @@ const HallOfRecords = () => {
       </RecordsTable>
 
       <h2 style={{ marginTop: "2.5rem" }}>All-Time Medal Rankings</h2>
-      <RecordsTable>
-        <TableHeader>
-          <TableTitle>Rank</TableTitle>
-          <TableTitle>User</TableTitle>
-          <TableTitle>Gold 🥇</TableTitle>
-          <TableTitle>Silver 🥈</TableTitle>
-          <TableTitle>Bronze 🥉</TableTitle>
-        </TableHeader>
+      <CustomMedalTable>
+        <CustomMedalHeader>
+          <div>Rank</div>
+          <div>User</div>
+          <div>Gold 🥇</div>
+          <div>Silver 🥈</div>
+          <div>Bronze 🥉</div>
+        </CustomMedalHeader>
         {rankings.map((entry) => (
-          <TableRow key={entry.user}>
-            <Year>{entry.rank}</Year>
-            <ChampionName>{entry.user}</ChampionName>
-            <ChampionName>{entry.gold}</ChampionName>
-            <SecondName>{entry.silver}</SecondName>
-            <ThirdName>{entry.bronze}</ThirdName>
-          </TableRow>
+          <CustomMedalRow key={entry.user}>
+            <div>{entry.rank}</div>
+            <div>{entry.user}</div>
+            <div>{entry.gold}</div>
+            <div>{entry.silver}</div>
+            <div>{entry.bronze}</div>
+          </CustomMedalRow>
         ))}
-      </RecordsTable>
+      </CustomMedalTable>
     </RecordsSection>
   );
 };

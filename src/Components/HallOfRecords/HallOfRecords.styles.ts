@@ -42,8 +42,20 @@ export const TableHeader = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  & > div:nth-child(2) {
-    flex: 2 1 0;
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
   }
 
   @media (max-width: 768px) {
@@ -75,8 +87,20 @@ export const TableRow = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  & > div:nth-child(2) {
-    flex: 2 1 0;
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
   }
   &:hover {
     background: rgba(15, 52, 96, 0.5);
@@ -133,4 +157,50 @@ export const ThirdName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+`;
+
+export const CustomMedalTable = styled(RecordsTable)``;
+export const CustomMedalHeader = styled(TableHeader)`
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
+  }
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 20%;
+    min-width: 20%;
+    max-width: 20%;
+    width: 20%;
+  }
+`;
+export const CustomMedalRow = styled(TableRow)`
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
+  }
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 20%;
+    min-width: 20%;
+    max-width: 20%;
+    width: 20%;
+  }
 `;
