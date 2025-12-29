@@ -11,21 +11,21 @@ import {
 } from "./Champion.styles";
 
 const currentChampion: CurrentChampion = {
-  team: "Team Thunder",
-  owner: "Mike Johnson",
-  year: "2023",
+  team: "Jaxon Flaxon Waxon",
+  owner: "jeffgottfried",
+  year: "2025",
   record: "12-2",
-  points: 1847,
-  playoffRun: "Won semifinals 145-132, Won finals 168-143",
+  points: 1797.38,
+  playoffRun: "Won semifinals 130.40-94.76, Won finals 137.20-83.94",
 };
 
 const Champion = () => {
   return (
     <ChampionSection>
       <ChampionCard>
-        <ChampionBadge>👑 Reigning Champion</ChampionBadge>
+        <ChampionBadge>Reigning Champion</ChampionBadge>
         <ChampionTeam>{currentChampion.team}</ChampionTeam>
-        <ChampionOwner>Owner: {currentChampion.owner}</ChampionOwner>
+        <ChampionOwner>Owner: 👑 {currentChampion.owner}</ChampionOwner>
         <ChampionStats>
           <ChampionStat>
             <span className="label">Championship Year:</span>
@@ -37,7 +37,16 @@ const Champion = () => {
           </ChampionStat>
           <ChampionStat>
             <span className="label">Total Points:</span>
-            <span className="value">{currentChampion.points}</span>
+            <span className="value">{currentChampion.points}*</span>
+          </ChampionStat>
+          <ChampionStat
+            style={{
+              textAlign: "center",
+              width: "100%",
+              justifyContent: "center",
+            }}
+          >
+            <span className="label">*Won Most Regular Season Points</span>
           </ChampionStat>
         </ChampionStats>
         <PlayoffRun>

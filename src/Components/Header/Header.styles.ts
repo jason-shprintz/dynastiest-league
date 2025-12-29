@@ -27,8 +27,12 @@ export const Navigation = styled.nav`
   background: rgba(15, 52, 96, 0.3);
 
   @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.25rem;
-    padding: 0.5rem;
+    padding: 0.5rem 0.2rem;
+    width: 100vw;
+    box-sizing: border-box;
   }
 `;
 
@@ -43,6 +47,8 @@ export const NavButton = styled.button<{ $isActive?: boolean }>`
   font-weight: 600;
   transition: all 0.3s ease;
   white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
 
   &:hover {
     background: rgba(15, 52, 96, 0.5);
@@ -53,6 +59,10 @@ export const NavButton = styled.button<{ $isActive?: boolean }>`
 
   @media (max-width: 480px) {
     padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    font-size: 1rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
   }
 `;
