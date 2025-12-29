@@ -32,7 +32,7 @@ const constitutionSections: ConstitutionSection[] = [
       Win One Lose One: 3 lottery entries
       Lose Both Matchups: 2 lottery entries
 
-    All lottery entries are combined into a single pool, and the draft order for picks 5-10 is determined by randomly drawing from this pool.`,
+    All lottery entries are combined into a single pool, and the draft order for picks 1-6 is determined by randomly drawing from this pool.`,
   },
   {
     title: "5. Trading Policy",
