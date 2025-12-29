@@ -9,7 +9,7 @@ export const Hero = styled.div`
   text-align: center;
   padding: 2rem 1rem;
 
-  h2 {
+  h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
     color: ${COLORS.accent};

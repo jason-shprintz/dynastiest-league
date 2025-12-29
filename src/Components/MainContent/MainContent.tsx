@@ -12,7 +12,7 @@ const MainContent = () => {
   return (
     <HomeSection>
       <Hero>
-        <h2>The Dynastiest League</h2>
+        <h1>The Dynastiest League</h1>
         <HeroText>Est. 2020</HeroText>
         <StatsGrid>
           <StatCard>
