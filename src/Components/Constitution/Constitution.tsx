@@ -23,7 +23,7 @@ const renderContentWithLinks = (content: string) => {
         {part}
       </a>
     ) : (
-      part
+      <span key={index}>{part}</span>
     )
   );
 };
