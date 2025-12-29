@@ -1,4 +1,4 @@
-type Section = "home" | "records" | "champion" | "constitution";
+type Section = "home" | "records" | "champion" | "constitution" | "blog";
 
 interface ConstitutionSection {
   title: string;
@@ -21,4 +21,10 @@ interface ChampionRecord {
   third: string;
 }
 
-export type { Section, ConstitutionSection, CurrentChampion, ChampionRecord };
+interface BlogPost {
+  title: string;
+  date: string;
+  content: string;
+}
+
+export type { Section, ConstitutionSection, CurrentChampion, ChampionRecord, BlogPost };

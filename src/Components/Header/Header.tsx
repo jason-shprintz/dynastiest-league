@@ -51,6 +51,12 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
         >
           Constitution
         </NavButton>
+        <NavButton
+          $isActive={activeSection === "blog"}
+          onClick={() => setActiveSection("blog")}
+        >
+          Blog
+        </NavButton>
       </Navigation>
     </HeaderContainer>
   );
