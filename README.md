@@ -9,6 +9,7 @@ A fantasy football league landing page built with Vite, React, and TypeScript. F
 - Hall of Records showcasing past champions
 - Current Champion spotlight
 - League Constitution with rules and regulations
+- Blog section for news and updates
 - Fully responsive design for desktop, tablet, and mobile devices
 
 ## Development

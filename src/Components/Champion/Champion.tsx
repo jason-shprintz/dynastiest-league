@@ -19,6 +19,19 @@ const currentChampion: CurrentChampion = {
   playoffRun: "Won semifinals 130.40-94.76, Won finals 137.20-83.94",
 };
 
+/**
+ * Displays the reigning fantasy league champion's information.
+ *
+ * Renders a styled card showcasing the current champion with their team name,
+ * owner, championship year, regular season record, total points, and playoff run details.
+ *
+ * @returns A React component displaying the champion's information card
+ *
+ * @example
+ * ```tsx
+ * <Champion />
+ * ```
+ */
 const Champion = () => {
   return (
     <ChampionSection>

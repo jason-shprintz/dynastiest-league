@@ -10,6 +10,20 @@ import {
   StyledParagraph,
 } from "./MainContent.styles";
 
+/**
+ * MainContent component that displays the home page content for the Dynastiest League.
+ *
+ * This component renders the hero section with the league title, establishment year,
+ * and key statistics (number of teams, seasons, and annual prize pool), followed by
+ * a content section with a welcome message and description of the dynasty league format.
+ *
+ * @returns A React component containing the main landing page content
+ *
+ * @example
+ * ```tsx
+ * <MainContent />
+ * ```
+ */
 const MainContent = () => {
   return (
     <HomeSection>

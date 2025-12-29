@@ -14,6 +14,18 @@ import {
   CustomMedalTable,
 } from "./HallOfRecords.styles";
 
+/**
+ * Displays the Hall of Records component featuring championship history and all-time medal rankings.
+ *
+ * This component renders two main sections:
+ * 1. A historical table showing yearly champions, second, and third place finishers
+ * 2. An all-time medal rankings table with gold, silver, and bronze counts per user
+ *
+ * Medal rankings are sorted by gold count first, then silver, then bronze,
+ * with alphabetical ordering as a tiebreaker. Tied entries share the same rank.
+ *
+ * @returns A React component displaying the Hall of Records with championship history and medal standings
+ */
 const HallOfRecords = () => {
   // Prepare sorted rankings array
   const rankingsRaw = Object.entries(medalCounts)
