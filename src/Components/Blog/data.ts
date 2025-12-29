@@ -2,6 +2,7 @@ import { BlogPost } from "../../types";
 
 const blogPosts: BlogPost[] = [
   {
+    id: "welcome-2025-12-29",
     title: "Welcome to the Dynastiest League Blog",
     date: "2025-12-29",
     content:
