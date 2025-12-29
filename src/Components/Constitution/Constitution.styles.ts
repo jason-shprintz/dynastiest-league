@@ -1,11 +1,12 @@
 import styled from "styled-components";
+import { COLORS } from "../../theme/colors";
 
 export const ConstitutionSection = styled.section`
   animation: fadeIn 0.5s ease-in;
 
   h2 {
     font-size: 2.5rem;
-    color: #ffd700;
+    color: ${COLORS.accent};
     margin-bottom: 0.5rem;
     text-align: center;
 
@@ -17,7 +18,7 @@ export const ConstitutionSection = styled.section`
 
 export const SectionDescription = styled.p`
   text-align: center;
-  color: #a8b2d1;
+  color: ${COLORS.textMuted};
   font-size: 1.1rem;
   margin-bottom: 2rem;
 
@@ -38,7 +39,7 @@ export const ConstitutionItem = styled.div`
   background: rgba(15, 52, 96, 0.3);
   padding: 1.5rem;
   border-radius: 12px;
-  border-left: 4px solid #ffd700;
+  border-left: 4px solid ${COLORS.accent};
   transition: all 0.3s ease;
 
   &:hover {
@@ -47,7 +48,7 @@ export const ConstitutionItem = styled.div`
   }
 
   h3 {
-    color: #ffd700;
+    color: ${COLORS.accent};
     margin-bottom: 0.75rem;
     font-size: 1.3rem;
 
@@ -61,7 +62,7 @@ export const ConstitutionItem = styled.div`
   }
 
   p {
-    color: #ccd6f6;
+    color: ${COLORS.textSecondary};
     line-height: 1.7;
     font-size: 1.05rem;
     white-space: pre-line;

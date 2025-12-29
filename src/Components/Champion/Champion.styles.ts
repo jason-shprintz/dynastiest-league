@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { COLORS } from "../../theme/colors";
 
 export const ChampionSection = styled.section`
   animation: fadeIn 0.5s ease-in;
@@ -10,7 +11,7 @@ export const ChampionSection = styled.section`
 
 export const ChampionCard = styled.div`
   background: rgba(15, 52, 96, 0.4);
-  border: 3px solid #ffd700;
+  border: 3px solid ${COLORS.accent};
   border-radius: 16px;
   padding: 3rem;
   max-width: 700px;
@@ -29,8 +30,8 @@ export const ChampionCard = styled.div`
 
 export const ChampionBadge = styled.div`
   display: inline-block;
-  background: #ffd700;
-  color: #1a1a2e;
+  background: ${COLORS.accent};
+  color: ${COLORS.background};
   padding: 0.5rem 1.5rem;
   border-radius: 20px;
   font-weight: 800;
@@ -40,7 +41,7 @@ export const ChampionBadge = styled.div`
 
 export const ChampionTeam = styled.h2`
   font-size: 3rem;
-  color: #ffd700;
+  color: ${COLORS.accent};
   margin-bottom: 0.5rem;
   font-weight: 900;
 
@@ -55,7 +56,7 @@ export const ChampionTeam = styled.h2`
 
 export const ChampionOwner = styled.p`
   font-size: 1.3rem;
-  color: #a8b2d1;
+  color: ${COLORS.textMuted};
   margin-bottom: 2rem;
 
   @media (max-width: 480px) {
@@ -85,12 +86,12 @@ export const ChampionStat = styled.div`
   }
 
   .label {
-    color: #a8b2d1;
+    color: ${COLORS.textMuted};
     font-weight: 600;
   }
 
   .value {
-    color: #ccd6f6;
+    color: ${COLORS.textSecondary};
     font-weight: 700;
     font-size: 1.1rem;
   }
@@ -108,7 +109,7 @@ export const PlayoffRun = styled.div`
   border-top: 2px solid rgba(255, 215, 0, 0.3);
 
   h3 {
-    color: #ffd700;
+    color: ${COLORS.accent};
     margin-bottom: 1rem;
     font-size: 1.5rem;
 
@@ -118,7 +119,7 @@ export const PlayoffRun = styled.div`
   }
 
   p {
-    color: #ccd6f6;
+    color: ${COLORS.textSecondary};
     line-height: 1.6;
     font-size: 1.1rem;
 

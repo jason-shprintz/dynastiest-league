@@ -1,9 +1,10 @@
 import styled from "styled-components";
+import { COLORS } from "../../theme/colors";
 
 export const HeaderContainer = styled.header`
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
-  border-bottom: 2px solid #0f3460;
+  border-bottom: 2px solid ${COLORS.secondary};
   position: sticky;
   top: 0;
   z-index: 100;
@@ -38,9 +39,11 @@ export const Navigation = styled.nav`
 
 export const NavButton = styled.button<{ $isActive?: boolean }>`
   padding: 0.75rem 1.5rem;
-  background: ${(props) => (props.$isActive ? "#0f3460" : "transparent")};
-  border: 2px solid ${(props) => (props.$isActive ? "#ffd700" : "#0f3460")};
-  color: ${(props) => (props.$isActive ? "#ffd700" : "#a8b2d1")};
+  background: ${(props) =>
+    props.$isActive ? COLORS.secondary : "transparent"};
+  border: 2px solid
+    ${(props) => (props.$isActive ? COLORS.accent : COLORS.secondary)};
+  color: ${(props) => (props.$isActive ? COLORS.accent : COLORS.textMuted)};
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
@@ -52,8 +55,8 @@ export const NavButton = styled.button<{ $isActive?: boolean }>`
 
   &:hover {
     background: rgba(15, 52, 96, 0.5);
-    border-color: #ffd700;
-    color: #ffd700;
+    border-color: ${COLORS.accent};
+    color: ${COLORS.accent};
     transform: translateY(-2px);
   }
 
