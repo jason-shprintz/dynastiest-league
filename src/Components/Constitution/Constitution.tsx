@@ -6,12 +6,13 @@ import {
   ConstitutionItem,
 } from "./Constitution.styles";
 
+const urlRegex = /(https?:\/\/[^\s]+)/g;
+
 // Helper to render text with clickable links
 const renderContentWithLinks = (content: string) => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = content.split(urlRegex);
   return parts.map((part, index) =>
-    urlRegex.test(part) ? (
+    index % 2 === 1 ? (
       <a
         key={index}
         href={part}
