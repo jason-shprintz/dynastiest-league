@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { COLORS } from "../../theme/colors";
 
 export const HomeSection = styled.section`
   animation: fadeIn 0.5s ease-in;
@@ -11,7 +12,7 @@ export const Hero = styled.div`
   h2 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    color: #ffd700;
+    color: ${COLORS.accent};
 
     @media (max-width: 768px) {
       font-size: 2rem;
@@ -30,7 +31,7 @@ export const Hero = styled.div`
 export const HeroText = styled.p`
   font-size: 1.2rem;
   line-height: 1.8;
-  color: #ccd6f6;
+  color: ${COLORS.textSecondary};
   max-width: 800px;
   margin: 0 auto 3rem;
 
@@ -64,12 +65,12 @@ export const StatCard = styled.div`
   background: rgba(15, 52, 96, 0.4);
   padding: 2rem;
   border-radius: 12px;
-  border: 2px solid #0f3460;
+  border: 2px solid ${COLORS.secondary};
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-5px);
-    border-color: #ffd700;
+    border-color: ${COLORS.accent};
     box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
   }
 
@@ -81,7 +82,7 @@ export const StatCard = styled.div`
 export const StatNumber = styled.div`
   font-size: 3rem;
   font-weight: 800;
-  color: #ffd700;
+  color: ${COLORS.accent};
   margin-bottom: 0.5rem;
 
   @media (max-width: 480px) {
@@ -91,5 +92,5 @@ export const StatNumber = styled.div`
 
 export const StatLabel = styled.div`
   font-size: 1.1rem;
-  color: #a8b2d1;
+  color: ${COLORS.textMuted};
 `;

@@ -5,6 +5,7 @@ import {
   ConstitutionContent,
   ConstitutionItem,
 } from "./Constitution.styles";
+import { COLORS } from "../../theme/colors";
 
 const urlRegex = /(https?:\/\/[^\s]+)/g;
 
@@ -18,7 +19,7 @@ const renderContentWithLinks = (content: string) => {
         href={part}
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: "#ffd700", textDecoration: "underline" }}
+        style={{ color: COLORS.accent, textDecoration: "underline" }}
       >
         {part}
       </a>

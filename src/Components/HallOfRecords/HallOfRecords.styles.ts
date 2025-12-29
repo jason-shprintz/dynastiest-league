@@ -1,11 +1,12 @@
 import styled from "styled-components";
+import { COLORS } from "../../theme/colors";
 
 export const RecordsSection = styled.section`
   animation: fadeIn 0.5s ease-in;
 
   h2 {
     font-size: 2.5rem;
-    color: #ffd700;
+    color: ${COLORS.accent};
     margin-bottom: 0.5rem;
     text-align: center;
 
@@ -30,9 +31,9 @@ export const TableHeader = styled.div`
   justify-content: flex-start;
   align-items: center;
   padding: 1.25rem;
-  background: #0f3460;
+  background: ${COLORS.secondary};
   font-weight: 700;
-  color: #ffd700;
+  color: ${COLORS.accent};
   font-size: 1.1rem;
   gap: 1rem;
   & > div {
@@ -124,12 +125,12 @@ export const TableTitle = styled.div`
   font-weight: 600;
   width: 25%;
   min-width: 125px;
-  color: #ffd700;
+  color: ${COLORS.accent};
 `;
 
 export const Year = styled.div`
   font-weight: 600;
-  color: #ffd700;
+  color: ${COLORS.accent};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -137,7 +138,7 @@ export const Year = styled.div`
 
 export const ChampionName = styled.div`
   font-weight: 900;
-  color: #ccd6f6;
+  color: ${COLORS.textSecondary};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -145,7 +146,7 @@ export const ChampionName = styled.div`
 
 export const SecondName = styled.div`
   font-weight: 700;
-  color: #ccd6f6;
+  color: ${COLORS.textSecondary};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -153,7 +154,7 @@ export const SecondName = styled.div`
 
 export const ThirdName = styled.div`
   font-weight: 500;
-  color: #ccd6f6;
+  color: ${COLORS.textSecondary};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
