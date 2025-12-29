@@ -69,7 +69,7 @@ const constitutionSections: ConstitutionSection[] = [
 
       All league members are expected to uphold the integrity and spirit of fair competition within the Dynastiest League. The commissioner will enforce these rules to ensure a positive and enjoyable experience for all participants. If any league member has concerns or questions regarding these policies, they are encouraged to discuss them with the commissioner.
 
-      In the unlikely and also unfortunate instance  where a league member is expelled from the league mid season due to unsportsmanlike conduct, the commissioner will set the team's lineup based solely on projected points until a suitable replacement manager is found.
+      In the unlikely and also unfortunate instance where a league member is expelled from the league mid season due to unsportsmanlike conduct, the commissioner will set the team's lineup based solely on projected points until a suitable replacement manager is found.
       `,
   },
   {
