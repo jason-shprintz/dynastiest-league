@@ -94,3 +94,37 @@ export const StatLabel = styled.div`
   font-size: 1.1rem;
   color: ${COLORS.textMuted};
 `;
+
+export const ContentSection = styled.div`
+  max-width: 900px;
+  margin: 2rem auto 0;
+  padding: 0 1rem;
+`;
+
+export const StyledParagraph = styled.p`
+  background: rgba(15, 52, 96, 0.25);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  border-left: 4px solid ${COLORS.accent};
+  color: ${COLORS.textSecondary};
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(15, 52, 96, 0.4);
+    transform: translateY(-5px);
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+`;
