@@ -29,6 +29,36 @@ const MainContent = () => {
           </StatCard>
         </StatsGrid>
       </Hero>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
     </HomeSection>
   );
 };
