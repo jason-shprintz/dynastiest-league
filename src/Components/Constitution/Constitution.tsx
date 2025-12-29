@@ -5,29 +5,7 @@ import {
   ConstitutionContent,
   ConstitutionItem,
 } from "./Constitution.styles";
-import { COLORS } from "../../theme/colors";
-
-const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-// Helper to render text with clickable links
-const renderContentWithLinks = (content: string) => {
-  const parts = content.split(urlRegex);
-  return parts.map((part, index) =>
-    index % 2 === 1 ? (
-      <a
-        key={index}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ color: COLORS.accent, textDecoration: "underline" }}
-      >
-        {part}
-      </a>
-    ) : (
-      <span key={index}>{part}</span>
-    )
-  );
-};
+import renderContentWithLinks from "../../helper/renderContentWithLinks";
 
 const Constitution = () => {
   return (
