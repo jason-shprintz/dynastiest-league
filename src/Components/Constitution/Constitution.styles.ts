@@ -64,6 +64,7 @@ export const ConstitutionItem = styled.div`
     color: #ccd6f6;
     line-height: 1.7;
     font-size: 1.05rem;
+    white-space: pre-line;
 
     @media (max-width: 480px) {
       font-size: 0.95rem;
