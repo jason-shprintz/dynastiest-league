@@ -35,6 +35,7 @@ const renderContentWithLinks = (content: string) => {
         target="_blank"
         rel="noopener noreferrer"
         style={{ color: COLORS.accent, textDecoration: "underline" }}
+        aria-label={`${part} (opens in a new tab)`}
       >
         {part}
       </a>
