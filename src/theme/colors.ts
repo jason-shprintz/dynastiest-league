@@ -4,10 +4,10 @@ export const COLORS = {
   backgroundGradientEnd: "#16213e",
   accent: "#ffd700", // Gold
   white: "#ffffff",
-  
+
   // Secondary colors
   secondary: "#0f3460",
-  
+
   // Text colors
   textPrimary: "#ffffff",
   textSecondary: "#ccd6f6",

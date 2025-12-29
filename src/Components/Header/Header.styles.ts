@@ -39,8 +39,10 @@ export const Navigation = styled.nav`
 
 export const NavButton = styled.button<{ $isActive?: boolean }>`
   padding: 0.75rem 1.5rem;
-  background: ${(props) => (props.$isActive ? COLORS.secondary : "transparent")};
-  border: 2px solid ${(props) => (props.$isActive ? COLORS.accent : COLORS.secondary)};
+  background: ${(props) =>
+    props.$isActive ? COLORS.secondary : "transparent"};
+  border: 2px solid
+    ${(props) => (props.$isActive ? COLORS.accent : COLORS.secondary)};
   color: ${(props) => (props.$isActive ? COLORS.accent : COLORS.textMuted)};
   border-radius: 8px;
   cursor: pointer;
