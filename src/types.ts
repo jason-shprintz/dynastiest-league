@@ -17,8 +17,8 @@ interface CurrentChampion {
 interface ChampionRecord {
   year: string;
   champion: string;
-  record: string;
-  points: number;
+  second: string;
+  third: string;
 }
 
 export type { Section, ConstitutionSection, CurrentChampion, ChampionRecord };

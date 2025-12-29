@@ -15,45 +15,56 @@ export const RecordsSection = styled.section`
   }
 `;
 
-export const SectionDescription = styled.p`
-  text-align: center;
-  color: #a8b2d1;
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-
-  @media (max-width: 480px) {
-    font-size: 1rem;
-  }
-`;
-
 export const RecordsTable = styled.div`
   background: rgba(15, 52, 96, 0.3);
   border-radius: 12px;
   overflow: hidden;
-  max-width: 900px;
+  max-width: 800px;
+  width: auto;
   margin: 0 auto;
 `;
 
 export const TableHeader = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr;
-  gap: 1rem;
-  padding: 1.25rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
+  padding: 1.25rem;
   background: #0f3460;
   font-weight: 700;
   color: #ffd700;
   font-size: 1.1rem;
+  gap: 1rem;
+  & > div {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
+  }
 
   @media (max-width: 768px) {
-    grid-template-columns: 0.8fr 2fr 1fr 1fr;
     gap: 0.5rem;
     padding: 1rem;
     font-size: 0.9rem;
   }
 
   @media (max-width: 480px) {
-    grid-template-columns: 1fr 2fr 1fr 1fr;
     gap: 0.25rem;
     padding: 0.75rem 0.5rem;
     font-size: 0.85rem;
@@ -61,51 +72,135 @@ export const TableHeader = styled.div`
 `;
 
 export const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   gap: 1rem;
   padding: 1.25rem;
-  align-items: center;
   border-bottom: 1px solid rgba(15, 52, 96, 0.5);
   transition: background 0.3s ease;
-
+  & > div {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
+  }
   &:hover {
     background: rgba(15, 52, 96, 0.5);
   }
-
   &:last-child {
     border-bottom: none;
   }
-
   @media (max-width: 768px) {
-    grid-template-columns: 0.8fr 2fr 1fr 1fr;
     gap: 0.5rem;
     padding: 1rem;
     font-size: 0.9rem;
   }
-
   @media (max-width: 480px) {
-    grid-template-columns: 1fr 2fr 1fr 1fr;
     gap: 0.25rem;
     padding: 0.75rem 0.5rem;
     font-size: 0.8rem;
   }
 `;
 
-export const Year = styled.div`
+export const TableTitle = styled.div`
   font-weight: 600;
+  width: 25%;
+  min-width: 125px;
   color: #ffd700;
 `;
 
+export const Year = styled.div`
+  font-weight: 600;
+  color: #ffd700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 export const ChampionName = styled.div`
+  font-weight: 900;
+  color: #ccd6f6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const SecondName = styled.div`
   font-weight: 700;
   color: #ccd6f6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
-export const Record = styled.div`
-  color: #a8b2d1;
+export const ThirdName = styled.div`
+  font-weight: 500;
+  color: #ccd6f6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
-export const Points = styled.div`
-  color: #a8b2d1;
+export const CustomMedalTable = styled(RecordsTable)``;
+export const CustomMedalHeader = styled(TableHeader)`
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
+  }
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 20%;
+    min-width: 20%;
+    max-width: 20%;
+    width: 20%;
+  }
+`;
+export const CustomMedalRow = styled(TableRow)`
+  & > div:first-child {
+    flex: 0 0 10%;
+    min-width: 10%;
+    max-width: 10%;
+    width: 10%;
+  }
+  & > div:nth-child(2) {
+    flex: 0 0 30%;
+    min-width: 30%;
+    max-width: 30%;
+    width: 30%;
+  }
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 20%;
+    min-width: 20%;
+    max-width: 20%;
+    width: 20%;
+  }
 `;

@@ -12,19 +12,15 @@ const MainContent = () => {
   return (
     <HomeSection>
       <Hero>
-        <h2>Welcome to the Dynastiest League</h2>
-        <HeroText>
-          Where champions are made and dynasties are built. This is more than
-          just fantasy football— it's a legacy that spans seasons, a brotherhood
-          of competition, and a pursuit of glory.
-        </HeroText>
+        <h2>The Dynastiest League</h2>
+        <HeroText>Est. 2020</HeroText>
         <StatsGrid>
           <StatCard>
             <StatNumber>10</StatNumber>
             <StatLabel>Teams</StatLabel>
           </StatCard>
           <StatCard>
-            <StatNumber>4</StatNumber>
+            <StatNumber>6</StatNumber>
             <StatLabel>Seasons</StatLabel>
           </StatCard>
           <StatCard>
@@ -33,6 +29,36 @@ const MainContent = () => {
           </StatCard>
         </StatsGrid>
       </Hero>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod,
+        urna eu tincidunt consectetur, nisi nisl aliquam enim, eget facilisis
+        enim nisl nec elit. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas.
+      </p>
     </HomeSection>
   );
 };

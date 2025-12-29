@@ -10,39 +10,11 @@ export const HeaderContainer = styled.header`
 `;
 
 export const HeaderContent = styled.div`
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
 
   @media (max-width: 480px) {
     padding: 1rem;
-  }
-`;
-
-export const LeagueTitle = styled.h1`
-  font-size: 2.5rem;
-  margin-bottom: 0.25rem;
-  background: linear-gradient(45deg, #ffd700, #ffed4e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 800;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 1.5rem;
-  }
-`;
-
-export const LeagueSubtitle = styled.p`
-  font-size: 1rem;
-  color: #a8b2d1;
-  font-weight: 300;
-
-  @media (max-width: 480px) {
-    font-size: 0.85rem;
   }
 `;
 
@@ -55,8 +27,12 @@ export const Navigation = styled.nav`
   background: rgba(15, 52, 96, 0.3);
 
   @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.25rem;
-    padding: 0.5rem;
+    padding: 0.5rem 0.2rem;
+    width: 100vw;
+    box-sizing: border-box;
   }
 `;
 
@@ -71,6 +47,8 @@ export const NavButton = styled.button<{ $isActive?: boolean }>`
   font-weight: 600;
   transition: all 0.3s ease;
   white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
 
   &:hover {
     background: rgba(15, 52, 96, 0.5);
@@ -81,6 +59,10 @@ export const NavButton = styled.button<{ $isActive?: boolean }>`
 
   @media (max-width: 480px) {
     padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    font-size: 1rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
   }
 `;
