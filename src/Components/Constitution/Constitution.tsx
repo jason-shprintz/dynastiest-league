@@ -6,6 +6,27 @@ import {
   ConstitutionItem,
 } from "./Constitution.styles";
 
+// Helper to render text with clickable links
+const renderContentWithLinks = (content: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlRegex);
+  return parts.map((part, index) =>
+    urlRegex.test(part) ? (
+      <a
+        key={index}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: "#ffd700", textDecoration: "underline" }}
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  );
+};
+
 const Constitution = () => {
   return (
     <ConstitutionSection>
@@ -17,7 +38,7 @@ const Constitution = () => {
         {constitutionSections.map((section) => (
           <ConstitutionItem key={section.title}>
             <h3>{section.title}</h3>
-            <p>{section.content}</p>
+            <p>{renderContentWithLinks(section.content)}</p>
           </ConstitutionItem>
         ))}
       </ConstitutionContent>
