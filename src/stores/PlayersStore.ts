@@ -85,6 +85,12 @@ export class PlayersStore {
       console.error("Failed to load players from cache:", err);
       // Try to clear invalid cache
       await deleteCachedData(PLAYERS_CACHE_KEY);
+    } finally {
+      if (!this.cacheLoaded) {
+        runInAction(() => {
+          this.cacheLoaded = true;
+        });
+      }
     }
   }
 
