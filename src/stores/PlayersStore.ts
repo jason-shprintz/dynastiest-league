@@ -151,6 +151,8 @@ export class PlayersStore {
       runInAction(() => {
         this.error = err instanceof Error ? err.message : "Unknown error";
         this.isLoading = false;
+        // Keep existing cached data if fetch fails - stale data is better than no data
+        // Only clear if we truly have no data
       });
     }
   }

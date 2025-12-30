@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { DEFAULT_LEAGUE_ID } from "../../constants";
-import type { Roster, User } from "../../types/sleeper";
+import type { Roster, User, Player } from "../../types/sleeper";
 import {
   TeamsSection,
   TeamsGrid,
@@ -94,23 +94,26 @@ const sortByStandings = (teams: TeamData[]): TeamData[] => {
 
 /**
  * Format player display text with name, position, and team
+ * Uses getPlayerById to fetch player object once instead of 3 separate lookups
  */
 const formatPlayerDisplay = (
   playerId: string,
-  getPlayerName: (id: string) => string,
-  getPlayerPosition: (id: string) => string,
-  getPlayerTeam: (id: string) => string
+  getPlayerById: (id: string) => Player | undefined
 ): string => {
-  const playerName = getPlayerName(playerId);
-  const position = getPlayerPosition(playerId);
-  const team = getPlayerTeam(playerId);
+  const player = getPlayerById(playerId);
+  
+  if (!player) {
+    return playerId;
+  }
+
+  const { full_name, position, team } = player;
 
   if (position && team) {
-    return `${playerName} (${position} - ${team})`;
+    return `${full_name} (${position} - ${team})`;
   } else if (position) {
-    return `${playerName} (${position})`;
+    return `${full_name} (${position})`;
   }
-  return playerName;
+  return full_name;
 };
 
 /**
@@ -217,9 +220,7 @@ export const AllTeams = observer(
                             <PlayerChip key={playerId}>
                               {formatPlayerDisplay(
                                 playerId,
-                                store.playersStore.getPlayerName,
-                                store.playersStore.getPlayerPosition,
-                                store.playersStore.getPlayerTeam
+                                store.playersStore.getPlayerById
                               )}
                             </PlayerChip>
                           ))}
@@ -240,9 +241,7 @@ export const AllTeams = observer(
                             <PlayerChip key={playerId}>
                               {formatPlayerDisplay(
                                 playerId,
-                                store.playersStore.getPlayerName,
-                                store.playersStore.getPlayerPosition,
-                                store.playersStore.getPlayerTeam
+                                store.playersStore.getPlayerById
                               )}
                             </PlayerChip>
                           ))}
@@ -263,9 +262,7 @@ export const AllTeams = observer(
                             <PlayerChip key={playerId}>
                               {formatPlayerDisplay(
                                 playerId,
-                                store.playersStore.getPlayerName,
-                                store.playersStore.getPlayerPosition,
-                                store.playersStore.getPlayerTeam
+                                store.playersStore.getPlayerById
                               )}
                             </PlayerChip>
                           ))}
@@ -284,9 +281,7 @@ export const AllTeams = observer(
                             <PlayerChip key={playerId}>
                               {formatPlayerDisplay(
                                 playerId,
-                                store.playersStore.getPlayerName,
-                                store.playersStore.getPlayerPosition,
-                                store.playersStore.getPlayerTeam
+                                store.playersStore.getPlayerById
                               )}
                             </PlayerChip>
                           ))}

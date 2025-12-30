@@ -51,14 +51,16 @@ interface ParsedCacheEntry<T> {
 export const getCachedData = async <T>(
   key: string
 ): Promise<ParsedCacheEntry<T> | null> => {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDatabase();
+    db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readonly");
+      const transaction = db!.transaction(STORE_NAME, "readonly");
       const store = transaction.objectStore(STORE_NAME);
       const request = store.get(key);
 
       request.onerror = () => {
+        db!.close();
         reject(new Error("Failed to get cached data"));
       };
 
@@ -77,10 +79,17 @@ export const getCachedData = async <T>(
       };
 
       transaction.oncomplete = () => {
-        db.close();
+        db!.close();
+      };
+
+      transaction.onerror = () => {
+        db!.close();
       };
     });
   } catch (err) {
+    if (db) {
+      db.close();
+    }
     console.error("IndexedDB get error:", err);
     return null;
   }
@@ -97,16 +106,18 @@ export const setCachedData = async <T>(
   data: T,
   timestamp: number
 ): Promise<void> => {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDatabase();
+    db = await openDatabase();
     const serializedData = JSON.stringify(data);
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const transaction = db!.transaction(STORE_NAME, "readwrite");
       const store = transaction.objectStore(STORE_NAME);
       const entry: CacheEntry = { key, data: serializedData, timestamp };
       const request = store.put(entry);
 
       request.onerror = () => {
+        db!.close();
         reject(new Error("Failed to save cached data"));
       };
 
@@ -115,10 +126,17 @@ export const setCachedData = async <T>(
       };
 
       transaction.oncomplete = () => {
-        db.close();
+        db!.close();
+      };
+
+      transaction.onerror = () => {
+        db!.close();
       };
     });
   } catch (err) {
+    if (db) {
+      db.close();
+    }
     console.error("IndexedDB set error:", err);
   }
 };
@@ -128,14 +146,16 @@ export const setCachedData = async <T>(
  * @param key - The cache key to delete
  */
 export const deleteCachedData = async (key: string): Promise<void> => {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDatabase();
+    db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const transaction = db!.transaction(STORE_NAME, "readwrite");
       const store = transaction.objectStore(STORE_NAME);
       const request = store.delete(key);
 
       request.onerror = () => {
+        db!.close();
         reject(new Error("Failed to delete cached data"));
       };
 
@@ -144,10 +164,17 @@ export const deleteCachedData = async (key: string): Promise<void> => {
       };
 
       transaction.oncomplete = () => {
-        db.close();
+        db!.close();
+      };
+
+      transaction.onerror = () => {
+        db!.close();
       };
     });
   } catch (err) {
+    if (db) {
+      db.close();
+    }
     console.error("IndexedDB delete error:", err);
   }
 };
@@ -156,14 +183,16 @@ export const deleteCachedData = async (key: string): Promise<void> => {
  * Clear all cached data from IndexedDB
  */
 export const clearCache = async (): Promise<void> => {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDatabase();
+    db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const transaction = db!.transaction(STORE_NAME, "readwrite");
       const store = transaction.objectStore(STORE_NAME);
       const request = store.clear();
 
       request.onerror = () => {
+        db!.close();
         reject(new Error("Failed to clear cache"));
       };
 
@@ -172,10 +201,17 @@ export const clearCache = async (): Promise<void> => {
       };
 
       transaction.oncomplete = () => {
-        db.close();
+        db!.close();
+      };
+
+      transaction.onerror = () => {
+        db!.close();
       };
     });
   } catch (err) {
+    if (db) {
+      db.close();
+    }
     console.error("IndexedDB clear error:", err);
   }
 };
