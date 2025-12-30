@@ -95,50 +95,6 @@ export const StatLabel = styled.div`
   color: ${COLORS.textMuted};
 `;
 
-export const EmbedContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 2rem auto;
-  max-width: 400px;
-
-  h3 {
-    color: ${COLORS.accent};
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-    text-align: center;
-  }
-`;
-
-export const EmbedWrapper = styled.div`
-  background: rgba(15, 52, 96, 0.4);
-  padding: 1rem;
-  border-radius: 12px;
-  border: 2px solid ${COLORS.secondary};
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: ${COLORS.accent};
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);
-  }
-
-  iframe {
-    display: block;
-    border-radius: 8px;
-    border: none;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0.5rem;
-
-    iframe {
-      width: 100%;
-      max-width: 320px;
-    }
-  }
-`;
-
 export const ContentSection = styled.div`
   max-width: 900px;
   margin: 2rem auto 0;
