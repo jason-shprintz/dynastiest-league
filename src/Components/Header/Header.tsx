@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Section } from "../../types";
 import {
   HeaderContainer,
@@ -17,6 +17,20 @@ interface IHeaderProps {
   activeSection: Section;
   setActiveSection: React.Dispatch<React.SetStateAction<Section>>;
 }
+
+interface NavItem {
+  section: Section;
+  label: string;
+}
+
+const navItems: NavItem[] = [
+  { section: "home", label: "Home" },
+  { section: "records", label: "Hall of Records" },
+  { section: "champion", label: "Current Champion" },
+  { section: "constitution", label: "Constitution" },
+  { section: "scouting", label: "Scouting" },
+  { section: "blog", label: "Blog" },
+];
 
 const sectionLabels: Record<Section, string> = {
   home: "Home",
@@ -37,11 +51,38 @@ const sectionLabels: Record<Section, string> = {
  */
 const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const handleNavClick = (section: Section) => {
     setActiveSection(section);
     setIsMobileMenuOpen(false);
   };
+
+  const handleCloseMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    hamburgerRef.current?.focus();
+  };
+
+  // Handle escape key to close mobile menu
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isMobileMenuOpen) {
+        handleCloseMobileMenu();
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("keydown", handleEscape);
+      // Trap focus within overlay when open
+      const firstButton = overlayRef.current?.querySelector("button");
+      firstButton?.focus();
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <HeaderContainer>
@@ -60,50 +101,25 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
 
       {/* Desktop Navigation */}
       <Navigation>
-        <NavButton
-          $isActive={activeSection === "home"}
-          onClick={() => setActiveSection("home")}
-        >
-          Home
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "records"}
-          onClick={() => setActiveSection("records")}
-        >
-          Hall of Records
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "champion"}
-          onClick={() => setActiveSection("champion")}
-        >
-          Current Champion
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "constitution"}
-          onClick={() => setActiveSection("constitution")}
-        >
-          Constitution
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "scouting"}
-          onClick={() => setActiveSection("scouting")}
-        >
-          Scouting
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "blog"}
-          onClick={() => setActiveSection("blog")}
-        >
-          Blog
-        </NavButton>
+        {navItems.map((item) => (
+          <NavButton
+            key={item.section}
+            $isActive={activeSection === item.section}
+            onClick={() => setActiveSection(item.section)}
+          >
+            {item.label}
+          </NavButton>
+        ))}
       </Navigation>
 
       {/* Mobile Navigation Bar */}
       <MobileNavBar>
         <MobileTitle>{sectionLabels[activeSection]}</MobileTitle>
         <HamburgerButton
+          ref={hamburgerRef}
           onClick={() => setIsMobileMenuOpen(true)}
           aria-label="Open menu"
+          aria-expanded={isMobileMenuOpen}
         >
           <span></span>
           <span></span>
@@ -112,50 +128,29 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
       </MobileNavBar>
 
       {/* Mobile Menu Overlay */}
-      <MobileMenuOverlay $isOpen={isMobileMenuOpen}>
+      <MobileMenuOverlay
+        ref={overlayRef}
+        $isOpen={isMobileMenuOpen}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+      >
         <MobileMenuContainer>
           <CloseButton
-            onClick={() => setIsMobileMenuOpen(false)}
+            onClick={handleCloseMobileMenu}
             aria-label="Close menu"
           >
             ✕
           </CloseButton>
-          <NavButton
-            $isActive={activeSection === "home"}
-            onClick={() => handleNavClick("home")}
-          >
-            Home
-          </NavButton>
-          <NavButton
-            $isActive={activeSection === "records"}
-            onClick={() => handleNavClick("records")}
-          >
-            Hall of Records
-          </NavButton>
-          <NavButton
-            $isActive={activeSection === "champion"}
-            onClick={() => handleNavClick("champion")}
-          >
-            Current Champion
-          </NavButton>
-          <NavButton
-            $isActive={activeSection === "constitution"}
-            onClick={() => handleNavClick("constitution")}
-          >
-            Constitution
-          </NavButton>
-          <NavButton
-            $isActive={activeSection === "scouting"}
-            onClick={() => handleNavClick("scouting")}
-          >
-            Scouting
-          </NavButton>
-          <NavButton
-            $isActive={activeSection === "blog"}
-            onClick={() => handleNavClick("blog")}
-          >
-            Blog
-          </NavButton>
+          {navItems.map((item) => (
+            <NavButton
+              key={item.section}
+              $isActive={activeSection === item.section}
+              onClick={() => handleNavClick(item.section)}
+            >
+              {item.label}
+            </NavButton>
+          ))}
         </MobileMenuContainer>
       </MobileMenuOverlay>
     </HeaderContainer>
