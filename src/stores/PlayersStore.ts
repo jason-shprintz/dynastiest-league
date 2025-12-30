@@ -21,8 +21,9 @@ const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
  *
  * @remarks
  * This store handles fetching, caching, and querying player data from the Sleeper API.
- * It implements a caching strategy that stores player data in localStorage and only
- * fetches new data if the cache is older than 7 days.
+ * It implements a caching strategy that stores player data in an IndexedDB-backed cache
+ * (via the `indexedDBCache` utilities) and only fetches new data if the cache is older
+ * than 7 days.
  *
  * According to Sleeper API documentation, the players endpoint should be called
  * sparingly (at most once per day). This implementation uses a weekly refresh cycle.
