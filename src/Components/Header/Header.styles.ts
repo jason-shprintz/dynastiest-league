@@ -160,4 +160,10 @@ export const CloseButton = styled.button`
     color: ${COLORS.white};
     transform: rotate(90deg);
   }
+
+  &:focus-visible {
+    outline: 2px solid ${COLORS.accent};
+    outline-offset: 3px;
+    background: rgba(0, 0, 0, 0.4);
+  }
 `;
