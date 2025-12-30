@@ -45,23 +45,26 @@ const getAvatarUrl = (avatar: string | null): string | null => {
 };
 
 /**
- * Get bench players (players not in starters or reserve)
+ * Get bench players (players not in starters, reserve, or taxi)
  */
 const getBenchPlayers = (roster: Roster): string[] => {
   const startersSet = new Set(roster.starters);
   const reserveSet = new Set(roster.reserve || []);
+  const taxiSet = new Set(roster.taxi || []);
 
   return roster.players.filter(
-    (playerId) => !startersSet.has(playerId) && !reserveSet.has(playerId)
+    (playerId) =>
+      !startersSet.has(playerId) &&
+      !reserveSet.has(playerId) &&
+      !taxiSet.has(playerId)
   );
 };
 
 /**
- * Get taxi squad players from roster metadata
+ * Get taxi squad players from roster
  */
 const getTaxiPlayers = (roster: Roster): string[] => {
-  const metadata = roster.metadata as { taxi?: string[] } | null;
-  return metadata?.taxi || [];
+  return roster.taxi || [];
 };
 
 /**
@@ -173,7 +176,10 @@ export const AllTeams = observer(
                     </TeamName>
                     <UserName>{user?.display_name || "Unknown User"}</UserName>
                     <TeamRecord>Record: {record}</TeamRecord>
-                    <TeamRecord>Points For: {roster.settings.fpts} | Points Against: {roster.settings.fpts_against}</TeamRecord>
+                    <TeamRecord>
+                      Points For: {roster.settings.fpts} | Points Against:{" "}
+                      {roster.settings.fpts_against}
+                    </TeamRecord>
                   </TeamInfo>
                 </TeamSummary>
 
