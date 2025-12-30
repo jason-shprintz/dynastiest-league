@@ -36,6 +36,7 @@ export class PlayersStore {
   isLoading = false;
   error: string | null = null;
   lastFetchTimestamp: number | null = null;
+  private hasPlayers = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -53,6 +54,7 @@ export class PlayersStore {
       if (cachedData && cacheTimestamp) {
         this.players = JSON.parse(cachedData);
         this.lastFetchTimestamp = parseInt(cacheTimestamp, 10);
+        this.hasPlayers = true;
       }
     } catch (err) {
       console.error("Failed to load players from cache:", err);
@@ -93,7 +95,7 @@ export class PlayersStore {
    */
   async loadPlayers(forceRefresh = false): Promise<void> {
     // If cache is valid and not forcing refresh, use cached data
-    if (!forceRefresh && this.isCacheValid() && Object.keys(this.players).length > 0) {
+    if (!forceRefresh && this.isCacheValid() && this.hasPlayers) {
       return;
     }
 
@@ -105,6 +107,7 @@ export class PlayersStore {
       runInAction(() => {
         this.players = data;
         this.lastFetchTimestamp = Date.now();
+        this.hasPlayers = true;
         this.isLoading = false;
         this.saveToCache();
       });
@@ -163,6 +166,7 @@ export class PlayersStore {
     this.isLoading = false;
     this.error = null;
     this.lastFetchTimestamp = null;
+    this.hasPlayers = false;
     // Note: We don't clear localStorage on reset to preserve cache
   }
 }

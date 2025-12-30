@@ -93,6 +93,27 @@ const sortByStandings = (teams: TeamData[]): TeamData[] => {
 };
 
 /**
+ * Format player display text with name, position, and team
+ */
+const formatPlayerDisplay = (
+  playerId: string,
+  getPlayerName: (id: string) => string,
+  getPlayerPosition: (id: string) => string,
+  getPlayerTeam: (id: string) => string
+): string => {
+  const playerName = getPlayerName(playerId);
+  const position = getPlayerPosition(playerId);
+  const team = getPlayerTeam(playerId);
+
+  if (position && team) {
+    return `${playerName} (${position} - ${team})`;
+  } else if (position) {
+    return `${playerName} (${position})`;
+  }
+  return playerName;
+};
+
+/**
  * Component that displays all teams in the league
  * Each team is shown in a card with summary information
  * Cards can be expanded to show roster details (starters, bench, IR, taxi)
@@ -192,25 +213,16 @@ export const AllTeams = observer(
                       </RosterSectionTitle>
                       {roster.starters.length > 0 ? (
                         <PlayersList>
-                          {roster.starters.map((playerId) => {
-                            const playerName =
-                              store.playersStore.getPlayerName(playerId);
-                            const position =
-                              store.playersStore.getPlayerPosition(playerId);
-                            const team =
-                              store.playersStore.getPlayerTeam(playerId);
-                            const displayText =
-                              position && team
-                                ? `${playerName} (${position} - ${team})`
-                                : position
-                                  ? `${playerName} (${position})`
-                                  : playerName;
-                            return (
-                              <PlayerChip key={playerId}>
-                                {displayText}
-                              </PlayerChip>
-                            );
-                          })}
+                          {roster.starters.map((playerId) => (
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerName,
+                                store.playersStore.getPlayerPosition,
+                                store.playersStore.getPlayerTeam
+                              )}
+                            </PlayerChip>
+                          ))}
                         </PlayersList>
                       ) : (
                         <EmptyState>No starters</EmptyState>
@@ -224,25 +236,16 @@ export const AllTeams = observer(
                       </RosterSectionTitle>
                       {benchPlayers.length > 0 ? (
                         <PlayersList>
-                          {benchPlayers.map((playerId) => {
-                            const playerName =
-                              store.playersStore.getPlayerName(playerId);
-                            const position =
-                              store.playersStore.getPlayerPosition(playerId);
-                            const team =
-                              store.playersStore.getPlayerTeam(playerId);
-                            const displayText =
-                              position && team
-                                ? `${playerName} (${position} - ${team})`
-                                : position
-                                  ? `${playerName} (${position})`
-                                  : playerName;
-                            return (
-                              <PlayerChip key={playerId}>
-                                {displayText}
-                              </PlayerChip>
-                            );
-                          })}
+                          {benchPlayers.map((playerId) => (
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerName,
+                                store.playersStore.getPlayerPosition,
+                                store.playersStore.getPlayerTeam
+                              )}
+                            </PlayerChip>
+                          ))}
                         </PlayersList>
                       ) : (
                         <EmptyState>No bench players</EmptyState>
@@ -256,25 +259,16 @@ export const AllTeams = observer(
                           IR ({roster.reserve.length})
                         </RosterSectionTitle>
                         <PlayersList>
-                          {roster.reserve.map((playerId) => {
-                            const playerName =
-                              store.playersStore.getPlayerName(playerId);
-                            const position =
-                              store.playersStore.getPlayerPosition(playerId);
-                            const team =
-                              store.playersStore.getPlayerTeam(playerId);
-                            const displayText =
-                              position && team
-                                ? `${playerName} (${position} - ${team})`
-                                : position
-                                  ? `${playerName} (${position})`
-                                  : playerName;
-                            return (
-                              <PlayerChip key={playerId}>
-                                {displayText}
-                              </PlayerChip>
-                            );
-                          })}
+                          {roster.reserve.map((playerId) => (
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerName,
+                                store.playersStore.getPlayerPosition,
+                                store.playersStore.getPlayerTeam
+                              )}
+                            </PlayerChip>
+                          ))}
                         </PlayersList>
                       </RosterSection>
                     )}
@@ -286,25 +280,16 @@ export const AllTeams = observer(
                           Taxi Squad ({taxiPlayers.length})
                         </RosterSectionTitle>
                         <PlayersList>
-                          {taxiPlayers.map((playerId) => {
-                            const playerName =
-                              store.playersStore.getPlayerName(playerId);
-                            const position =
-                              store.playersStore.getPlayerPosition(playerId);
-                            const team =
-                              store.playersStore.getPlayerTeam(playerId);
-                            const displayText =
-                              position && team
-                                ? `${playerName} (${position} - ${team})`
-                                : position
-                                  ? `${playerName} (${position})`
-                                  : playerName;
-                            return (
-                              <PlayerChip key={playerId}>
-                                {displayText}
-                              </PlayerChip>
-                            );
-                          })}
+                          {taxiPlayers.map((playerId) => (
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerName,
+                                store.playersStore.getPlayerPosition,
+                                store.playersStore.getPlayerTeam
+                              )}
+                            </PlayerChip>
+                          ))}
                         </PlayersList>
                       </RosterSection>
                     )}
