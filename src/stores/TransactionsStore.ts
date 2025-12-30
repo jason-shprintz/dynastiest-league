@@ -3,7 +3,7 @@
  * MobX store for managing transaction data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction, computed } from "mobx";
 import type { Transaction } from "../types/sleeper";
 import { fetchTransactions } from "../services/sleeperApi";
 
@@ -13,7 +13,9 @@ export class TransactionsStore {
   error: string | null = null;
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      allTransactions: computed,
+    });
   }
 
   async loadTransactions(leagueId: string, week: number): Promise<void> {

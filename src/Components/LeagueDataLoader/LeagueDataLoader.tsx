@@ -7,25 +7,29 @@ import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
-const LEAGUE_ID = "1194516531404427264";
+interface LeagueDataLoaderProps {
+  leagueId?: string;
+}
+
+const DEFAULT_LEAGUE_ID = "1194516531404427264";
 
 /**
  * Component that loads all league data on mount
  * This serves as a demonstration of the data fetching functionality
  */
-export const LeagueDataLoader = observer(() => {
+export const LeagueDataLoader = observer(({ leagueId = DEFAULT_LEAGUE_ID }: LeagueDataLoaderProps) => {
   const store = useStore();
 
   useEffect(() => {
     // Load all basic league data
-    store.loadAllLeagueData(LEAGUE_ID);
+    store.loadAllLeagueData(leagueId);
 
     // Load matchups for week 1 as an example
-    store.loadMatchupsForWeek(LEAGUE_ID, 1);
+    store.loadMatchupsForWeek(leagueId, 1);
 
     // Load transactions for week 1 as an example
-    store.loadTransactionsForWeek(LEAGUE_ID, 1);
-  }, [store]);
+    store.loadTransactionsForWeek(leagueId, 1);
+  }, [store, leagueId]);
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>

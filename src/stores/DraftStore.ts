@@ -36,6 +36,7 @@ export class DraftStore {
 
   get mostRecentDraft(): Draft | null {
     if (this.drafts.length === 0) return null;
+    if (this.drafts.length === 1) return this.drafts[0];
     return this.drafts.reduce((latest, current) => {
       return current.created > latest.created ? current : latest;
     });
