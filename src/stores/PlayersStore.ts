@@ -52,9 +52,12 @@ export class PlayersStore {
       const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
 
       if (cachedData && cacheTimestamp) {
-        this.players = JSON.parse(cachedData);
-        this.lastFetchTimestamp = parseInt(cacheTimestamp, 10);
-        this.hasPlayers = true;
+        const parsedTimestamp = parseInt(cacheTimestamp, 10);
+        if (!isNaN(parsedTimestamp)) {
+          this.players = JSON.parse(cachedData);
+          this.lastFetchTimestamp = parsedTimestamp;
+          this.hasPlayers = true;
+        }
       }
     } catch (err) {
       console.error("Failed to load players from cache:", err);
@@ -151,11 +154,11 @@ export class PlayersStore {
   /**
    * Get a player's team by their ID
    * @param playerId - The player's unique identifier
-   * @returns Player's team abbreviation or empty string if not found
+   * @returns Player's team abbreviation or 'FA' if free agent/not found
    */
   getPlayerTeam(playerId: string): string {
     const player = this.players[playerId];
-    return player?.team || "";
+    return player?.team || "FA";
   }
 
   /**
