@@ -173,7 +173,7 @@ export const AllTeams = observer(
                     </TeamName>
                     <UserName>{user?.display_name || "Unknown User"}</UserName>
                     <TeamRecord>Record: {record}</TeamRecord>
-                    <TeamRecord>Points: {roster.settings.fpts}</TeamRecord>
+                    <TeamRecord>Points For: {roster.settings.fpts} | Points Against: {roster.settings.fpts_against}</TeamRecord>
                   </TeamInfo>
                 </TeamSummary>
 
