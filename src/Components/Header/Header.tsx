@@ -59,13 +59,12 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   const currentLabel =
     navItems.find((item) => item.section === activeSection)?.label || "Home";
 
-  // Handle escape key to close mobile menu
-  useEffect(() => {
-    if (!isMobileMenuOpen) return;
-
   // Handle keyboard interactions for mobile menu (Escape to close, Tab to trap focus)
   useEffect(() => {
     if (!isMobileMenuOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -177,10 +176,7 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
         aria-label="Navigation menu"
       >
         <MobileMenuContainer>
-          <CloseButton
-            onClick={handleCloseMobileMenu}
-            aria-label="Close menu"
-          >
+          <CloseButton onClick={handleCloseMobileMenu} aria-label="Close menu">
             ✕
           </CloseButton>
           {navItems.map((item) => (
