@@ -56,9 +56,10 @@ export const NavButton = styled.button<{ $isActive?: boolean }>`
   }
 
   @media (max-width: 768px) {
-    padding: 1rem 1.5rem;
-    font-size: 1.125rem;
+    padding: 1.25rem 2rem;
+    font-size: 1.25rem;
     width: 100%;
+    max-width: 400px;
   }
 `;
 
@@ -131,8 +132,10 @@ export const MobileMenuOverlay = styled.div<{ $isOpen: boolean }>`
 export const MobileMenuContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 5rem 2rem 2rem;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
   height: 100%;
   overflow-y: auto;
 `;
