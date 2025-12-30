@@ -4,7 +4,8 @@ type Section =
   | "champion"
   | "constitution"
   | "scouting"
-  | "blog";
+  | "blog"
+  | "data";
 
 interface ConstitutionSection {
   title: string;
