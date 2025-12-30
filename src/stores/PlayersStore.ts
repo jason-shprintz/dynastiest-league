@@ -1,15 +1,19 @@
 /**
  * Players Store
  * MobX store for managing player data from Sleeper API
- * Implements caching strategy to minimize API calls (once per week)
+ * Implements caching strategy using IndexedDB to minimize API calls (once per week)
  */
 
 import { makeAutoObservable, runInAction } from "mobx";
 import type { Player } from "../types/sleeper";
 import { fetchAllPlayers } from "../services/sleeperApi";
+import {
+  getCachedData,
+  setCachedData,
+  deleteCachedData,
+} from "../utils/indexedDBCache";
 
-const PLAYERS_CACHE_KEY = "sleeper_players_cache";
-const CACHE_TIMESTAMP_KEY = "sleeper_players_cache_timestamp";
+const PLAYERS_CACHE_KEY = "sleeper_players";
 const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 /**
@@ -37,45 +41,61 @@ export class PlayersStore {
   error: string | null = null;
   lastFetchTimestamp: number | null = null;
   private hasPlayers = false;
+  private cacheLoaded = false;
 
   constructor() {
     makeAutoObservable(this);
-    this.loadFromCache();
+    // Clean up old localStorage cache (migrating to IndexedDB)
+    this.cleanupOldCache();
   }
 
   /**
-   * Load player data from localStorage cache if available
+   * Remove old localStorage cache entries (migration cleanup)
    */
-  private loadFromCache(): void {
+  private cleanupOldCache(): void {
     try {
-      const cachedData = localStorage.getItem(PLAYERS_CACHE_KEY);
-      const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-
-      if (cachedData && cacheTimestamp) {
-        const parsedTimestamp = parseInt(cacheTimestamp, 10);
-        if (!isNaN(parsedTimestamp)) {
-          this.players = JSON.parse(cachedData);
-          this.lastFetchTimestamp = parsedTimestamp;
-          this.hasPlayers = true;
-        }
-      }
-    } catch (err) {
-      console.error("Failed to load players from cache:", err);
-      // Clear invalid cache
-      localStorage.removeItem(PLAYERS_CACHE_KEY);
-      localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+      localStorage.removeItem("sleeper_players_cache");
+      localStorage.removeItem("sleeper_players_cache_timestamp");
+    } catch {
+      // Ignore errors during cleanup
     }
   }
 
   /**
-   * Save player data to localStorage cache
+   * Load player data from IndexedDB cache if available
    */
-  private saveToCache(): void {
+  private async loadFromCache(): Promise<void> {
+    if (this.cacheLoaded) return;
+
     try {
-      localStorage.setItem(PLAYERS_CACHE_KEY, JSON.stringify(this.players));
-      localStorage.setItem(
-        CACHE_TIMESTAMP_KEY,
-        this.lastFetchTimestamp?.toString() || "",
+      const cached = await getCachedData<Record<string, Player>>(
+        PLAYERS_CACHE_KEY
+      );
+
+      if (cached) {
+        runInAction(() => {
+          this.players = cached.data;
+          this.lastFetchTimestamp = cached.timestamp;
+          this.hasPlayers = true;
+          this.cacheLoaded = true;
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load players from cache:", err);
+      // Try to clear invalid cache
+      await deleteCachedData(PLAYERS_CACHE_KEY);
+    }
+  }
+
+  /**
+   * Save player data to IndexedDB cache
+   */
+  private async saveToCache(): Promise<void> {
+    try {
+      await setCachedData(
+        PLAYERS_CACHE_KEY,
+        this.players,
+        this.lastFetchTimestamp || Date.now()
       );
     } catch (err) {
       console.error("Failed to save players to cache:", err);
@@ -97,6 +117,11 @@ export class PlayersStore {
    * @param forceRefresh - If true, bypass cache and fetch fresh data from API
    */
   async loadPlayers(forceRefresh = false): Promise<void> {
+    // First, try to load from cache if not already loaded
+    if (!this.cacheLoaded) {
+      await this.loadFromCache();
+    }
+
     // If cache is valid and not forcing refresh, use cached data
     if (!forceRefresh && this.isCacheValid() && this.hasPlayers) {
       return;
@@ -112,8 +137,9 @@ export class PlayersStore {
         this.lastFetchTimestamp = Date.now();
         this.hasPlayers = true;
         this.isLoading = false;
-        this.saveToCache();
       });
+      // Save to cache asynchronously (don't block)
+      this.saveToCache();
     } catch (err) {
       runInAction(() => {
         this.error = err instanceof Error ? err.message : "Unknown error";
@@ -127,39 +153,39 @@ export class PlayersStore {
    * @param playerId - The player's unique identifier
    * @returns Player object or undefined if not found
    */
-  getPlayerById(playerId: string): Player | undefined {
+  getPlayerById = (playerId: string): Player | undefined => {
     return this.players[playerId];
-  }
+  };
 
   /**
    * Get a player's full name by their ID
    * @param playerId - The player's unique identifier
    * @returns Player's full name or the player ID if not found
    */
-  getPlayerName(playerId: string): string {
+  getPlayerName = (playerId: string): string => {
     const player = this.players[playerId];
     return player?.full_name || playerId;
-  }
+  };
 
   /**
    * Get a player's position by their ID
    * @param playerId - The player's unique identifier
    * @returns Player's position or empty string if not found
    */
-  getPlayerPosition(playerId: string): string {
+  getPlayerPosition = (playerId: string): string => {
     const player = this.players[playerId];
     return player?.position || "";
-  }
+  };
 
   /**
    * Get a player's team by their ID
    * @param playerId - The player's unique identifier
    * @returns Player's team abbreviation or 'FA' if free agent/not found
    */
-  getPlayerTeam(playerId: string): string {
+  getPlayerTeam = (playerId: string): string => {
     const player = this.players[playerId];
     return player?.team || "FA";
-  }
+  };
 
   /**
    * Reset the store to its initial state
@@ -170,6 +196,7 @@ export class PlayersStore {
     this.error = null;
     this.lastFetchTimestamp = null;
     this.hasPlayers = false;
-    // Note: We don't clear localStorage on reset to preserve cache
+    this.cacheLoaded = false;
+    // Note: We don't clear IndexedDB on reset to preserve cache
   }
 }
