@@ -5,7 +5,7 @@ type Section =
   | "constitution"
   | "scouting"
   | "blog"
-  | "data";
+  | "teams";
 
 interface ConstitutionSection {
   title: string;

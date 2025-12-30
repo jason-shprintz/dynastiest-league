@@ -9,7 +9,7 @@ import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import Blog from "./Components/Blog/Blog";
 import Scouting from "./Components/Scouting/Scouting";
-import { LeagueDataLoader } from "./Components/LeagueDataLoader/LeagueDataLoader";
+import { AllTeams } from "./Components/AllTeams/AllTeams";
 import { Section } from "./types";
 
 /**
@@ -46,7 +46,7 @@ function App() {
           {activeSection === "constitution" && <Constitution />}
           {activeSection === "scouting" && <Scouting />}
           {activeSection === "blog" && <Blog />}
-          {activeSection === "data" && <LeagueDataLoader />}
+          {activeSection === "teams" && <AllTeams />}
         </MainContent>
 
         <Footer />
