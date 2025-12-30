@@ -61,19 +61,20 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
 
   // Handle escape key to close mobile menu
   useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isMobileMenuOpen) {
+      if (event.key === "Escape") {
         handleCloseMobileMenu();
       }
     };
 
-    if (isMobileMenuOpen) {
-      document.addEventListener("keydown", handleEscape);
-      // Focus first navigation button (skip close button)
-      const navButtons = overlayRef.current?.querySelectorAll("button");
-      if (navButtons && navButtons.length > 1) {
-        (navButtons[1] as HTMLButtonElement).focus();
-      }
+    document.addEventListener("keydown", handleEscape);
+    
+    // Focus first navigation button (skip close button)
+    const navButtons = overlayRef.current?.querySelectorAll("button");
+    if (navButtons && navButtons.length > 1) {
+      (navButtons[1] as HTMLButtonElement).focus();
     }
 
     return () => {
