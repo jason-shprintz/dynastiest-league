@@ -30,6 +30,10 @@ const Scouting = () => {
               width="350"
               height="500"
               title="Sleeper Trending Player Adds"
+              aria-label="List of trending player adds in the last 24 hours from Sleeper"
+              loading="lazy"
+              allowTransparency={true}
+              tabIndex={0}
             />
           </EmbedWrapper>
         </EmbedContainer>
@@ -41,6 +45,10 @@ const Scouting = () => {
               width="350"
               height="500"
               title="Sleeper Trending Player Drops"
+              aria-label="List of trending player drops in the last 24 hours from Sleeper"
+              loading="lazy"
+              allowTransparency={true}
+              tabIndex={0}
             />
           </EmbedWrapper>
         </EmbedContainer>
