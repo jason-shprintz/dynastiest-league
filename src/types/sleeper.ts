@@ -70,21 +70,65 @@ export interface User {
 }
 
 export interface PlayoffBracket {
+  /**
+   * Round number within the playoff bracket (e.g., 1 = first round).
+   */
   r: number;
+  /**
+   * Matchup identifier within the round.
+   */
   m: number;
+  /**
+   * Roster ID for team 1 in this matchup.
+   */
   t1: number;
+  /**
+   * Roster ID for team 2 in this matchup.
+   */
   t2: number;
+  /**
+   * Roster ID of the winner of this matchup (null if not yet decided).
+   */
   w: number | null;
+  /**
+   * Roster ID of the loser of this matchup (null if not yet decided).
+   */
   l: number | null;
+  /**
+   * Source matchup for team 1, indicating which previous matchup's
+   * winner/loser advanced into the t1 slot.
+   */
   t1_from: {
+    /**
+     * Matchup ID whose winner advances to team 1 in this matchup.
+     */
     w?: number;
+    /**
+     * Matchup ID whose loser advances to team 1 in this matchup.
+     */
     l?: number;
   } | null;
+  /**
+   * Source matchup for team 2, indicating which previous matchup's
+   * winner/loser advanced into the t2 slot.
+   */
   t2_from: {
+    /**
+     * Matchup ID whose winner advances to team 2 in this matchup.
+     */
     w?: number;
+    /**
+     * Matchup ID whose loser advances to team 2 in this matchup.
+     */
     l?: number;
   } | null;
+  /**
+   * Position or seed of this matchup within the overall playoff bracket.
+   */
   p: number;
+  /**
+   * Additional metadata provided by Sleeper for this playoff matchup.
+   */
   metadata: Record<string, unknown> | null;
 }
 
