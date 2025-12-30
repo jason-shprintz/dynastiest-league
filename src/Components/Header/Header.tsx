@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Section } from "../../types";
+import { useMobileMenuAccessibility } from "../../hooks/useMobileMenuAccessibility";
 import {
   HeaderContainer,
   HeaderContent,
@@ -50,79 +51,21 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
     setIsMobileMenuOpen(false);
   };
 
-  const handleCloseMobileMenu = () => {
+  const handleCloseMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
     hamburgerRef.current?.focus();
-  };
+  }, []);
 
   // Get label for current section
   const currentLabel =
     navItems.find((item) => item.section === activeSection)?.label || "Home";
 
   // Handle keyboard interactions for mobile menu (Escape to close, Tab to trap focus)
-  useEffect(() => {
-    if (!isMobileMenuOpen) return;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        handleCloseMobileMenu();
-        return;
-      }
-
-      if (event.key !== "Tab") {
-        return;
-      }
-
-      const overlay = overlayRef.current;
-      if (!overlay) {
-        return;
-      }
-
-      const focusableElements = overlay.querySelectorAll("button");
-      if (!focusableElements.length) {
-        return;
-      }
-
-      const firstElement = focusableElements[0] as HTMLElement;
-      const lastElement = focusableElements[
-        focusableElements.length - 1
-      ] as HTMLElement;
-      const activeElement = document.activeElement as HTMLElement | null;
-
-      if (event.shiftKey) {
-        // Shift+Tab: move focus backwards, wrap from first to last
-        if (!activeElement || activeElement === firstElement) {
-          event.preventDefault();
-          lastElement.focus();
-        }
-      } else {
-        // Tab: move focus forwards, wrap from last to first
-        if (!activeElement || activeElement === lastElement) {
-          event.preventDefault();
-          firstElement.focus();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    // Focus first navigation button (skip close button when available)
-    const navButtons = overlayRef.current?.querySelectorAll("button");
-    if (navButtons && navButtons.length > 1) {
-      (navButtons[1] as HTMLButtonElement).focus();
-    } else if (navButtons && navButtons.length === 1) {
-      (navButtons[0] as HTMLButtonElement).focus();
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      // Restore original body scroll behavior
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isMobileMenuOpen]);
+  useMobileMenuAccessibility({
+    isOpen: isMobileMenuOpen,
+    onClose: handleCloseMobileMenu,
+    overlayRef,
+  });
 
   return (
     <HeaderContainer>
