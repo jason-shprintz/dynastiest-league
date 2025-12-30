@@ -41,14 +41,6 @@ interface AllTeamsProps {
 const MOCK_DATA_FALLBACK_TIMEOUT = 1000;
 
 /**
- * Get avatar URL from Sleeper CDN
- */
-const getAvatarUrl = (avatar: string | null): string | null => {
-  if (!avatar) return null;
-  return `https://sleepercdn.com/avatars/thumbs/${avatar}`;
-};
-
-/**
  * Get bench players (players not in starters or reserve)
  */
 const getBenchPlayers = (roster: Roster): string[] => {
@@ -73,6 +65,33 @@ const getTaxiPlayers = (roster: Roster): string[] => {
  */
 const formatRecord = (wins: number, losses: number, ties: number): string => {
   return `${wins}-${losses}${ties > 0 ? `-${ties}` : ""}`;
+};
+
+/**
+ * Sort teams by standings (wins descending, then losses ascending, then ties descending)
+ */
+const sortByStandings = (teams: TeamData[]): TeamData[] => {
+  return [...teams].sort((a, b) => {
+    // First sort by wins (descending)
+    if (a.roster.settings.wins !== b.roster.settings.wins) {
+      return b.roster.settings.wins - a.roster.settings.wins;
+    }
+    // If wins are equal, sort by losses (ascending)
+    if (a.roster.settings.losses !== b.roster.settings.losses) {
+      return a.roster.settings.losses - b.roster.settings.losses;
+    }
+    // If losses are equal, sort by ties (descending)
+    return b.roster.settings.ties - a.roster.settings.ties;
+  });
+};
+
+/**
+ * Get team avatar URL from roster metadata
+ */
+const getTeamAvatarUrl = (roster: Roster): string | null => {
+  const metadata = roster.metadata as { avatar?: string } | null;
+  if (!metadata?.avatar) return null;
+  return `https://sleepercdn.com/avatars/thumbs/${metadata.avatar}`;
 };
 
 /**
@@ -143,7 +162,7 @@ export const AllTeams = observer(
       return <LoadingMessage>Loading teams...</LoadingMessage>;
     }
 
-    const teams = getTeamData();
+    const teams = sortByStandings(getTeamData());
 
     if (teams.length === 0) {
       return <LoadingMessage>No teams found</LoadingMessage>;
@@ -170,13 +189,13 @@ export const AllTeams = observer(
               >
                 <TeamSummary>
                   <TeamAvatar>
-                    {user?.avatar ? (
+                    {getTeamAvatarUrl(roster) ? (
                       <img
-                        src={getAvatarUrl(user.avatar) || ""}
-                        alt={user.display_name}
+                        src={getTeamAvatarUrl(roster) || ""}
+                        alt={user?.metadata?.team_name || "Team"}
                       />
                     ) : (
-                      <span style={{ fontSize: "1.5rem" }}>👤</span>
+                      <span style={{ fontSize: "1.5rem" }}>🏈</span>
                     )}
                   </TeamAvatar>
                   <TeamInfo>
