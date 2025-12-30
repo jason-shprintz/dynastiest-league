@@ -3,7 +3,7 @@
  * Displays all teams in the league with expandable cards showing roster details
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { DEFAULT_LEAGUE_ID } from "../../constants";
@@ -37,6 +37,44 @@ interface AllTeamsProps {
   leagueId?: string;
 }
 
+// Timeout for fallback to mock data in milliseconds
+const MOCK_DATA_FALLBACK_TIMEOUT = 1000;
+
+/**
+ * Get avatar URL from Sleeper CDN
+ */
+const getAvatarUrl = (avatar: string | null): string | null => {
+  if (!avatar) return null;
+  return `https://sleepercdn.com/avatars/thumbs/${avatar}`;
+};
+
+/**
+ * Get bench players (players not in starters or reserve)
+ */
+const getBenchPlayers = (roster: Roster): string[] => {
+  const startersSet = new Set(roster.starters);
+  const reserveSet = new Set(roster.reserve || []);
+
+  return roster.players.filter(
+    (playerId) => !startersSet.has(playerId) && !reserveSet.has(playerId)
+  );
+};
+
+/**
+ * Get taxi squad players from roster metadata
+ */
+const getTaxiPlayers = (roster: Roster): string[] => {
+  const metadata = roster.metadata as { taxi?: string[] } | null;
+  return metadata?.taxi || [];
+};
+
+/**
+ * Format team record as "W-L" or "W-L-T" if there are ties
+ */
+const formatRecord = (wins: number, losses: number, ties: number): string => {
+  return `${wins}-${losses}${ties > 0 ? `-${ties}` : ""}`;
+};
+
 /**
  * Component that displays all teams in the league
  * Each team is shown in a card with summary information
@@ -54,7 +92,7 @@ export const AllTeams = observer(
       const loadData = async () => {
         try {
           await store.loadAllLeagueData(leagueId);
-          // If data fails to load (empty arrays), use mock data
+          // If data fails to load (empty arrays), use mock data after timeout
           setTimeout(() => {
             if (
               store.rostersStore.rosters.length === 0 &&
@@ -63,7 +101,7 @@ export const AllTeams = observer(
             ) {
               setUseMockData(true);
             }
-          }, 1000);
+          }, MOCK_DATA_FALLBACK_TIMEOUT);
         } catch {
           setUseMockData(true);
         }
@@ -71,18 +109,16 @@ export const AllTeams = observer(
       loadData();
     }, [store, leagueId]);
 
-    const handleTeamClick = (rosterId: number) => {
-      // If clicking on the already expanded team, collapse it
-      // Otherwise, expand the clicked team
-      setExpandedTeamId(expandedTeamId === rosterId ? null : rosterId);
-    };
+    const handleTeamClick = useCallback(
+      (rosterId: number) => {
+        // If clicking on the already expanded team, collapse it
+        // Otherwise, expand the clicked team
+        setExpandedTeamId(expandedTeamId === rosterId ? null : rosterId);
+      },
+      [expandedTeamId]
+    );
 
-    const getAvatarUrl = (avatar: string | null) => {
-      if (!avatar) return null;
-      return `https://sleepercdn.com/avatars/thumbs/${avatar}`;
-    };
-
-    const getTeamData = (): TeamData[] => {
+    const getTeamData = useCallback((): TeamData[] => {
       if (useMockData) {
         return mockRosters.map((roster) => ({
           roster,
@@ -93,23 +129,7 @@ export const AllTeams = observer(
         roster,
         user: store.usersStore.getUserById(roster.owner_id),
       }));
-    };
-
-    const getBenchPlayers = (roster: Roster): string[] => {
-      // Bench players are in the players array but not in starters or reserve
-      const startersSet = new Set(roster.starters);
-      const reserveSet = new Set(roster.reserve || []);
-
-      return roster.players.filter(
-        (playerId) => !startersSet.has(playerId) && !reserveSet.has(playerId)
-      );
-    };
-
-    const getTaxiPlayers = (roster: Roster): string[] => {
-      // Taxi squad is stored in metadata if available
-      const metadata = roster.metadata as { taxi?: string[] } | null;
-      return metadata?.taxi || [];
-    };
+    }, [useMockData, store.rostersStore.rosters, store.usersStore]);
 
     if (!useMockData && (store.rostersStore.isLoading || store.usersStore.isLoading)) {
       return <LoadingMessage>Loading teams...</LoadingMessage>;
@@ -134,7 +154,11 @@ export const AllTeams = observer(
         <TeamsGrid>
           {teams.map(({ roster, user }) => {
             const isExpanded = expandedTeamId === roster.roster_id;
-            const record = `${roster.settings.wins}-${roster.settings.losses}${roster.settings.ties > 0 ? `-${roster.settings.ties}` : ""}`;
+            const record = formatRecord(
+              roster.settings.wins,
+              roster.settings.losses,
+              roster.settings.ties
+            );
             const benchPlayers = getBenchPlayers(roster);
             const taxiPlayers = getTaxiPlayers(roster);
 
