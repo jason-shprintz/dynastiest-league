@@ -31,8 +31,6 @@ export const LeagueDataLoader = observer(
       store.loadTransactionsForWeek(leagueId, 1);
     }, [store, leagueId]);
 
-    console.log(store.transactionsStore);
-
     return (
       <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
         <h2>Sleeper League Data Status</h2>
