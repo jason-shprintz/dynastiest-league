@@ -21,9 +21,9 @@ import renderContentWithLinks from "../../helper/renderContentWithLinks";
 const Blog = () => {
   return (
     <BlogSection>
-      <h2>League Blog</h2>
+      <h2>Commissioner's Blog</h2>
       <SectionDescription>
-        Updates, insights, and stories from the Dynastiest League
+        Updates from the Commissioner
       </SectionDescription>
       <BlogContent>
         {blogPosts.map((post) => (
