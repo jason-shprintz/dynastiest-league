@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
   { section: "constitution", label: "Constitution" },
   { section: "scouting", label: "Scouting" },
   { section: "blog", label: "Blog" },
+  { section: "data", label: "League Data" },
 ];
 
 /**
