@@ -8,7 +8,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { DEFAULT_LEAGUE_ID } from "../../constants";
 import type { Roster, User } from "../../types/sleeper";
-import { mockRosters, mockUsers } from "./mockData";
 import {
   TeamsSection,
   TeamsGrid,
@@ -37,8 +36,13 @@ interface AllTeamsProps {
   leagueId?: string;
 }
 
-// Timeout for fallback to mock data in milliseconds
-const MOCK_DATA_FALLBACK_TIMEOUT = 1000;
+/**
+ * Get user avatar URL from Sleeper CDN
+ */
+const getAvatarUrl = (avatar: string | null): string | null => {
+  if (!avatar) return null;
+  return `https://sleepercdn.com/avatars/thumbs/${avatar}`;
+};
 
 /**
  * Get bench players (players not in starters or reserve)
@@ -86,15 +90,6 @@ const sortByStandings = (teams: TeamData[]): TeamData[] => {
 };
 
 /**
- * Get team avatar URL from roster metadata
- */
-const getTeamAvatarUrl = (roster: Roster): string | null => {
-  const metadata = roster.metadata as { avatar?: string } | null;
-  if (!metadata?.avatar) return null;
-  return `https://sleepercdn.com/avatars/thumbs/${metadata.avatar}`;
-};
-
-/**
  * Component that displays all teams in the league
  * Each team is shown in a card with summary information
  * Cards can be expanded to show roster details (starters, bench, IR, taxi)
@@ -104,28 +99,10 @@ export const AllTeams = observer(
   ({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
     const store = useStore();
     const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null);
-    const [useMockData, setUseMockData] = useState(false);
 
     useEffect(() => {
       // Load all basic league data
-      const loadData = async () => {
-        try {
-          await store.loadAllLeagueData(leagueId);
-          // If data fails to load (empty arrays), use mock data after timeout
-          setTimeout(() => {
-            if (
-              store.rostersStore.rosters.length === 0 &&
-              !store.rostersStore.isLoading &&
-              store.rostersStore.error
-            ) {
-              setUseMockData(true);
-            }
-          }, MOCK_DATA_FALLBACK_TIMEOUT);
-        } catch {
-          setUseMockData(true);
-        }
-      };
-      loadData();
+      store.loadAllLeagueData(leagueId);
     }, [store, leagueId]);
 
     const handleTeamClick = useCallback(
@@ -137,32 +114,24 @@ export const AllTeams = observer(
       [expandedTeamId]
     );
 
-    const getTeamData = useCallback((): TeamData[] => {
-      if (useMockData) {
-        return mockRosters.map((roster) => ({
-          roster,
-          user: mockUsers.find((u) => u.user_id === roster.owner_id),
-        }));
-      }
-      return store.rostersStore.rosters.map((roster) => ({
+    if (store.rostersStore.isLoading || store.usersStore.isLoading) {
+      return <LoadingMessage>Loading teams...</LoadingMessage>;
+    }
+
+    if (store.rostersStore.error) {
+      return <LoadingMessage>Error loading teams</LoadingMessage>;
+    }
+
+    if (store.usersStore.error) {
+      return <LoadingMessage>Error loading users</LoadingMessage>;
+    }
+
+    const teams = sortByStandings(
+      store.rostersStore.rosters.map((roster) => ({
         roster,
         user: store.usersStore.getUserById(roster.owner_id),
-      }));
-    }, [useMockData, store.rostersStore.rosters, store.usersStore]);
-
-    if (!useMockData && (store.rostersStore.isLoading || store.usersStore.isLoading)) {
-      return <LoadingMessage>Loading teams...</LoadingMessage>;
-    }
-
-    if (!useMockData && store.rostersStore.error && store.rostersStore.rosters.length === 0) {
-      return <LoadingMessage>Loading teams...</LoadingMessage>;
-    }
-
-    if (!useMockData && store.usersStore.error && store.usersStore.users.length === 0) {
-      return <LoadingMessage>Loading teams...</LoadingMessage>;
-    }
-
-    const teams = sortByStandings(getTeamData());
+      }))
+    );
 
     if (teams.length === 0) {
       return <LoadingMessage>No teams found</LoadingMessage>;
@@ -189,13 +158,13 @@ export const AllTeams = observer(
               >
                 <TeamSummary>
                   <TeamAvatar>
-                    {getTeamAvatarUrl(roster) ? (
+                    {user?.avatar ? (
                       <img
-                        src={getTeamAvatarUrl(roster) || ""}
-                        alt={user?.metadata?.team_name || "Team"}
+                        src={getAvatarUrl(user.avatar) || ""}
+                        alt={user.display_name}
                       />
                     ) : (
-                      <span style={{ fontSize: "1.5rem" }}>🏈</span>
+                      <span style={{ fontSize: "1.5rem" }}>👤</span>
                     )}
                   </TeamAvatar>
                   <TeamInfo>
@@ -204,6 +173,7 @@ export const AllTeams = observer(
                     </TeamName>
                     <UserName>{user?.display_name || "Unknown User"}</UserName>
                     <TeamRecord>Record: {record}</TeamRecord>
+                    <TeamRecord>Points: {roster.settings.fpts}</TeamRecord>
                   </TeamInfo>
                 </TeamSummary>
 
