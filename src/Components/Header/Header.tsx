@@ -1,15 +1,37 @@
+import { useState, useCallback, useRef } from "react";
 import { Section } from "../../types";
+import { useMobileMenuAccessibility } from "../../hooks/useMobileMenuAccessibility";
 import {
   HeaderContainer,
   HeaderContent,
   Navigation,
   NavButton,
+  MobileNavBar,
+  MobileTitle,
+  HamburgerButton,
+  MobileMenuOverlay,
+  MobileMenuContainer,
+  CloseButton,
 } from "./Header.styles";
 
 interface IHeaderProps {
   activeSection: Section;
   setActiveSection: React.Dispatch<React.SetStateAction<Section>>;
 }
+
+interface NavItem {
+  section: Section;
+  label: string;
+}
+
+const navItems: NavItem[] = [
+  { section: "home", label: "Home" },
+  { section: "records", label: "Hall of Records" },
+  { section: "champion", label: "Current Champion" },
+  { section: "constitution", label: "Constitution" },
+  { section: "scouting", label: "Scouting" },
+  { section: "blog", label: "Blog" },
+];
 
 /**
  * Header component that displays the league hero image and navigation menu.
@@ -20,6 +42,31 @@ interface IHeaderProps {
  * @returns A header element containing the hero image and navigation buttons
  */
 const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const handleNavClick = (section: Section) => {
+    setActiveSection(section);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleCloseMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    hamburgerRef.current?.focus();
+  }, []);
+
+  // Get label for current section
+  const currentLabel =
+    navItems.find((item) => item.section === activeSection)?.label || "Home";
+
+  // Handle keyboard interactions for mobile menu (Escape to close, Tab to trap focus)
+  useMobileMenuAccessibility({
+    isOpen: isMobileMenuOpen,
+    onClose: handleCloseMobileMenu,
+    overlayRef,
+  });
+
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -34,44 +81,58 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
           }}
         />
       </HeaderContent>
+
+      {/* Desktop Navigation */}
       <Navigation>
-        <NavButton
-          $isActive={activeSection === "home"}
-          onClick={() => setActiveSection("home")}
-        >
-          Home
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "records"}
-          onClick={() => setActiveSection("records")}
-        >
-          Hall of Records
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "champion"}
-          onClick={() => setActiveSection("champion")}
-        >
-          Current Champion
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "constitution"}
-          onClick={() => setActiveSection("constitution")}
-        >
-          Constitution
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "scouting"}
-          onClick={() => setActiveSection("scouting")}
-        >
-          Scouting
-        </NavButton>
-        <NavButton
-          $isActive={activeSection === "blog"}
-          onClick={() => setActiveSection("blog")}
-        >
-          Blog
-        </NavButton>
+        {navItems.map((item) => (
+          <NavButton
+            key={item.section}
+            $isActive={activeSection === item.section}
+            onClick={() => setActiveSection(item.section)}
+          >
+            {item.label}
+          </NavButton>
+        ))}
       </Navigation>
+
+      {/* Mobile Navigation Bar */}
+      <MobileNavBar>
+        <MobileTitle>{currentLabel}</MobileTitle>
+        <HamburgerButton
+          ref={hamburgerRef}
+          onClick={() => setIsMobileMenuOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={isMobileMenuOpen}
+        >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </HamburgerButton>
+      </MobileNavBar>
+
+      {/* Mobile Menu Overlay */}
+      <MobileMenuOverlay
+        ref={overlayRef}
+        $isOpen={isMobileMenuOpen}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+      >
+        <MobileMenuContainer>
+          <CloseButton onClick={handleCloseMobileMenu} aria-label="Close menu">
+            ✕
+          </CloseButton>
+          {navItems.map((item) => (
+            <NavButton
+              key={item.section}
+              $isActive={activeSection === item.section}
+              onClick={() => handleNavClick(item.section)}
+            >
+              {item.label}
+            </NavButton>
+          ))}
+        </MobileMenuContainer>
+      </MobileMenuOverlay>
     </HeaderContainer>
   );
 };
