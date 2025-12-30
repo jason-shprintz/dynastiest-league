@@ -119,9 +119,9 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
           aria-label="Open menu"
           aria-expanded={isMobileMenuOpen}
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
         </HamburgerButton>
       </MobileNavBar>
 
