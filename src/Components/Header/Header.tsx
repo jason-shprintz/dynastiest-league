@@ -60,6 +60,12 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
           Constitution
         </NavButton>
         <NavButton
+          $isActive={activeSection === "scouting"}
+          onClick={() => setActiveSection("scouting")}
+        >
+          Scouting
+        </NavButton>
+        <NavButton
           $isActive={activeSection === "blog"}
           onClick={() => setActiveSection("blog")}
         >

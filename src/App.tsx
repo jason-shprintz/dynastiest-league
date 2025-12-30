@@ -8,6 +8,7 @@ import Home from "./Components/MainContent/MainContent";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import Blog from "./Components/Blog/Blog";
+import Scouting from "./Components/Scouting/Scouting";
 import { Section } from "./types";
 
 /**
@@ -42,6 +43,7 @@ function App() {
           {activeSection === "records" && <HallOfRecords />}
           {activeSection === "champion" && <Champion />}
           {activeSection === "constitution" && <Constitution />}
+          {activeSection === "scouting" && <Scouting />}
           {activeSection === "blog" && <Blog />}
         </MainContent>
 
