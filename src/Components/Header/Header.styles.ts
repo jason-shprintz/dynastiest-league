@@ -120,9 +120,11 @@ export const MobileMenuOverlay = styled.div<{ $isOpen: boolean }>`
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.98);
     backdrop-filter: blur(10px);
-    z-index: 200;
+    z-index: 9999;
     opacity: ${(props) => (props.$isOpen ? "1" : "0")};
     pointer-events: ${(props) => (props.$isOpen ? "auto" : "none")};
     transition: opacity 0.3s ease;
@@ -136,7 +138,8 @@ export const MobileMenuContainer = styled.div`
   align-items: center;
   gap: 1rem;
   padding: 2rem;
-  height: 100%;
+  height: 100vh;
+  width: 100%;
   overflow-y: auto;
 `;
 
@@ -152,7 +155,7 @@ export const CloseButton = styled.button`
   padding: 0.5rem;
   line-height: 1;
   transition: all 0.3s ease;
-  z-index: 201;
+  z-index: 10000;
 
   &:hover {
     color: ${COLORS.white};
