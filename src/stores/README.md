@@ -5,6 +5,7 @@ This directory contains MobX stores for managing data from the Sleeper fantasy f
 ## Overview
 
 The stores provide observable state management for all Sleeper API data, including:
+
 - League information
 - Rosters
 - Matchups
@@ -78,9 +79,11 @@ const MyComponent = observer(() => {
 ## Store Structure
 
 ### RootStore
+
 The main store that contains all other stores and provides helper methods for loading data.
 
 **Methods:**
+
 - `loadAllLeagueData(leagueId)` - Loads league info, rosters, users, drafts, playoff bracket, and traded picks
 - `loadMatchupsForWeek(leagueId, week)` - Loads matchups for a specific week
 - `loadTransactionsForWeek(leagueId, week)` - Loads transactions for a specific week
@@ -89,6 +92,7 @@ The main store that contains all other stores and provides helper methods for lo
 ### Individual Stores
 
 Each store has:
+
 - Observable data properties
 - `isLoading` - Boolean indicating if data is being fetched
 - `error` - Error message if fetch fails
@@ -96,80 +100,104 @@ Each store has:
 - `reset()` - Method to reset the store
 
 #### LeagueStore
+
 Manages league information.
 
 **Properties:**
+
 - `league: League | null` - The league data
 
 **Methods:**
+
 - `loadLeague(leagueId)` - Fetches league information
 
 #### RostersStore
+
 Manages roster data for all teams in the league.
 
 **Properties:**
+
 - `rosters: Roster[]` - Array of all rosters
 
 **Methods:**
+
 - `loadRosters(leagueId)` - Fetches all rosters
 
 #### MatchupsStore
+
 Manages matchup data by week.
 
 **Properties:**
+
 - `matchupsByWeek: Map<number, Matchup[]>` - Matchups organized by week
 
 **Methods:**
+
 - `loadMatchups(leagueId, week)` - Fetches matchups for a specific week
 - `getMatchupsForWeek(week)` - Returns matchups for a specific week
 
 #### UsersStore
+
 Manages user/owner data.
 
 **Properties:**
+
 - `users: User[]` - Array of all users
 
 **Methods:**
+
 - `loadUsers(leagueId)` - Fetches all users
 - `getUserById(userId)` - Returns a specific user by ID
 
 #### PlayoffsStore
+
 Manages playoff bracket data.
 
 **Properties:**
+
 - `bracket: PlayoffBracket[]` - The playoff bracket
 
 **Methods:**
+
 - `loadPlayoffBracket(leagueId)` - Fetches the playoff bracket
 
 #### DraftStore
+
 Manages draft data.
 
 **Properties:**
+
 - `drafts: Draft[]` - Array of all drafts
 - `mostRecentDraft` - Computed property returning the most recent draft
 
 **Methods:**
+
 - `loadDrafts(leagueId)` - Fetches all drafts for the league
 
 #### TransactionsStore
+
 Manages transaction data by week.
 
 **Properties:**
+
 - `transactionsByWeek: Map<number, Transaction[]>` - Transactions organized by week
 - `allTransactions` - Computed property returning all transactions across all weeks
 
 **Methods:**
+
 - `loadTransactions(leagueId, week)` - Fetches transactions for a specific week
 - `getTransactionsForWeek(week)` - Returns transactions for a specific week
 
 #### TradedPicksStore
+
 Manages traded pick data.
 
 **Properties:**
+
 - `tradedPicks: TradedPick[]` - Array of all traded picks
 
 **Methods:**
+
 - `loadTradedPicks(leagueId)` - Fetches all traded picks
 
 ## Important Notes
@@ -181,4 +209,4 @@ Manages traded pick data.
 
 ## API Documentation
 
-For more information about the Sleeper API, see: https://docs.sleeper.com/
+For more information about the Sleeper API, see: <https://docs.sleeper.com/>

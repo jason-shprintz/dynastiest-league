@@ -7,6 +7,23 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { Matchup } from "../types/sleeper";
 import { fetchMatchups } from "../services/sleeperApi";
 
+/**
+ * MobX store for managing NFL fantasy league matchups data.
+ * 
+ * This store handles fetching, caching, and accessing matchup data
+ * organized by week from the Sleeper API.
+ * 
+ * @example
+ * ```typescript
+ * const matchupsStore = new MatchupsStore();
+ * await matchupsStore.loadMatchups('league123', 1);
+ * const weekOneMatchups = matchupsStore.getMatchupsForWeek(1);
+ * ```
+ * 
+ * @remarks
+ * The store uses MobX for reactive state management and caches
+ * matchups by week number to avoid redundant API calls.
+ */
 export class MatchupsStore {
   matchupsByWeek: Map<number, Matchup[]> = new Map();
   isLoading = false;

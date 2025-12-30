@@ -7,6 +7,21 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { League } from "../types/sleeper";
 import { fetchLeague } from "../services/sleeperApi";
 
+/**
+ * MobX store for managing Sleeper fantasy football league data.
+ * 
+ * @remarks
+ * This store handles fetching, caching, and state management for league information
+ * retrieved from the Sleeper API. It provides reactive state for loading status,
+ * error handling, and the fetched league data.
+ * 
+ * @example
+ * ```typescript
+ * const leagueStore = new LeagueStore();
+ * await leagueStore.loadLeague('123456789');
+ * console.log(leagueStore.league?.name);
+ * ```
+ */
 export class LeagueStore {
   league: League | null = null;
   isLoading = false;

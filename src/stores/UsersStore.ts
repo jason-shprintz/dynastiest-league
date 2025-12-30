@@ -7,6 +7,20 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { User } from "../types/sleeper";
 import { fetchUsers } from "../services/sleeperApi";
 
+/**
+ * MobX store for managing Sleeper league users.
+ *
+ * @remarks
+ * This store handles fetching, storing, and querying user data from the Sleeper API.
+ * It uses MobX for reactive state management with automatic observable properties.
+ *
+ * @example
+ * ```typescript
+ * const usersStore = new UsersStore();
+ * await usersStore.loadUsers('123456789');
+ * const user = usersStore.getUserById('user_123');
+ * ```
+ */
 export class UsersStore {
   users: User[] = [];
   isLoading = false;

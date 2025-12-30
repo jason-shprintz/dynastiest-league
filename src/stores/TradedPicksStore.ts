@@ -7,6 +7,20 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { TradedPick } from "../types/sleeper";
 import { fetchTradedPicks } from "../services/sleeperApi";
 
+/**
+ * MobX store for managing traded draft picks data from the Sleeper API.
+ *
+ * This store handles fetching, storing, and resetting traded picks information
+ * for a fantasy football league. It tracks loading state and any errors that
+ * occur during data fetching.
+ *
+ * @example
+ * ```typescript
+ * const tradedPicksStore = new TradedPicksStore();
+ * await tradedPicksStore.loadTradedPicks('123456789');
+ * console.log(tradedPicksStore.tradedPicks);
+ * ```
+ */
 export class TradedPicksStore {
   tradedPicks: TradedPick[] = [];
   isLoading = false;

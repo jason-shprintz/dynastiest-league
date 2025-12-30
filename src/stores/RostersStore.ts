@@ -7,6 +7,25 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { Roster } from "../types/sleeper";
 import { fetchRosters } from "../services/sleeperApi";
 
+/**
+ * MobX store for managing NFL fantasy league roster data.
+ * 
+ * This store handles fetching, storing, and managing roster information
+ * from the Sleeper API. It provides observable state for rosters,
+ * loading status, and error handling.
+ * 
+ * @example
+ * ```typescript
+ * const rostersStore = new RostersStore();
+ * await rostersStore.loadRosters('123456789');
+ * console.log(rostersStore.rosters);
+ * ```
+ * 
+ * @remarks
+ * This store uses MobX for state management with `makeAutoObservable`
+ * for automatic observable property detection. All async state updates
+ * are wrapped in `runInAction` to ensure proper MobX action boundaries.
+ */
 export class RostersStore {
   rosters: Roster[] = [];
   isLoading = false;

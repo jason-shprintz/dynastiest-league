@@ -7,6 +7,20 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { Draft } from "../types/sleeper";
 import { fetchDrafts } from "../services/sleeperApi";
 
+/**
+ * MobX store for managing NFL fantasy draft data from the Sleeper API.
+ *
+ * @remarks
+ * This store handles fetching, storing, and accessing draft information
+ * for a fantasy football league. It uses MobX for reactive state management.
+ *
+ * @example
+ * ```typescript
+ * const draftStore = new DraftStore();
+ * await draftStore.loadDrafts('123456789');
+ * console.log(draftStore.mostRecentDraft);
+ * ```
+ */
 export class DraftStore {
   drafts: Draft[] = [];
   isLoading = false;
