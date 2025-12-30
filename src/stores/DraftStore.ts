@@ -3,7 +3,7 @@
  * MobX store for managing draft data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction, computed } from "mobx";
 import type { Draft } from "../types/sleeper";
 import { fetchDrafts } from "../services/sleeperApi";
 
@@ -27,7 +27,9 @@ export class DraftStore {
   error: string | null = null;
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      mostRecentDraft: computed,
+    });
   }
 
   async loadDrafts(leagueId: string): Promise<void> {

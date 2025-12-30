@@ -36,10 +36,11 @@ export class RootStore {
   /**
    * Load all league data for a given league ID
    * This fetches league info, rosters, users, drafts, playoff bracket, and traded picks
+   * Uses Promise.allSettled to allow independent error handling for each store
    * @param leagueId - The ID of the league to load
    */
   async loadAllLeagueData(leagueId: string): Promise<void> {
-    await Promise.all([
+    await Promise.allSettled([
       this.leagueStore.loadLeague(leagueId),
       this.rostersStore.loadRosters(leagueId),
       this.usersStore.loadUsers(leagueId),

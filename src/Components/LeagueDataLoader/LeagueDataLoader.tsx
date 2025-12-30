@@ -6,7 +6,7 @@
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { DEFAULT_LEAGUE_ID } from "../../../constants";
+import { DEFAULT_LEAGUE_ID } from "../../constants";
 
 interface LeagueDataLoaderProps {
   leagueId?: string;
