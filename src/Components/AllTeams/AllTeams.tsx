@@ -150,8 +150,8 @@ export const AllTeams = observer(
               roster.settings.losses,
               roster.settings.ties
             );
-            const benchPlayers = getBenchPlayers(roster);
-            const taxiPlayers = getTaxiPlayers(roster);
+            const benchPlayers = isExpanded ? getBenchPlayers(roster) : [];
+            const taxiPlayers = isExpanded ? getTaxiPlayers(roster) : [];
 
             return (
               <TeamCard
