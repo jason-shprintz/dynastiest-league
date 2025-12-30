@@ -46,7 +46,7 @@ function App() {
           {activeSection === "constitution" && <Constitution />}
           {activeSection === "scouting" && <Scouting />}
           {activeSection === "blog" && <Blog />}
-          {activeSection === "data" && <AllTeams />}
+          {activeSection === "teams" && <AllTeams />}
         </MainContent>
 
         <Footer />
