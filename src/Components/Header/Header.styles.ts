@@ -140,7 +140,6 @@ export const MobileMenuContainer = styled.div`
   padding: 2rem;
   height: 100vh;
   width: 100%;
-  overflow-y: auto;
 `;
 
 export const CloseButton = styled.button`
