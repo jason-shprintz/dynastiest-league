@@ -32,15 +32,6 @@ const navItems: NavItem[] = [
   { section: "blog", label: "Blog" },
 ];
 
-const sectionLabels: Record<Section, string> = {
-  home: "Home",
-  records: "Hall of Records",
-  champion: "Current Champion",
-  constitution: "Constitution",
-  scouting: "Scouting",
-  blog: "Blog",
-};
-
 /**
  * Header component that displays the league hero image and navigation menu.
  *
@@ -64,6 +55,10 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
     hamburgerRef.current?.focus();
   };
 
+  // Get label for current section
+  const currentLabel =
+    navItems.find((item) => item.section === activeSection)?.label || "Home";
+
   // Handle escape key to close mobile menu
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -74,9 +69,11 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
 
     if (isMobileMenuOpen) {
       document.addEventListener("keydown", handleEscape);
-      // Trap focus within overlay when open
-      const firstButton = overlayRef.current?.querySelector("button");
-      firstButton?.focus();
+      // Focus first navigation button (skip close button)
+      const navButtons = overlayRef.current?.querySelectorAll("button");
+      if (navButtons && navButtons.length > 1) {
+        (navButtons[1] as HTMLButtonElement).focus();
+      }
     }
 
     return () => {
@@ -114,7 +111,7 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
 
       {/* Mobile Navigation Bar */}
       <MobileNavBar>
-        <MobileTitle>{sectionLabels[activeSection]}</MobileTitle>
+        <MobileTitle>{currentLabel}</MobileTitle>
         <HamburgerButton
           ref={hamburgerRef}
           onClick={() => setIsMobileMenuOpen(true)}
