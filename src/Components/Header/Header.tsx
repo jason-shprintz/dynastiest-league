@@ -70,15 +70,21 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
     };
 
     document.addEventListener("keydown", handleEscape);
-    
+
     // Focus first navigation button (skip close button)
     const navButtons = overlayRef.current?.querySelectorAll("button");
     if (navButtons && navButtons.length > 1) {
       (navButtons[1] as HTMLButtonElement).focus();
     }
 
+    // Lock body scroll while the mobile menu is open
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
       document.removeEventListener("keydown", handleEscape);
+      // Restore original body scroll behavior
+      document.body.style.overflow = originalOverflow;
     };
   }, [isMobileMenuOpen]);
 
