@@ -63,26 +63,63 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   useEffect(() => {
     if (!isMobileMenuOpen) return;
 
-    const handleEscape = (event: KeyboardEvent) => {
+  // Handle keyboard interactions for mobile menu (Escape to close, Tab to trap focus)
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         handleCloseMobileMenu();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const overlay = overlayRef.current;
+      if (!overlay) {
+        return;
+      }
+
+      const focusableElements = overlay.querySelectorAll("button");
+      if (!focusableElements.length) {
+        return;
+      }
+
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[
+        focusableElements.length - 1
+      ] as HTMLElement;
+      const activeElement = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        // Shift+Tab: move focus backwards, wrap from first to last
+        if (!activeElement || activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab: move focus forwards, wrap from last to first
+        if (!activeElement || activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("keydown", handleKeyDown);
 
-    // Focus first navigation button (skip close button)
+    // Focus first navigation button (skip close button when available)
     const navButtons = overlayRef.current?.querySelectorAll("button");
     if (navButtons && navButtons.length > 1) {
       (navButtons[1] as HTMLButtonElement).focus();
+    } else if (navButtons && navButtons.length === 1) {
+      (navButtons[0] as HTMLButtonElement).focus();
     }
 
-    // Lock body scroll while the mobile menu is open
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeyDown);
       // Restore original body scroll behavior
       document.body.style.overflow = originalOverflow;
     };
