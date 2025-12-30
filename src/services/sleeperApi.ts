@@ -13,6 +13,7 @@ import type {
   Draft,
   Transaction,
   TradedPick,
+  Player,
 } from "../types/sleeper";
 
 const SLEEPER_API_BASE = "https://api.sleeper.app/v1";
@@ -141,6 +142,23 @@ export async function fetchTradedPicks(
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch traded picks: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch all players from the Sleeper players database
+ * @returns Object mapping player IDs to player data
+ * @remarks
+ * This endpoint returns a very large payload (~5-10MB) containing all NFL players.
+ * According to Sleeper API documentation, this should be called sparingly
+ * (at most once per day, preferably once per week or less).
+ * The data should be cached locally to minimize API calls.
+ */
+export async function fetchAllPlayers(): Promise<Record<string, Player>> {
+  const response = await fetch(`${SLEEPER_API_BASE}/players/nfl`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch players: ${response.statusText}`);
   }
   return response.json();
 }

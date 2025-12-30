@@ -12,6 +12,7 @@ export { PlayoffsStore } from "./PlayoffsStore";
 export { DraftStore } from "./DraftStore";
 export { TransactionsStore } from "./TransactionsStore";
 export { TradedPicksStore } from "./TradedPicksStore";
+export { PlayersStore } from "./PlayersStore";
 
 export { StoreProvider } from "./StoreContext";
 
@@ -25,4 +26,5 @@ export {
   useDraftStore,
   useTransactionsStore,
   useTradedPicksStore,
+  usePlayersStore,
 } from "./hooks";
