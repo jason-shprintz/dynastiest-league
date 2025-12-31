@@ -119,7 +119,7 @@ export const MobileMenuOverlay = styled.div<{ $isOpen: boolean }>`
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 5rem;
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.98);
@@ -132,12 +132,16 @@ export const MobileMenuOverlay = styled.div<{ $isOpen: boolean }>`
 `;
 
 export const MobileMenuContainer = styled.div`
+  position: absolute;
+  top: 5rem;
+  left: 0;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 5rem 2rem;
-  height: 100%;
+  padding: 1rem 2rem 2rem;
+  height: calc(100% - 5rem);
   width: 100%;
   overflow-y: auto;
   box-sizing: border-box;
