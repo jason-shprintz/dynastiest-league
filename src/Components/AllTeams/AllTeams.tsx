@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { DEFAULT_LEAGUE_ID } from "../../constants";
-import type { Roster, User } from "../../types/sleeper";
+import type { Roster, User, Player } from "../../types/sleeper";
 import {
   TeamsSection,
   TeamsGrid,
@@ -90,6 +90,30 @@ const sortByStandings = (teams: TeamData[]): TeamData[] => {
     // If losses are equal, sort by ties (descending)
     return b.roster.settings.ties - a.roster.settings.ties;
   });
+};
+
+/**
+ * Format player display text with name, position, and team
+ * Uses getPlayerById to fetch player object once instead of 3 separate lookups
+ */
+const formatPlayerDisplay = (
+  playerId: string,
+  getPlayerById: (id: string) => Player | undefined
+): string => {
+  const player = getPlayerById(playerId);
+  
+  if (!player) {
+    return playerId;
+  }
+
+  const { full_name, position, team } = player;
+
+  if (position && team) {
+    return `${full_name} (${position} - ${team})`;
+  } else if (position) {
+    return `${full_name} (${position})`;
+  }
+  return full_name;
 };
 
 /**
@@ -185,7 +209,7 @@ export const AllTeams = observer(
 
                 {isExpanded && (
                   <TeamDetails>
-                    {/* Starters */}
+                     {/* Starters */}
                     <RosterSection>
                       <RosterSectionTitle>
                         Starters ({roster.starters.length})
@@ -193,7 +217,12 @@ export const AllTeams = observer(
                       {roster.starters.length > 0 ? (
                         <PlayersList>
                           {roster.starters.map((playerId) => (
-                            <PlayerChip key={playerId}>{playerId}</PlayerChip>
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerById
+                              )}
+                            </PlayerChip>
                           ))}
                         </PlayersList>
                       ) : (
@@ -209,7 +238,12 @@ export const AllTeams = observer(
                       {benchPlayers.length > 0 ? (
                         <PlayersList>
                           {benchPlayers.map((playerId) => (
-                            <PlayerChip key={playerId}>{playerId}</PlayerChip>
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerById
+                              )}
+                            </PlayerChip>
                           ))}
                         </PlayersList>
                       ) : (
@@ -225,7 +259,12 @@ export const AllTeams = observer(
                         </RosterSectionTitle>
                         <PlayersList>
                           {roster.reserve.map((playerId) => (
-                            <PlayerChip key={playerId}>{playerId}</PlayerChip>
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerById
+                              )}
+                            </PlayerChip>
                           ))}
                         </PlayersList>
                       </RosterSection>
@@ -239,7 +278,12 @@ export const AllTeams = observer(
                         </RosterSectionTitle>
                         <PlayersList>
                           {taxiPlayers.map((playerId) => (
-                            <PlayerChip key={playerId}>{playerId}</PlayerChip>
+                            <PlayerChip key={playerId}>
+                              {formatPlayerDisplay(
+                                playerId,
+                                store.playersStore.getPlayerById
+                              )}
+                            </PlayerChip>
                           ))}
                         </PlayersList>
                       </RosterSection>

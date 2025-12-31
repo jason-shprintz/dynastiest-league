@@ -54,3 +54,7 @@ export function useTransactionsStore() {
 export function useTradedPicksStore() {
   return useStore().tradedPicksStore;
 }
+
+export function usePlayersStore() {
+  return useStore().playersStore;
+}

@@ -313,3 +313,34 @@ export interface TradedPick {
   previous_owner_id: number;
   owner_id: number;
 }
+
+/**
+ * Represents a player from the Sleeper players database.
+ * The players database contains comprehensive information about all NFL players.
+ * According to Sleeper API docs, this should be fetched sparingly (at most once per day).
+ *
+ * @interface Player
+ * @property {string} player_id - Unique identifier for the player
+ * @property {string} first_name - Player's first name
+ * @property {string} last_name - Player's last name
+ * @property {string} full_name - Player's full name
+ * @property {string} position - Player's position (e.g., "QB", "RB", "WR")
+ * @property {string} team - NFL team abbreviation (null if free agent)
+ * @property {number} age - Player's age
+ * @property {string} status - Player's status (e.g., "Active", "Inactive", "Injured Reserve")
+ * @property {number} number - Player's jersey number
+ * @property {string} college - College the player attended
+ */
+export interface Player {
+  player_id: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  position: string;
+  team: string | null;
+  age: number;
+  status: string;
+  number: number;
+  college: string;
+  [key: string]: unknown; // Additional fields from Sleeper API
+}
