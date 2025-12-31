@@ -119,10 +119,10 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
         aria-modal="true"
         aria-label="Navigation menu"
       >
+        <CloseButton onClick={handleCloseMobileMenu} aria-label="Close menu">
+          ✕
+        </CloseButton>
         <MobileMenuContainer>
-          <CloseButton onClick={handleCloseMobileMenu} aria-label="Close menu">
-            ✕
-          </CloseButton>
           {navItems.map((item) => (
             <NavButton
               key={item.section}
