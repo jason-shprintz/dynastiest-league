@@ -71,16 +71,24 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
   return (
     <HeaderContainer>
       <HeaderContent>
-        <img
-          src="/Hero.png"
-          alt="Dynastiest League Hero"
-          style={{
-            width: "50%",
-            maxWidth: "300px",
-            height: "auto",
-            borderRadius: "12px",
-          }}
-        />
+        <picture>
+          <source
+            type="image/webp"
+            srcSet="/Hero-small.webp 400w, /Hero-medium.webp 800w, /Hero.webp 1536w"
+            sizes="(max-width: 600px) 400px, (max-width: 1200px) 800px, 300px"
+          />
+          <img
+            src="/Hero.png"
+            alt="Dynastiest League Hero"
+            fetchPriority="high"
+            style={{
+              width: "50%",
+              maxWidth: "300px",
+              height: "auto",
+              borderRadius: "12px",
+            }}
+          />
+        </picture>
       </HeaderContent>
 
       {/* Desktop Navigation */}
