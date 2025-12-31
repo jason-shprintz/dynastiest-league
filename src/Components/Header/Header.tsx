@@ -75,7 +75,7 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
           <source
             type="image/webp"
             srcSet="/Hero-small.webp 400w, /Hero-medium.webp 800w, /Hero.webp 1536w"
-            sizes="(max-width: 600px) 400px, (max-width: 1200px) 800px, 300px"
+            sizes="(max-width: 768px) 50vw, 300px"
           />
           <img
             src="/Hero.png"
