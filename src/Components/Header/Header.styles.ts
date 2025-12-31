@@ -134,12 +134,14 @@ export const MobileMenuOverlay = styled.div<{ $isOpen: boolean }>`
 export const MobileMenuContainer = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 1rem;
   padding: 2rem;
+  padding-top: 5rem;
   height: 100vh;
   width: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
 `;
 
 export const CloseButton = styled.button`
