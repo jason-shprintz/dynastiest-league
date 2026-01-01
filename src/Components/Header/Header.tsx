@@ -78,7 +78,7 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
             sizes="(max-width: 768px) 50vw, 300px"
           />
           <img
-            src="/Hero.png"
+            src="/Hero-medium.webp"
             alt="Dynastiest League Hero"
             fetchPriority="high"
             style={{
