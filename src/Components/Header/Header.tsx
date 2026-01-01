@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
   { section: "scouting", label: "Scouting" },
   { section: "blog", label: "Blog" },
   { section: "teams", label: "Teams" },
+  { section: "breaking-news", label: "Breaking News" },
 ];
 
 /**

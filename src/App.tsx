@@ -10,6 +10,7 @@ import Header from "./Components/Header/Header";
 import Blog from "./Components/Blog/Blog";
 import Scouting from "./Components/Scouting/Scouting";
 import { AllTeams } from "./Components/AllTeams/AllTeams";
+import { BreakingNews } from "./Components/BreakingNews/BreakingNews";
 import { Section } from "./types";
 
 /**
@@ -47,6 +48,7 @@ function App() {
           {activeSection === "scouting" && <Scouting />}
           {activeSection === "blog" && <Blog />}
           {activeSection === "teams" && <AllTeams />}
+          {activeSection === "breaking-news" && <BreakingNews />}
         </MainContent>
 
         <Footer />
