@@ -17,12 +17,12 @@ export interface SleeperTransaction {
   transaction_id: string;
   status_updated: number;
   status: string;
-  settings: Record<string, unknown> | null;
-  roster_ids: number[];
-  metadata: Record<string, unknown> | null;
+  settings?: Record<string, unknown> | null;
+  roster_ids?: number[];
+  metadata?: Record<string, unknown> | null;
   leg: number;
-  drops: Record<string, number> | null;
-  draft_picks: Array<{
+  drops?: Record<string, number> | null;
+  draft_picks?: Array<{
     season: string;
     round: number;
     roster_id: number;
@@ -31,9 +31,9 @@ export interface SleeperTransaction {
   }>;
   creator: string;
   created: number;
-  consenter_ids: number[];
-  adds: Record<string, number> | null;
-  waiver_budget: Array<{
+  consenter_ids?: number[];
+  adds?: Record<string, number> | null;
+  waiver_budget?: Array<{
     sender: number;
     receiver: number;
     amount: number;
@@ -70,6 +70,16 @@ export interface SleeperPlayer {
   team: string | null;
   age: number;
   status: string;
+}
+
+/**
+ * Sleeper NFL state response
+ */
+export interface SleeperNflState {
+  week: number;
+  season_type: string;
+  season: string;
+  [key: string]: unknown;
 }
 
 /**

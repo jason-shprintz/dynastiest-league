@@ -8,6 +8,7 @@ import type {
   SleeperRoster,
   SleeperUser,
   SleeperPlayer,
+  SleeperNflState,
 } from "./types";
 
 const SLEEPER_API_BASE = "https://api.sleeper.app/v1";
@@ -66,14 +67,25 @@ export async function fetchPlayers(): Promise<Record<string, SleeperPlayer>> {
 }
 
 /**
- * Get the current NFL week
- * This is a simplified version - you may want to adjust based on the current season state
+ * Fetch NFL state from Sleeper to get current week
  */
-export function getCurrentWeek(): number {
-  const now = new Date();
-  const seasonStart = new Date(now.getFullYear(), 8, 1); // September 1st
-  const weeksPassed = Math.floor(
-    (now.getTime() - seasonStart.getTime()) / (7 * 24 * 60 * 60 * 1000)
-  );
-  return Math.max(1, Math.min(18, weeksPassed + 1));
+export async function fetchNflState(): Promise<SleeperNflState> {
+  const response = await fetch(`${SLEEPER_API_BASE}/state/nfl`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch NFL state: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Get the current NFL week from Sleeper API
+ */
+export async function getCurrentWeek(): Promise<number> {
+  try {
+    const state = await fetchNflState();
+    return state.week || 1;
+  } catch (error) {
+    console.error("Failed to fetch current week from Sleeper, defaulting to week 1:", error);
+    return 1;
+  }
 }

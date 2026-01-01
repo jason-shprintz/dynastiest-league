@@ -8,7 +8,6 @@ import type {
   SleeperTransaction,
   SleeperRoster,
   SleeperUser,
-  SleeperPlayer,
   TradeAnalysis,
 } from "./types";
 
@@ -82,8 +81,7 @@ const ANALYSIS_SCHEMA = {
 function buildTradeContext(
   trade: SleeperTransaction,
   rosters: SleeperRoster[],
-  users: SleeperUser[],
-  players: Record<string, SleeperPlayer>
+  users: SleeperUser[]
 ): string {
   const getTeamName = (rosterId: number): string => {
     const roster = rosters.find((r) => r.roster_id === rosterId);
@@ -94,16 +92,16 @@ function buildTradeContext(
   };
 
   const getPlayerInfo = (playerId: string): string => {
-    const player = players[playerId];
-    if (!player) return `Player ${playerId}`;
-    return `${player.full_name} (${player.position}${player.team ? ` - ${player.team}` : ""})`;
+    // Without full player database, use player ID and any metadata
+    return `Player ID: ${playerId}`;
   };
 
   let context = `Transaction ID: ${trade.transaction_id}\n`;
   context += `Date: ${new Date(trade.created).toLocaleDateString()}\n\n`;
   context += `Teams involved:\n`;
 
-  trade.roster_ids.forEach((rosterId) => {
+  const rosterIds = trade.roster_ids ?? [];
+  rosterIds.forEach((rosterId) => {
     const teamName = getTeamName(rosterId);
     const roster = rosters.find((r) => r.roster_id === rosterId);
     const record = roster ? `${roster.settings.wins}-${roster.settings.losses}` : "N/A";
@@ -112,29 +110,25 @@ function buildTradeContext(
     context += `Received:\n`;
 
     // Players received
-    if (trade.adds) {
-      Object.entries(trade.adds).forEach(([playerId, addedToRosterId]) => {
-        if (addedToRosterId === rosterId) {
-          context += `  - ${getPlayerInfo(playerId)}\n`;
-        }
-      });
-    }
+    const adds = trade.adds ?? {};
+    Object.entries(adds).forEach(([playerId, addedToRosterId]) => {
+      if (addedToRosterId === rosterId) {
+        context += `  - ${getPlayerInfo(playerId)}\n`;
+      }
+    });
 
     // Picks received
-    if (trade.draft_picks) {
-      trade.draft_picks.forEach((pick) => {
-        if (pick.owner_id === rosterId) {
-          const originalTeam = getTeamName(pick.roster_id);
-          context += `  - ${pick.season} Round ${pick.round} Pick (originally ${originalTeam}'s)\n`;
-        }
-      });
-    }
+    const draftPicks = trade.draft_picks ?? [];
+    draftPicks.forEach((pick) => {
+      if (pick.owner_id === rosterId) {
+        const originalTeam = getTeamName(pick.roster_id);
+        context += `  - ${pick.season} Round ${pick.round} Pick (originally ${originalTeam}'s)\n`;
+      }
+    });
 
     // Check if team received nothing
-    const receivedPlayers = trade.adds
-      ? Object.entries(trade.adds).some(([, r]) => r === rosterId)
-      : false;
-    const receivedPicks = trade.draft_picks.some((p) => p.owner_id === rosterId);
+    const receivedPlayers = Object.entries(adds).some(([, r]) => r === rosterId);
+    const receivedPicks = draftPicks.some((p) => p.owner_id === rosterId);
     if (!receivedPlayers && !receivedPicks) {
       context += `  - Nothing\n`;
     }
@@ -150,12 +144,11 @@ export async function generateTradeAnalysis(
   trade: SleeperTransaction,
   rosters: SleeperRoster[],
   users: SleeperUser[],
-  players: Record<string, SleeperPlayer>,
   apiKey: string
 ): Promise<TradeAnalysis> {
   const openai = new OpenAI({ apiKey });
 
-  const context = buildTradeContext(trade, rosters, users, players);
+  const context = buildTradeContext(trade, rosters, users);
 
   const prompt = `You are analyzing a fantasy football trade for a dynasty league. Your job is to create an in-depth, snarky analysis written as a conversation between two sports analysts named Mike and Jim.
 
