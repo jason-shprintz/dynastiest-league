@@ -77,30 +77,23 @@ export class TransactionsStore {
     this.isLoading = true;
     this.error = null;
 
-    try {
-      // Load transactions for all weeks concurrently
-      const promises = [];
-      for (let week = 1; week <= totalWeeks; week++) {
-        promises.push(fetchTransactions(leagueId, week));
-      }
-
-      const results = await Promise.allSettled(promises);
-
-      runInAction(() => {
-        results.forEach((result, index) => {
-          if (result.status === "fulfilled") {
-            const week = index + 1;
-            this.transactionsByWeek.set(week, result.value);
-          }
-        });
-        this.isLoading = false;
-      });
-    } catch (err) {
-      runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
-        this.isLoading = false;
-      });
+    // Load transactions for all weeks concurrently
+    const promises = [];
+    for (let week = 1; week <= totalWeeks; week++) {
+      promises.push(fetchTransactions(leagueId, week));
     }
+
+    const results = await Promise.allSettled(promises);
+
+    runInAction(() => {
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          const week = index + 1;
+          this.transactionsByWeek.set(week, result.value);
+        }
+      });
+      this.isLoading = false;
+    });
   }
 
   reset(): void {
