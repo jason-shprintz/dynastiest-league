@@ -28,9 +28,16 @@ const ITEMS_PER_PAGE = 10;
  */
 export const BreakingNews = observer(
   ({ leagueId = DEFAULT_LEAGUE_ID }: BreakingNewsProps) => {
-    const { transactionsStore, usersStore, rostersStore, playersStore } =
-      useStore();
+    const {
+      transactionsStore,
+      usersStore,
+      rostersStore,
+      playersStore,
+      leagueStore,
+    } = useStore();
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const leagueYear: string =
+      leagueStore.league?.season || new Date().getFullYear().toString();
 
     useEffect(() => {
       const loadData = async () => {
@@ -62,10 +69,14 @@ export const BreakingNews = observer(
      */
     const getRosterName = useCallback(
       (rosterId: number): string => {
-        const roster = rostersStore.rosters.find((r) => r.roster_id === rosterId);
+        const roster = rostersStore.rosters.find(
+          (r) => r.roster_id === rosterId
+        );
         if (!roster) return `Team ${rosterId}`;
 
-        const user = usersStore.users.find((u) => u.user_id === roster.owner_id);
+        const user = usersStore.users.find(
+          (u) => u.user_id === roster.owner_id
+        );
         if (!user) return `Team ${rosterId}`;
 
         return user.metadata?.team_name || user.display_name || user.username;
@@ -73,11 +84,18 @@ export const BreakingNews = observer(
       [rostersStore.rosters, usersStore.users]
     );
 
-    if (transactionsStore.isLoading || usersStore.isLoading || rostersStore.isLoading || playersStore.isLoading) {
+    if (
+      transactionsStore.isLoading ||
+      usersStore.isLoading ||
+      rostersStore.isLoading ||
+      playersStore.isLoading
+    ) {
       return (
         <BreakingNewsSection>
           <h2>Breaking News</h2>
-          <SectionDescription>All league trades</SectionDescription>
+          <SectionDescription>
+            All league trades in {leagueYear}
+          </SectionDescription>
           <LoadingMessage>Loading trades...</LoadingMessage>
         </BreakingNewsSection>
       );
@@ -87,7 +105,9 @@ export const BreakingNews = observer(
       return (
         <BreakingNewsSection>
           <h2>Breaking News</h2>
-          <SectionDescription>All league trades</SectionDescription>
+          <SectionDescription>
+            All league trades in {leagueYear}
+          </SectionDescription>
           <EmptyState>
             Error loading trades: {transactionsStore.error}
           </EmptyState>
@@ -99,7 +119,9 @@ export const BreakingNews = observer(
       return (
         <BreakingNewsSection>
           <h2>Breaking News</h2>
-          <SectionDescription>All league trades</SectionDescription>
+          <SectionDescription>
+            All league trades in {leagueYear}
+          </SectionDescription>
           <EmptyState>No trades have been made in this league yet.</EmptyState>
         </BreakingNewsSection>
       );
@@ -109,8 +131,9 @@ export const BreakingNews = observer(
       <BreakingNewsSection>
         <h2>Breaking News</h2>
         <SectionDescription>
-          {allTrades.length} {allTrades.length === 1 ? "trade" : "trades"} in
-          league history
+          {allTrades.length} {allTrades.length === 1 ? "trade" : "trades"}
+          &nbsp;in&nbsp;
+          {leagueYear}
         </SectionDescription>
         <TradesContainer>
           {visibleTrades.map((trade) => (
