@@ -34,6 +34,7 @@ export const BreakingNews = observer(
       rostersStore,
       playersStore,
       leagueStore,
+      tradeAnalysisStore,
     } = useStore();
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const leagueYear: string =
@@ -48,6 +49,14 @@ export const BreakingNews = observer(
           playersStore.loadPlayers(),
           leagueStore.loadLeague(leagueId),
         ]);
+
+        // After trades load, fetch analyses for all trades
+        const tradeIds = transactionsStore.allTrades.map(
+          (trade) => trade.transaction_id
+        );
+        if (tradeIds.length > 0) {
+          await tradeAnalysisStore.loadAnalysesBatch(tradeIds);
+        }
       };
 
       loadData();
@@ -58,6 +67,7 @@ export const BreakingNews = observer(
       rostersStore,
       playersStore,
       leagueStore,
+      tradeAnalysisStore,
     ]);
 
     const handleLoadMore = useCallback(() => {
@@ -148,6 +158,10 @@ export const BreakingNews = observer(
               trade={trade}
               players={playersStore.players}
               getRosterName={getRosterName}
+              analysis={tradeAnalysisStore.getAnalysis(trade.transaction_id)}
+              isLoadingAnalysis={tradeAnalysisStore.isLoadingAnalysis(
+                trade.transaction_id
+              )}
             />
           ))}
         </TradesContainer>

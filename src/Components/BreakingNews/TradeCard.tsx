@@ -5,6 +5,7 @@
 
 import { Fragment } from "react";
 import type { Transaction, Player } from "../../types/sleeper";
+import type { TradeAnalysis } from "../../stores/TradeAnalysisStore";
 import {
   TradeCardContainer,
   TradeHeader,
@@ -24,6 +25,8 @@ interface TradeCardProps {
   trade: Transaction;
   players: Record<string, Player>;
   getRosterName: (rosterId: number) => string;
+  analysis?: TradeAnalysis | null;
+  isLoadingAnalysis?: boolean;
 }
 
 /**
@@ -118,7 +121,13 @@ const getTradeItems = (
 /**
  * TradeCard component that displays trade details in a card format
  */
-export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => {
+export const TradeCard = ({ 
+  trade, 
+  players, 
+  getRosterName,
+  analysis,
+  isLoadingAnalysis,
+}: TradeCardProps) => {
   // Filter to only the rosters involved in the trade
   const involvedRosters = trade.roster_ids;
 
@@ -133,12 +142,21 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
         {involvedRosters.map((rosterId, index) => {
           const items = getTradeItems(trade, rosterId, players);
           const hasItems = items.players.length > 0 || items.picks.length > 0;
+          const teamName = getRosterName(rosterId);
+          const teamAnalysis = analysis?.teams?.[teamName];
 
           return (
             <Fragment key={rosterId}>
               {index > 0 && <TradeArrow>⇄</TradeArrow>}
               <TeamSection>
-                <TeamName>{getRosterName(rosterId)}</TeamName>
+                <TeamName>
+                  {teamName}
+                  {teamAnalysis && (
+                    <span style={{ marginLeft: "8px", color: "#4CAF50" }}>
+                      Grade: {teamAnalysis.grade}
+                    </span>
+                  )}
+                </TeamName>
                 <ItemsList>
                   <ItemsTitle>Received:</ItemsTitle>
                   {!hasItems && <EmptyItems>Nothing</EmptyItems>}
@@ -153,11 +171,78 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
                     </Item>
                   ))}
                 </ItemsList>
+                {teamAnalysis && (
+                  <div style={{ 
+                    marginTop: "8px", 
+                    fontSize: "14px", 
+                    fontStyle: "italic",
+                    color: "#666"
+                  }}>
+                    {teamAnalysis.summary}
+                  </div>
+                )}
               </TeamSection>
             </Fragment>
           );
         })}
       </TradeParties>
+
+      {/* AI Analysis Section */}
+      {isLoadingAnalysis && (
+        <div style={{
+          marginTop: "16px",
+          padding: "16px",
+          background: "#f5f5f5",
+          borderRadius: "8px",
+          textAlign: "center",
+          fontStyle: "italic",
+          color: "#666",
+        }}>
+          🎬 Mike &amp; Jim are in the film room analyzing this trade...
+        </div>
+      )}
+
+      {analysis && (
+        <div style={{
+          marginTop: "16px",
+          padding: "16px",
+          background: "#f9f9f9",
+          borderRadius: "8px",
+        }}>
+          <h3 style={{ 
+            margin: "0 0 12px 0",
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}>
+            📺 Mike &amp; Jim's Analysis
+          </h3>
+          <div style={{ marginBottom: "12px" }}>
+            {analysis.conversation.map((msg, idx) => (
+              <div 
+                key={idx}
+                style={{
+                  marginBottom: "8px",
+                  paddingLeft: msg.speaker === "Jim" ? "20px" : "0",
+                }}
+              >
+                <strong style={{ color: msg.speaker === "Mike" ? "#1976d2" : "#d32f2f" }}>
+                  {msg.speaker}:
+                </strong>{" "}
+                {msg.text}
+              </div>
+            ))}
+          </div>
+          <div style={{
+            marginTop: "12px",
+            paddingTop: "12px",
+            borderTop: "1px solid #ddd",
+            fontWeight: "bold",
+            fontSize: "14px",
+          }}>
+            Bottom Line: {analysis.overall_take}
+          </div>
+        </div>
+      )}
     </TradeCardContainer>
   );
 };

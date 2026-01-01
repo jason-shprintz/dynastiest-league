@@ -12,6 +12,7 @@ import { DraftStore } from "./DraftStore";
 import { TransactionsStore } from "./TransactionsStore";
 import { TradedPicksStore } from "./TradedPicksStore";
 import { PlayersStore } from "./PlayersStore";
+import { TradeAnalysisStore } from "./TradeAnalysisStore";
 
 export class RootStore {
   leagueStore: LeagueStore;
@@ -23,6 +24,7 @@ export class RootStore {
   transactionsStore: TransactionsStore;
   tradedPicksStore: TradedPicksStore;
   playersStore: PlayersStore;
+  tradeAnalysisStore: TradeAnalysisStore;
 
   constructor() {
     this.leagueStore = new LeagueStore();
@@ -34,6 +36,7 @@ export class RootStore {
     this.transactionsStore = new TransactionsStore();
     this.tradedPicksStore = new TradedPicksStore();
     this.playersStore = new PlayersStore();
+    this.tradeAnalysisStore = new TradeAnalysisStore();
   }
 
   /**
@@ -88,5 +91,6 @@ export class RootStore {
     this.transactionsStore.reset();
     this.tradedPicksStore.reset();
     this.playersStore.reset();
+    this.tradeAnalysisStore.reset();
   }
 }
