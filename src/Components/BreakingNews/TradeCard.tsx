@@ -118,9 +118,9 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
           const hasItems = items.players.length > 0 || items.picks.length > 0;
 
           return (
-            <>
+            <div key={rosterId}>
               {index > 0 && <TradeArrow>⇄</TradeArrow>}
-              <TeamSection key={rosterId}>
+              <TeamSection>
                 <TeamName>{getRosterName(rosterId)}</TeamName>
                 <ItemsList>
                   <ItemsTitle>Received:</ItemsTitle>
@@ -133,7 +133,7 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
                   ))}
                 </ItemsList>
               </TeamSection>
-            </>
+            </div>
           );
         })}
       </TradeParties>

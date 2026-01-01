@@ -73,7 +73,7 @@ export const BreakingNews = observer(
       [rostersStore.rosters, usersStore.users]
     );
 
-    if (transactionsStore.isLoading || usersStore.isLoading || rostersStore.isLoading) {
+    if (transactionsStore.isLoading || usersStore.isLoading || rostersStore.isLoading || playersStore.isLoading) {
       return (
         <BreakingNewsSection>
           <h2>Breaking News</h2>
