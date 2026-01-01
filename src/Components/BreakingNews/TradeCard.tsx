@@ -3,6 +3,7 @@
  * Displays a single trade transaction with teams and items involved
  */
 
+import { Fragment } from "react";
 import type { Transaction, Player } from "../../types/sleeper";
 import {
   TradeCardContainer,
@@ -118,9 +119,9 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
           const hasItems = items.players.length > 0 || items.picks.length > 0;
 
           return (
-            <>
-              {index > 0 && <TradeArrow key={`arrow-${index}`}>⇄</TradeArrow>}
-              <TeamSection key={rosterId}>
+            <Fragment key={rosterId}>
+              {index > 0 && <TradeArrow>⇄</TradeArrow>}
+              <TeamSection>
                 <TeamName>{getRosterName(rosterId)}</TeamName>
                 <ItemsList>
                   <ItemsTitle>Received:</ItemsTitle>
@@ -133,7 +134,7 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
                   ))}
                 </ItemsList>
               </TeamSection>
-            </>
+            </Fragment>
           );
         })}
       </TradeParties>
