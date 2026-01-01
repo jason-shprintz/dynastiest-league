@@ -3,6 +3,7 @@ export const COLORS = {
   background: "#1a1a2e",
   backgroundGradientEnd: "#16213e",
   accent: "#ffd700", // Gold
+  accentHover: "#ffed4e", // Lighter gold for hover
   white: "#ffffff",
 
   // Secondary colors
