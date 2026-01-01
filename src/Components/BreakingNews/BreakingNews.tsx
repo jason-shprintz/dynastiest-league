@@ -57,7 +57,7 @@ export const BreakingNews = observer(
     }, []);
 
     // Get all trades sorted by date (most recent first)
-    const allTrades = transactionsStore.allTrades.sort(
+    const allTrades = [...transactionsStore.allTrades].sort(
       (a, b) => b.created - a.created
     );
 
