@@ -140,7 +140,7 @@ export const MobileMenuContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 2rem 5rem;
+  padding: 1rem 2rem 10rem;
   height: calc(100% - 5rem);
   width: 100%;
   overflow-y: auto;
