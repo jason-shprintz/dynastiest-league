@@ -1,0 +1,18 @@
+name = "dynastiest-league-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "dynastiest-league-db"
+database_id = "your-database-id" # Replace with actual D1 database ID after creation
+
+# Cron trigger - runs every 5 minutes
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Environment variables (secrets should be set via wrangler secret put)
+[vars]
+SLEEPER_LEAGUE_ID = "1194516531404427264"
+ANALYSIS_VERSION = "v1"

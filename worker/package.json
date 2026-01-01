@@ -1,0 +1,22 @@
+{
+  "name": "dynastiest-league-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "d1:create": "wrangler d1 create dynastiest-league-db",
+    "d1:migrations:create": "wrangler d1 migrations create DB",
+    "d1:migrations:apply": "wrangler d1 migrations apply DB --local",
+    "d1:migrations:apply:remote": "wrangler d1 migrations apply DB --remote"
+  },
+  "dependencies": {
+    "openai": "^4.77.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250115.0",
+    "wrangler": "^3.98.0",
+    "typescript": "^5.9.3"
+  }
+}
