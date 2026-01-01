@@ -43,10 +43,14 @@ export class TradeAnalysisStore {
   loadingTransactionIds: Set<string> = new Set();
   error: string | null = null;
 
-  // Worker API endpoint - update with your actual worker URL
+  // Worker API endpoint - must be set via environment variable
   private readonly workerUrl =
     import.meta.env.VITE_WORKER_URL ||
-    "https://dynastiest-league-worker.your-subdomain.workers.dev";
+    (() => {
+      throw new Error(
+        "VITE_WORKER_URL environment variable is not set. Please configure it in .env.local"
+      );
+    })();
 
   constructor() {
     makeAutoObservable(this);

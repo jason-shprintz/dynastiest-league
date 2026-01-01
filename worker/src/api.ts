@@ -8,9 +8,10 @@ import { getAnalysis, getBatchAnalyses } from "./db";
 
 /**
  * CORS headers for API responses
+ * TODO: In production, update Access-Control-Allow-Origin to your specific domain
  */
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*", // Update with your domain in production
+  "Access-Control-Allow-Origin": "*", // TODO: Replace with specific domain in production
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
   "Content-Type": "application/json",

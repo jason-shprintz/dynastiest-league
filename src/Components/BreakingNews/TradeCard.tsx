@@ -198,7 +198,7 @@ export const TradeCard = ({
           fontStyle: "italic",
           color: "#666",
         }}>
-          🎬 Mike &amp; Jim are in the film room analyzing this trade...
+          🎬 Mike & Jim are in the film room analyzing this trade...
         </div>
       )}
 
@@ -214,7 +214,7 @@ export const TradeCard = ({
             fontSize: "16px",
             fontWeight: "bold",
           }}>
-            📺 Mike &amp; Jim's Analysis
+            📺 Mike & Jim's Analysis
           </h3>
           <div style={{ marginBottom: "12px" }}>
             {analysis.conversation.map((msg, idx) => (
