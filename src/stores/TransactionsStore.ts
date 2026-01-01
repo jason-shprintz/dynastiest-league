@@ -40,6 +40,8 @@ export class TransactionsStore {
   constructor() {
     makeAutoObservable(this, {
       allTransactions: computed,
+      allTrades: computed,
+      allTradesSorted: computed,
     });
   }
 
@@ -71,6 +73,10 @@ export class TransactionsStore {
 
   get allTrades(): Transaction[] {
     return this.allTransactions.filter((tx) => tx.type === "trade");
+  }
+
+  get allTradesSorted(): Transaction[] {
+    return this.allTrades.slice().sort((a, b) => b.created - a.created);
   }
 
   async loadAllTrades(leagueId: string, totalWeeks = 18): Promise<void> {

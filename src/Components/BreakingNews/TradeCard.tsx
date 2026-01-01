@@ -28,6 +28,7 @@ interface TradeCardProps {
 
 /**
  * Format a timestamp into a readable date string
+ * @param timestamp - Unix timestamp in milliseconds from Sleeper API
  */
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -52,12 +53,21 @@ const getPlayerName = (playerId: string, players: Record<string, Player>): strin
 /**
  * Format a draft pick description
  */
-const formatDraftPick = (pick: {
-  season: string;
-  round: number;
-  roster_id: number;
-}): string => {
-  return `${pick.season} Round ${pick.round} Pick`;
+const formatDraftPick = (
+  pick: {
+    season: string;
+    round: number;
+    roster_id: number;
+    previous_owner_id?: number;
+    owner_id?: number;
+  },
+  getRosterName: (rosterId: number) => string
+): string => {
+  const baseDescription = `${pick.season} Round ${pick.round} Pick`;
+  if (typeof pick.previous_owner_id === "number") {
+    return `${baseDescription} (from ${getRosterName(pick.previous_owner_id)})`;
+  }
+  return baseDescription;
 };
 
 /**
@@ -65,7 +75,13 @@ const formatDraftPick = (pick: {
  */
 interface TradeItems {
   players: string[];
-  picks: Array<{ season: string; round: number; roster_id: number }>;
+  picks: Array<{
+    season: string;
+    round: number;
+    roster_id: number;
+    previous_owner_id?: number;
+    owner_id?: number;
+  }>;
 }
 
 const getTradeItems = (
@@ -126,11 +142,15 @@ export const TradeCard = ({ trade, players, getRosterName }: TradeCardProps) => 
                 <ItemsList>
                   <ItemsTitle>Received:</ItemsTitle>
                   {!hasItems && <EmptyItems>Nothing</EmptyItems>}
-                  {items.players.map((playerName, idx) => (
-                    <Item key={`player-${idx}`}>• {playerName}</Item>
+                  {items.players.map((playerName) => (
+                    <Item key={playerName}>• {playerName}</Item>
                   ))}
-                  {items.picks.map((pick, idx) => (
-                    <Item key={`pick-${idx}`}>• {formatDraftPick(pick)}</Item>
+                  {items.picks.map((pick) => (
+                    <Item
+                      key={`${pick.season}-${pick.round}-${pick.roster_id}`}
+                    >
+                      • {formatDraftPick(pick, getRosterName)}
+                    </Item>
                   ))}
                 </ItemsList>
               </TeamSection>

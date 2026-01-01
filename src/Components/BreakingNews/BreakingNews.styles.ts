@@ -71,6 +71,11 @@ export const LoadMoreButton = styled.button`
     transform: translateY(-2px);
   }
 
+  &:focus-visible {
+    outline: 2px solid ${COLORS.accent};
+    outline-offset: 4px;
+  }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;

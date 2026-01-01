@@ -46,20 +46,26 @@ export const BreakingNews = observer(
           usersStore.loadUsers(leagueId),
           rostersStore.loadRosters(leagueId),
           playersStore.loadPlayers(),
+          leagueStore.loadLeague(leagueId),
         ]);
       };
 
       loadData();
-    }, [leagueId, transactionsStore, usersStore, rostersStore, playersStore]);
+    }, [
+      leagueId,
+      transactionsStore,
+      usersStore,
+      rostersStore,
+      playersStore,
+      leagueStore,
+    ]);
 
     const handleLoadMore = useCallback(() => {
       setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
     }, []);
 
     // Get all trades sorted by date (most recent first)
-    const allTrades = [...transactionsStore.allTrades].sort(
-      (a, b) => b.created - a.created
-    );
+    const allTrades = transactionsStore.allTradesSorted;
 
     const visibleTrades = allTrades.slice(0, visibleCount);
     const hasMore = visibleCount < allTrades.length;

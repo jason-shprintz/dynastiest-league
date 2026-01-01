@@ -13,6 +13,12 @@ export const TradeCardContainer = styled.div`
     transform: translateY(-2px);
   }
 
+  &:focus-within {
+    background: rgba(15, 52, 96, 0.5);
+    outline: 2px solid ${COLORS.accent};
+    outline-offset: 2px;
+  }
+
   @media (max-width: 768px) {
     padding: 1.25rem;
   }
