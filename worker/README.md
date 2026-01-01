@@ -35,6 +35,7 @@ npm run d1:create
 ```
 
 Update `wrangler.toml` with your D1 database ID:
+
 ```toml
 [[d1_databases]]
 binding = "DB"
@@ -84,9 +85,11 @@ npm run tail
 Get analysis for a single trade.
 
 **Query Parameters:**
+
 - `transaction_id` (required): Sleeper transaction ID
 
 **Response:**
+
 ```json
 {
   "transaction_id": "123456",
@@ -115,9 +118,11 @@ Get analysis for a single trade.
 Get analyses for multiple trades (batch endpoint).
 
 **Query Parameters:**
+
 - `ids` (required): Comma-separated list of transaction IDs (max 100)
 
 **Response:**
+
 ```json
 {
   "123456": { ... },
@@ -133,6 +138,7 @@ Health check endpoint.
 ## Cron Schedule
 
 The worker runs every 5 minutes (`*/5 * * * *`) and:
+
 1. Checks the current week and previous week for new trades
 2. Filters for completed trades only
 3. Generates analysis for trades that don't have one yet
@@ -140,7 +146,7 @@ The worker runs every 5 minutes (`*/5 * * * *`) and:
 
 ## Architecture
 
-```
+```bash
 worker/
 ├── src/
 │   ├── index.ts      # Worker entry point
@@ -160,27 +166,33 @@ worker/
 ## Environment Variables
 
 Set in `wrangler.toml`:
+
 - `SLEEPER_LEAGUE_ID`: Your Sleeper league ID
 - `ANALYSIS_VERSION`: Version string for analysis schema (e.g., "v1")
 
 Set as secrets:
+
 - `OPENAI_API_KEY`: Your OpenAI API key
 
 ## Troubleshooting
 
 ### Check logs
+
 ```bash
 npm run tail
 ```
 
 ### Test locally
+
 ```bash
 npm run dev
 # Visit http://localhost:8787/health
 ```
 
 ### Manual trigger
+
 You can manually trigger the cron job by calling:
+
 ```bash
 curl -X GET "https://your-worker.workers.dev/api/trade-analyses?ids=transaction_id"
 ```

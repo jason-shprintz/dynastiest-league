@@ -16,11 +16,13 @@ A fantasy football league landing page built with Vite, React, and TypeScript. F
 ## AI Trade Analyzer
 
 The Breaking News page features AI-powered trade analysis using:
+
 - **Cloudflare Workers** - Serverless backend for API and scheduled jobs
 - **D1 Database** - Stores cached analyses (one per trade)
 - **OpenAI GPT-4o-mini** - Generates snarky, in-depth analysis as a conversation between two talking heads (Mike & Jim)
 
 When a trade happens in your Sleeper league, the worker automatically:
+
 1. Polls for new trades every 5 minutes
 2. Generates analysis with grades, impact assessment, and commentary
 3. Caches the result so all users see the same analysis

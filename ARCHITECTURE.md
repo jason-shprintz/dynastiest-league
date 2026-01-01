@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         User's Browser                              │
 │                                                                     │
@@ -77,7 +77,8 @@
 ## Data Flow
 
 ### 1. Trade Processing (Automated - Cron Job)
-```
+
+```bash
 Cron Trigger (Every 5 min)
     ↓
 Fetch transactions from Sleeper API
@@ -96,7 +97,8 @@ Store in D1 database
 ```
 
 ### 2. User Viewing Trade (On-Demand)
-```
+
+```bash
 User visits Breaking News page
     ↓
 Load trades from Sleeper API (client-side)
@@ -113,21 +115,25 @@ Display in TradeCard components
 ## Key Design Decisions
 
 ### 1. Idempotency
+
 - **Transaction ID as Primary Key**: Ensures only one analysis per trade
 - **Check before generate**: Worker checks D1 before calling OpenAI
 - **Result**: No duplicate analyses, predictable costs
 
 ### 2. Consistency
+
 - **Cached analyses**: All users see the same analysis
 - **No client-side OpenAI calls**: Avoids inconsistent results
 - **Versioned schema**: Analysis version tracked for future updates
 
 ### 3. Performance
+
 - **Batch endpoint**: Reduces HTTP requests (one call for all trades)
 - **Cron job**: Pre-generates analyses asynchronously
 - **D1 indexes**: Fast lookups by transaction_id and league_id
 
 ### 4. Security
+
 - **API key in Worker**: OpenAI key never reaches browser
 - **CORS headers**: Can be restricted to specific domain
 - **Environment variables**: Sensitive data stored as secrets
@@ -159,11 +165,13 @@ Display in TradeCard components
 ## Cost Analysis
 
 ### Cloudflare (Free Tier)
+
 - Workers: 100,000 requests/day ✅
 - D1: 5M reads/day, 5GB storage ✅
 - Cron: ~8,640 runs/month ✅
 
 ### OpenAI (Paid)
+
 - Model: GPT-4o-mini
 - Cost per analysis: ~$0.01-0.05
 - Typical monthly cost: $0.10-1.00 (5-20 trades/month)
@@ -184,12 +192,14 @@ Display in TradeCard components
 ## Monitoring
 
 ### Worker Logs
+
 ```bash
 cd worker
 npm run tail
 ```
 
 ### D1 Queries
+
 ```bash
 # List all analyses
 wrangler d1 execute dynastiest-league-db --remote \
@@ -201,6 +211,7 @@ wrangler d1 execute dynastiest-league-db --remote \
 ```
 
 ### OpenAI Usage
+
 - Monitor costs in OpenAI dashboard
 - Check token usage per request
 - Set spending limits if needed
@@ -208,6 +219,7 @@ wrangler d1 execute dynastiest-league-db --remote \
 ## Future Enhancements
 
 ### Potential Additions
+
 - Email notifications when new analysis is ready
 - Compare multiple trades side-by-side
 - Historical trend analysis ("This team is on fire!")
@@ -218,6 +230,7 @@ wrangler d1 execute dynastiest-league-db --remote \
 - Support for multiple leagues
 
 ### Scaling Considerations
+
 - If traffic grows: Use Cloudflare Cache API
 - If costs grow: Implement analysis quotas
 - If latency matters: Pre-warm recent analyses
@@ -226,6 +239,7 @@ wrangler d1 execute dynastiest-league-db --remote \
 ## Technical Details
 
 ### Stack
+
 - **Backend**: Cloudflare Workers (TypeScript)
 - **Database**: Cloudflare D1 (SQLite)
 - **AI**: OpenAI GPT-4o-mini
@@ -233,7 +247,8 @@ wrangler d1 execute dynastiest-league-db --remote \
 - **API**: Sleeper Fantasy Football API
 
 ### File Structure
-```
+
+```bash
 /worker/
   src/
     index.ts        # Worker entry point
