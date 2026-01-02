@@ -24,6 +24,7 @@ const ANALYSIS_SCHEMA = {
       additionalProperties: {
         type: "object",
         properties: {
+          teamName: { type: "string" },
           grade: { type: "string" },
           received: {
             type: "object",
@@ -56,7 +57,7 @@ const ANALYSIS_SCHEMA = {
           },
           summary: { type: "string" },
         },
-        required: ["grade", "received", "summary"],
+        required: ["teamName", "grade", "received", "summary"],
       },
     },
     conversation: {
@@ -91,13 +92,36 @@ function buildTradeContext(
     return user.metadata?.team_name || user.display_name || user.username;
   };
 
-  const getPlayerInfo = (playerId: string): string => {
-    // Without full player database, use player ID and any metadata
+  /**
+   * Attempt to resolve player name from trade metadata
+   */
+  const resolvePlayerName = (playerId: string): string => {
+    // Try to find player name in metadata
+    const metadata = trade.metadata;
+    if (metadata) {
+      // Common patterns in Sleeper metadata
+      if (typeof metadata.players === "object" && metadata.players) {
+        const playerInfo = (metadata.players as Record<string, unknown>)[playerId];
+        if (typeof playerInfo === "string") return playerInfo;
+        if (playerInfo && typeof playerInfo === "object") {
+          const info = playerInfo as Record<string, unknown>;
+          if (typeof info.name === "string") return info.name;
+          if (typeof info.full_name === "string") return info.full_name;
+        }
+      }
+      
+      // Sometimes metadata has player_id -> name direct mapping
+      const directName = (metadata as Record<string, unknown>)[playerId];
+      if (typeof directName === "string") return directName;
+    }
+    
+    // Fallback to player ID
     return `Player ID: ${playerId}`;
   };
 
+  const createdAt = trade.created ?? Date.now();
   let context = `Transaction ID: ${trade.transaction_id}\n`;
-  context += `Date: ${new Date(trade.created).toLocaleDateString()}\n\n`;
+  context += `Date: ${new Date(createdAt).toLocaleDateString()}\n\n`;
   context += `Teams involved:\n`;
 
   const rosterIds = trade.roster_ids ?? [];
@@ -106,14 +130,15 @@ function buildTradeContext(
     const roster = rosters.find((r) => r.roster_id === rosterId);
     const record = roster ? `${roster.settings.wins}-${roster.settings.losses}` : "N/A";
     
-    context += `\n${teamName} (${record}):\n`;
+    context += `\nRoster ID: ${rosterId}\n`;
+    context += `${teamName} (${record}):\n`;
     context += `Received:\n`;
 
     // Players received
     const adds = trade.adds ?? {};
     Object.entries(adds).forEach(([playerId, addedToRosterId]) => {
       if (addedToRosterId === rosterId) {
-        context += `  - ${getPlayerInfo(playerId)}\n`;
+        context += `  - ${resolvePlayerName(playerId)}\n`;
       }
     });
 
@@ -170,6 +195,22 @@ Keep the tone fun and engaging, but provide genuine fantasy football insights. C
 - Positional needs
 - Draft pick value
 - Dynasty league context (future value matters!)
+
+IMPORTANT: Key the "teams" object by roster ID (as a string), not team name. For example:
+{
+  "teams": {
+    "1": {
+      "teamName": "Olde Bowl",
+      "grade": "A-",
+      ...
+    },
+    "2": {
+      "teamName": "The Champs",
+      "grade": "B+",
+      ...
+    }
+  }
+}
 
 Return your analysis in the specified JSON format.`;
 

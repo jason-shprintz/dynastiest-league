@@ -29,8 +29,8 @@ function isProcessedTrade(tx: SleeperTransaction): boolean {
   // Also check if status_updated has a positive value (indicates processing)
   const hasStatusUpdate = !!(tx.status_updated && tx.status_updated > 0);
 
-  // Log trades that don't match expected criteria for debugging
-  if (!hasValidStatus && !hasStatusUpdate) {
+  // Only log unexpected status if status is defined but status_updated is missing/0
+  if (!hasValidStatus && !hasStatusUpdate && tx.status && tx.status.trim()) {
     console.log(
       `Trade ${tx.transaction_id} has unexpected status: "${tx.status}", status_updated: ${tx.status_updated}`
     );
@@ -46,15 +46,19 @@ function isProcessedTrade(tx: SleeperTransaction): boolean {
 async function processWeekTrades(
   env: Env,
   leagueId: string,
-  week: number
+  week: number,
+  seenTransactionIds: Set<string>
 ): Promise<number> {
   console.log(`Processing trades for week ${week}...`);
 
   try {
     const transactions = await fetchTransactions(leagueId, week);
+    
+    // Defensive: treat null/undefined as empty array
+    const safeTransactions = transactions ?? [];
 
     // Filter to processed trades using robust detection
-    const completedTrades = transactions.filter(isProcessedTrade);
+    const completedTrades = safeTransactions.filter(isProcessedTrade);
 
     if (completedTrades.length === 0) {
       console.log(`No completed trades found for week ${week}`);
@@ -74,6 +78,13 @@ async function processWeekTrades(
     // Process each trade
     for (const trade of completedTrades) {
       try {
+        // Skip if we've already seen this transaction (dedupe across weeks)
+        if (seenTransactionIds.has(trade.transaction_id)) {
+          console.log(`Already processed ${trade.transaction_id} in another week, skipping`);
+          continue;
+        }
+        seenTransactionIds.add(trade.transaction_id);
+
         // Check if analysis already exists
         const exists = await analysisExists(env.DB, trade.transaction_id);
         if (exists) {
@@ -91,12 +102,15 @@ async function processWeekTrades(
           env.OPENAI_API_KEY
         );
 
+        // Use fallback for created timestamp
+        const createdAt = trade.created ?? Date.now();
+
         // Save to database
         await saveAnalysis(
           env.DB,
           trade.transaction_id,
           leagueId,
-          trade.created,
+          createdAt,
           analysis,
           env.ANALYSIS_VERSION
         );
@@ -133,10 +147,12 @@ export async function handleScheduled(env: Env): Promise<void> {
 
   console.log(`Checking weeks: ${weeksToCheck.join(", ")}`);
 
+  // Track seen transaction IDs to avoid processing duplicates across weeks
+  const seenTransactionIds = new Set<string>();
   let totalProcessed = 0;
 
   for (const week of weeksToCheck) {
-    const processed = await processWeekTrades(env, leagueId, week);
+    const processed = await processWeekTrades(env, leagueId, week, seenTransactionIds);
     totalProcessed += processed;
   }
 

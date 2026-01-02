@@ -143,7 +143,7 @@ export const TradeCard = ({
           const items = getTradeItems(trade, rosterId, players);
           const hasItems = items.players.length > 0 || items.picks.length > 0;
           const teamName = getRosterName(rosterId);
-          const teamAnalysis = analysis?.teams?.[teamName];
+          const teamAnalysis = analysis?.teams?.[String(rosterId)];
 
           return (
             <Fragment key={rosterId}>

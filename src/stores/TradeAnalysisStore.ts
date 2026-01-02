@@ -12,7 +12,8 @@ export interface TradeAnalysis {
   transaction_id: string;
   timestamp: number;
   teams: {
-    [teamName: string]: {
+    [rosterId: string]: {
+      teamName: string;
       grade: string;
       received: {
         players: Array<{
@@ -41,6 +42,7 @@ export interface TradeAnalysis {
 export class TradeAnalysisStore {
   analysisByTransactionId: Map<string, TradeAnalysis | null> = new Map();
   loadingTransactionIds: Set<string> = new Set();
+  nextRetryAtById: Map<string, number> = new Map();
   error: string | null = null;
 
   // Worker API endpoint - must be set via environment variable
@@ -52,17 +54,32 @@ export class TradeAnalysisStore {
       );
     })();
 
+  // Retry configuration
+  private readonly RETRY_DELAY_MS = 60000; // 1 minute
+
   constructor() {
     makeAutoObservable(this);
+  }
+
+  /**
+   * Check if we should retry fetching an analysis
+   */
+  private shouldRetry(transactionId: string): boolean {
+    const nextRetry = this.nextRetryAtById.get(transactionId);
+    if (!nextRetry) return true;
+    return Date.now() >= nextRetry;
   }
 
   /**
    * Fetch analysis for a single transaction
    */
   async loadAnalysis(transactionId: string): Promise<void> {
-    // Don't refetch if we already have it (even if null)
+    // Check if we have it and shouldn't retry yet
     if (this.analysisByTransactionId.has(transactionId)) {
-      return;
+      const existing = this.analysisByTransactionId.get(transactionId);
+      if (existing !== null || !this.shouldRetry(transactionId)) {
+        return;
+      }
     }
 
     // Don't fetch if already loading
@@ -81,9 +98,10 @@ export class TradeAnalysisStore {
       );
 
       if (response.status === 404) {
-        // Analysis doesn't exist yet
+        // Analysis doesn't exist yet - cache null but schedule retry
         runInAction(() => {
           this.analysisByTransactionId.set(transactionId, null);
+          this.nextRetryAtById.set(transactionId, Date.now() + this.RETRY_DELAY_MS);
           this.loadingTransactionIds.delete(transactionId);
         });
         return;
@@ -97,6 +115,7 @@ export class TradeAnalysisStore {
 
       runInAction(() => {
         this.analysisByTransactionId.set(transactionId, analysis);
+        this.nextRetryAtById.delete(transactionId); // Clear retry timer
         this.loadingTransactionIds.delete(transactionId);
       });
     } catch (err) {
@@ -111,9 +130,10 @@ export class TradeAnalysisStore {
    * Fetch analyses for multiple transactions (batch)
    */
   async loadAnalysesBatch(transactionIds: string[]): Promise<void> {
-    // Filter out IDs we already have
+    // Filter out IDs we already have (unless retry is due)
     const idsToFetch = transactionIds.filter(
-      (id) => !this.analysisByTransactionId.has(id)
+      (id) => !this.analysisByTransactionId.has(id) || 
+             (this.analysisByTransactionId.get(id) === null && this.shouldRetry(id))
     );
 
     if (idsToFetch.length === 0) {
@@ -142,6 +162,13 @@ export class TradeAnalysisStore {
       runInAction(() => {
         Object.entries(analyses).forEach(([transactionId, analysis]) => {
           this.analysisByTransactionId.set(transactionId, analysis);
+          if (analysis === null) {
+            // Schedule retry for null results
+            this.nextRetryAtById.set(transactionId, Date.now() + this.RETRY_DELAY_MS);
+          } else {
+            // Clear retry timer if we got analysis
+            this.nextRetryAtById.delete(transactionId);
+          }
         });
         idsToFetch.forEach((id) => this.loadingTransactionIds.delete(id));
       });
@@ -173,6 +200,7 @@ export class TradeAnalysisStore {
   reset(): void {
     this.analysisByTransactionId.clear();
     this.loadingTransactionIds.clear();
+    this.nextRetryAtById.clear();
     this.error = null;
   }
 }

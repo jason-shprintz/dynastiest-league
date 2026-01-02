@@ -7,7 +7,6 @@ import type {
   SleeperTransaction,
   SleeperRoster,
   SleeperUser,
-  SleeperPlayer,
   SleeperNflState,
 } from "./types";
 
@@ -51,17 +50,6 @@ export async function fetchUsers(leagueId: string): Promise<SleeperUser[]> {
   const response = await fetch(`${SLEEPER_API_BASE}/league/${leagueId}/users`);
   if (!response.ok) {
     throw new Error(`Failed to fetch users: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-/**
- * Fetch all NFL players
- */
-export async function fetchPlayers(): Promise<Record<string, SleeperPlayer>> {
-  const response = await fetch(`${SLEEPER_API_BASE}/players/nfl`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch players: ${response.statusText}`);
   }
   return response.json();
 }
