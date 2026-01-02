@@ -6,13 +6,13 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         User's Browser                              │
 │                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐ │
-│  │  Breaking News Page (React Component)                        │ │
-│  │                                                                │ │
-│  │  - Loads trades from Sleeper API (client-side)               │ │
-│  │  - Fetches analyses from Worker API                          │ │
-│  │  - Displays TradeCard with AI analysis                       │ │
-│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │  Breaking News Page (React Component)                        │   │
+│  │                                                              │   │
+│  │  - Loads trades from Sleeper API (client-side)               │   │
+│  │  - Fetches analyses from Worker API                          │   │
+│  │  - Displays TradeCard with AI analysis                       │   │
+│  └──────────────────────────────────────────────────────────────┘   │
 │                              │                                      │
 │                              │ HTTP GET                             │
 │                              ▼                                      │
@@ -23,28 +23,28 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    Cloudflare Worker                                │
 │                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐ │
-│  │  HTTP API Endpoints                                           │ │
-│  │  - GET /api/trade-analysis?transaction_id=...                │ │
-│  │  - GET /api/trade-analyses?ids=...                           │ │
-│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │  HTTP API Endpoints                                          │   │
+│  │  - GET /api/trade-analysis?transaction_id=...                │   │
+│  │  - GET /api/trade-analyses?ids=...                           │   │
+│  └──────────────────────────────────────────────────────────────┘   │
 │                              │                                      │
 │                              │ Query                                │
 │                              ▼                                      │
-│  ┌──────────────────────────────────────────────────────────────┐ │
-│  │  D1 Database                                                  │ │
-│  │  - trade_analysis table                                       │ │
-│  │  - Stores cached analyses (one per trade)                    │ │
-│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │  D1 Database                                                 │   │
+│  │  - trade_analysis table                                      │   │
+│  │  - Stores cached analyses (one per trade)                    │   │
+│  └──────────────────────────────────────────────────────────────┘   │
 │                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐ │
-│  │  Scheduled Cron Job (Every 5 minutes)                        │ │
-│  │                                                                │ │
-│  │  1. Poll Sleeper API for new trades                          │ │
-│  │  2. Check if analysis exists in D1                           │ │
-│  │  3. If new: Generate analysis via OpenAI                     │ │
-│  │  4. Store result in D1                                       │ │
-│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │  Scheduled Cron Job (Every 5 minutes)                        │   │
+│  │                                                              │   │
+│  │  1. Poll Sleeper API for new trades                          │   │
+│  │  2. Check if analysis exists in D1                           │   │
+│  │  3. If new: Generate analysis via OpenAI                     │   │
+│  │  4. Store result in D1                                       │   │
+│  └──────────────────────────────────────────────────────────────┘   │
 │                              │                                      │
 │                              │ Generate Analysis                    │
 │                              ▼                                      │
@@ -56,9 +56,9 @@
 │                    OpenAI API (GPT-4o-mini)                         │
 │                                                                     │
 │  Generates:                                                         │
-│  - Team grades (A+, B-, etc.)                                      │
+│  - Team grades (A+, B-, etc.)                                       │
 │  - Player/pick summaries                                            │
-│  - Conversation between Mike & Jim                                 │
+│  - Conversation between Mike & Jim                                  │
 │  - Overall take                                                     │
 └─────────────────────────────────────────────────────────────────────┘
                                │
