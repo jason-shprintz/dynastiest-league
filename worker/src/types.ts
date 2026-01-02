@@ -61,17 +61,6 @@ export interface SleeperUser {
   };
 }
 
-export interface SleeperPlayer {
-  player_id: string;
-  first_name: string;
-  last_name: string;
-  full_name: string;
-  position: string;
-  team: string | null;
-  age: number;
-  status: string;
-}
-
 /**
  * Sleeper NFL state response
  */
@@ -89,7 +78,8 @@ export interface TradeAnalysis {
   transaction_id: string;
   timestamp: number;
   teams: {
-    [teamName: string]: {
+    [rosterId: string]: {
+      teamName: string;
       grade: string;
       received: {
         players: Array<{
