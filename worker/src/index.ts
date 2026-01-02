@@ -46,10 +46,10 @@ export default {
     // Health check endpoint
     if (url.pathname === "/health" || url.pathname === "/") {
       return new Response(
-        JSON.stringify({ 
-          status: "ok", 
+        JSON.stringify({
+          status: "ok",
           service: "dynastiest-league-worker",
-          version: env.ANALYSIS_VERSION 
+          version: env.ANALYSIS_VERSION,
         }),
         {
           status: 200,

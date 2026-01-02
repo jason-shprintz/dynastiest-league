@@ -32,9 +32,7 @@ export async function fetchTransactions(
 /**
  * Fetch all rosters for a league
  */
-export async function fetchRosters(
-  leagueId: string
-): Promise<SleeperRoster[]> {
+export async function fetchRosters(leagueId: string): Promise<SleeperRoster[]> {
   const response = await fetch(
     `${SLEEPER_API_BASE}/league/${leagueId}/rosters`
   );
@@ -85,7 +83,10 @@ export async function getCurrentWeek(): Promise<number> {
     const state = await fetchNflState();
     return state.week || 1;
   } catch (error) {
-    console.error("Failed to fetch current week from Sleeper, defaulting to week 1:", error);
+    console.error(
+      "Failed to fetch current week from Sleeper, defaulting to week 1:",
+      error
+    );
     return 1;
   }
 }

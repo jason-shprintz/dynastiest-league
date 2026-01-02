@@ -72,7 +72,13 @@ const ANALYSIS_SCHEMA = {
     },
     overall_take: { type: "string" },
   },
-  required: ["transaction_id", "timestamp", "teams", "conversation", "overall_take"],
+  required: [
+    "transaction_id",
+    "timestamp",
+    "teams",
+    "conversation",
+    "overall_take",
+  ],
 };
 
 /**
@@ -104,8 +110,10 @@ function buildTradeContext(
   rosterIds.forEach((rosterId) => {
     const teamName = getTeamName(rosterId);
     const roster = rosters.find((r) => r.roster_id === rosterId);
-    const record = roster ? `${roster.settings.wins}-${roster.settings.losses}` : "N/A";
-    
+    const record = roster
+      ? `${roster.settings.wins}-${roster.settings.losses}`
+      : "N/A";
+
     context += `\n${teamName} (${record}):\n`;
     context += `Received:\n`;
 
@@ -127,7 +135,9 @@ function buildTradeContext(
     });
 
     // Check if team received nothing
-    const receivedPlayers = Object.entries(adds).some(([, r]) => r === rosterId);
+    const receivedPlayers = Object.entries(adds).some(
+      ([, r]) => r === rosterId
+    );
     const receivedPicks = draftPicks.some((p) => p.owner_id === rosterId);
     if (!receivedPlayers && !receivedPicks) {
       context += `  - Nothing\n`;
@@ -178,7 +188,8 @@ Return your analysis in the specified JSON format.`;
     messages: [
       {
         role: "system",
-        content: "You are a fantasy football analyst who provides entertaining, snarky trade analysis.",
+        content:
+          "You are a fantasy football analyst who provides entertaining, snarky trade analysis.",
       },
       {
         role: "user",

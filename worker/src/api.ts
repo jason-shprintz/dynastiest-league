@@ -52,9 +52,9 @@ export async function handleGetAnalysis(
 
     if (!analysis) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Analysis not found",
-          message: "Mike & Jim are in the film room... Check back soon!"
+          message: "Mike & Jim are in the film room... Check back soon!",
         }),
         {
           status: 404,
@@ -69,13 +69,10 @@ export async function handleGetAnalysis(
     });
   } catch (error) {
     console.error("Error fetching analysis:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      {
-        status: 500,
-        headers: CORS_HEADERS,
-      }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
   }
 }
 
@@ -131,12 +128,9 @@ export async function handleGetBatchAnalyses(
     });
   } catch (error) {
     console.error("Error fetching batch analyses:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      {
-        status: 500,
-        headers: CORS_HEADERS,
-      }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
   }
 }

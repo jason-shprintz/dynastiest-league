@@ -13,9 +13,7 @@ export async function getAnalysis(
   transactionId: string
 ): Promise<TradeAnalysis | null> {
   const result = await db
-    .prepare(
-      "SELECT * FROM trade_analysis WHERE transaction_id = ?"
-    )
+    .prepare("SELECT * FROM trade_analysis WHERE transaction_id = ?")
     .bind(transactionId)
     .first<TradeAnalysisRecord>();
 
@@ -47,7 +45,7 @@ export async function getBatchAnalyses(
     .all<TradeAnalysisRecord>();
 
   const analyses: Record<string, TradeAnalysis | null> = {};
-  
+
   // Initialize all IDs to null
   transactionIds.forEach((id) => {
     analyses[id] = null;
@@ -104,9 +102,7 @@ export async function analysisExists(
   transactionId: string
 ): Promise<boolean> {
   const result = await db
-    .prepare(
-      "SELECT 1 FROM trade_analysis WHERE transaction_id = ? LIMIT 1"
-    )
+    .prepare("SELECT 1 FROM trade_analysis WHERE transaction_id = ? LIMIT 1")
     .bind(transactionId)
     .first();
 
@@ -128,5 +124,7 @@ export async function getLeagueAnalyses(
     .bind(leagueId, limit)
     .all<{ analysis_json: string }>();
 
-  return result.results.map((r) => JSON.parse(r.analysis_json) as TradeAnalysis);
+  return result.results.map(
+    (r) => JSON.parse(r.analysis_json) as TradeAnalysis
+  );
 }

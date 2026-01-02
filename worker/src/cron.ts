@@ -61,7 +61,9 @@ async function processWeekTrades(
       return 0;
     }
 
-    console.log(`Found ${completedTrades.length} completed trades for week ${week}`);
+    console.log(
+      `Found ${completedTrades.length} completed trades for week ${week}`
+    );
 
     // Fetch league data once for all trades
     const [rosters, users] = await Promise.all([
@@ -77,7 +79,9 @@ async function processWeekTrades(
         // Check if analysis already exists
         const exists = await analysisExists(env.DB, trade.transaction_id);
         if (exists) {
-          console.log(`Analysis already exists for ${trade.transaction_id}, skipping`);
+          console.log(
+            `Analysis already exists for ${trade.transaction_id}, skipping`
+          );
           continue;
         }
 
@@ -104,10 +108,7 @@ async function processWeekTrades(
         console.log(`Successfully saved analysis for ${trade.transaction_id}`);
         processed++;
       } catch (error) {
-        console.error(
-          `Error processing trade ${trade.transaction_id}:`,
-          error
-        );
+        console.error(`Error processing trade ${trade.transaction_id}:`, error);
         // Continue processing other trades even if one fails
       }
     }
@@ -140,7 +141,5 @@ export async function handleScheduled(env: Env): Promise<void> {
     totalProcessed += processed;
   }
 
-  console.log(
-    `Cron job completed. Processed ${totalProcessed} new trade(s)`
-  );
+  console.log(`Cron job completed. Processed ${totalProcessed} new trade(s)`);
 }
