@@ -107,7 +107,9 @@ function buildTradeContext(
     if (metadata) {
       // Common patterns in Sleeper metadata
       if (typeof metadata.players === "object" && metadata.players) {
-        const playerInfo = (metadata.players as Record<string, unknown>)[playerId];
+        const playerInfo = (metadata.players as Record<string, unknown>)[
+          playerId
+        ];
         if (typeof playerInfo === "string") return playerInfo;
         if (playerInfo && typeof playerInfo === "object") {
           const info = playerInfo as Record<string, unknown>;
@@ -115,12 +117,12 @@ function buildTradeContext(
           if (typeof info.full_name === "string") return info.full_name;
         }
       }
-      
+
       // Sometimes metadata has player_id -> name direct mapping
       const directName = (metadata as Record<string, unknown>)[playerId];
       if (typeof directName === "string") return directName;
     }
-    
+
     // Fallback to player ID
     return `Player ID: ${playerId}`;
   };
@@ -134,8 +136,10 @@ function buildTradeContext(
   rosterIds.forEach((rosterId) => {
     const teamName = getTeamName(rosterId);
     const roster = rosters.find((r) => r.roster_id === rosterId);
-    const record = roster ? `${roster.settings.wins}-${roster.settings.losses}` : "N/A";
-    
+    const record = roster
+      ? `${roster.settings.wins}-${roster.settings.losses}`
+      : "N/A";
+
     context += `\nRoster ID: ${rosterId}\n`;
     context += `${teamName} (${record}):\n`;
     context += `Received:\n`;
