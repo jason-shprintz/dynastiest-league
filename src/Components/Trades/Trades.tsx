@@ -1,5 +1,5 @@
 /**
- * Breaking News Component
+ * Trades Component
  * Displays all trades in the league with pagination/lazy loading
  */
 
