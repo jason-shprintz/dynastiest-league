@@ -25,7 +25,17 @@ const Blog = () => {
       <SectionDescription>Updates from the Commissioner</SectionDescription>
       <BlogContent>
         {blogPosts
-          .sort((a, b) => (a.date > b.date ? -1 : 1))
+          .sort((a, b) => {
+            const aTime = new Date(a.date).getTime();
+            const bTime = new Date(b.date).getTime();
+
+            if (aTime === bTime) {
+              return 0;
+            }
+
+            // Newest posts first
+            return bTime - aTime;
+          })
           .map((post) => (
             <BlogPostItem key={post.id}>
               <h3>{post.title}</h3>
