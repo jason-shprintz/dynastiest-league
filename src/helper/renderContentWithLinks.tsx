@@ -1,9 +1,6 @@
 import { COLORS } from "../theme/colors";
 import { TextHighlight } from "../Components/Blog/Blog.styles";
 
-const urlRegex = /(https?:\/\/[^\s]+)/g;
-const highlightRegex = /<TextHighlight>(.*?)<\/TextHighlight>/g;
-
 // Helper to validate URLs and ensure only http/https protocols
 const isValidUrl = (url: string): boolean => {
   try {
@@ -18,6 +15,7 @@ const isValidUrl = (url: string): boolean => {
  * Renders a string segment with URLs automatically converted to clickable links.
  */
 const renderLinks = (content: string, keyPrefix: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = content.split(urlRegex);
   return parts.map((part, index) =>
     index % 2 === 1 && isValidUrl(part) ? (
@@ -52,12 +50,10 @@ const renderLinks = (content: string, keyPrefix: string) => {
  * ```
  */
 const renderContentWithLinks = (content: string) => {
+  const highlightRegex = /<TextHighlight>(.*?)<\/TextHighlight>/g;
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
-
-  // Reset regex lastIndex
-  highlightRegex.lastIndex = 0;
 
   while ((match = highlightRegex.exec(content)) !== null) {
     // Add text before the match
