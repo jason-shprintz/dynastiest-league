@@ -101,7 +101,7 @@ const formatPlayerDisplay = (
   getPlayerById: (id: string) => Player | undefined
 ): string => {
   const player = getPlayerById(playerId);
-  
+
   if (!player) {
     return playerId;
   }
@@ -122,179 +122,179 @@ const formatPlayerDisplay = (
  * Cards can be expanded to show roster details (starters, bench, IR, taxi)
  * Only one team can be expanded at a time
  */
-export const AllTeams = observer(
-  ({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
-    const store = useStore();
-    const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null);
+const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
+  const store = useStore();
+  const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null);
 
-    useEffect(() => {
-      // Load all basic league data
-      store.loadAllLeagueData(leagueId);
-    }, [store, leagueId]);
+  useEffect(() => {
+    // Load all basic league data
+    store.loadAllLeagueData(leagueId);
+  }, [store, leagueId]);
 
-    const handleTeamClick = useCallback(
-      (rosterId: number) => {
-        // If clicking on the already expanded team, collapse it
-        // Otherwise, expand the clicked team
-        setExpandedTeamId(expandedTeamId === rosterId ? null : rosterId);
-      },
-      [expandedTeamId]
-    );
+  const handleTeamClick = useCallback(
+    (rosterId: number) => {
+      // If clicking on the already expanded team, collapse it
+      // Otherwise, expand the clicked team
+      setExpandedTeamId(expandedTeamId === rosterId ? null : rosterId);
+    },
+    [expandedTeamId]
+  );
 
-    if (store.rostersStore.isLoading || store.usersStore.isLoading) {
-      return <LoadingMessage>Loading teams...</LoadingMessage>;
-    }
-
-    if (store.rostersStore.error) {
-      return <LoadingMessage>Error loading teams</LoadingMessage>;
-    }
-
-    if (store.usersStore.error) {
-      return <LoadingMessage>Error loading users</LoadingMessage>;
-    }
-
-    const teams = sortByStandings(
-      store.rostersStore.rosters.map((roster) => ({
-        roster,
-        user: store.usersStore.getUserById(roster.owner_id),
-      }))
-    );
-
-    if (teams.length === 0) {
-      return <LoadingMessage>No teams found</LoadingMessage>;
-    }
-
-    return (
-      <TeamsSection>
-        <TeamsGrid>
-          {teams.map(({ roster, user }) => {
-            const isExpanded = expandedTeamId === roster.roster_id;
-            const record = formatRecord(
-              roster.settings.wins,
-              roster.settings.losses,
-              roster.settings.ties
-            );
-            const benchPlayers = isExpanded ? getBenchPlayers(roster) : [];
-            const taxiPlayers = isExpanded ? getTaxiPlayers(roster) : [];
-
-            return (
-              <TeamCard
-                key={roster.roster_id}
-                $isExpanded={isExpanded}
-                onClick={() => handleTeamClick(roster.roster_id)}
-              >
-                <TeamSummary>
-                  <TeamAvatar>
-                    {user?.avatar ? (
-                      <img
-                        src={getAvatarUrl(user.avatar) || ""}
-                        alt={user.display_name}
-                      />
-                    ) : (
-                      <span style={{ fontSize: "1.5rem" }}>👤</span>
-                    )}
-                  </TeamAvatar>
-                  <TeamInfo>
-                    <TeamName>
-                      {user?.metadata?.team_name || "Team " + roster.roster_id}
-                    </TeamName>
-                    <UserName>{user?.display_name || "Unknown User"}</UserName>
-                    <TeamRecord>Record: {record}</TeamRecord>
-                    <TeamRecord>
-                      Points For: {roster.settings.fpts} | Points Against:{" "}
-                      {roster.settings.fpts_against}
-                    </TeamRecord>
-                  </TeamInfo>
-                </TeamSummary>
-
-                {isExpanded && (
-                  <TeamDetails>
-                     {/* Starters */}
-                    <RosterSection>
-                      <RosterSectionTitle>
-                        Starters ({roster.starters.length})
-                      </RosterSectionTitle>
-                      {roster.starters.length > 0 ? (
-                        <PlayersList>
-                          {roster.starters.map((playerId) => (
-                            <PlayerChip key={playerId}>
-                              {formatPlayerDisplay(
-                                playerId,
-                                store.playersStore.getPlayerById
-                              )}
-                            </PlayerChip>
-                          ))}
-                        </PlayersList>
-                      ) : (
-                        <EmptyState>No starters</EmptyState>
-                      )}
-                    </RosterSection>
-
-                    {/* Bench */}
-                    <RosterSection>
-                      <RosterSectionTitle>
-                        Bench ({benchPlayers.length})
-                      </RosterSectionTitle>
-                      {benchPlayers.length > 0 ? (
-                        <PlayersList>
-                          {benchPlayers.map((playerId) => (
-                            <PlayerChip key={playerId}>
-                              {formatPlayerDisplay(
-                                playerId,
-                                store.playersStore.getPlayerById
-                              )}
-                            </PlayerChip>
-                          ))}
-                        </PlayersList>
-                      ) : (
-                        <EmptyState>No bench players</EmptyState>
-                      )}
-                    </RosterSection>
-
-                    {/* IR (Reserve) */}
-                    {roster.reserve && roster.reserve.length > 0 && (
-                      <RosterSection>
-                        <RosterSectionTitle>
-                          IR ({roster.reserve.length})
-                        </RosterSectionTitle>
-                        <PlayersList>
-                          {roster.reserve.map((playerId) => (
-                            <PlayerChip key={playerId}>
-                              {formatPlayerDisplay(
-                                playerId,
-                                store.playersStore.getPlayerById
-                              )}
-                            </PlayerChip>
-                          ))}
-                        </PlayersList>
-                      </RosterSection>
-                    )}
-
-                    {/* Taxi Squad */}
-                    {taxiPlayers.length > 0 && (
-                      <RosterSection>
-                        <RosterSectionTitle>
-                          Taxi Squad ({taxiPlayers.length})
-                        </RosterSectionTitle>
-                        <PlayersList>
-                          {taxiPlayers.map((playerId) => (
-                            <PlayerChip key={playerId}>
-                              {formatPlayerDisplay(
-                                playerId,
-                                store.playersStore.getPlayerById
-                              )}
-                            </PlayerChip>
-                          ))}
-                        </PlayersList>
-                      </RosterSection>
-                    )}
-                  </TeamDetails>
-                )}
-              </TeamCard>
-            );
-          })}
-        </TeamsGrid>
-      </TeamsSection>
-    );
+  if (store.rostersStore.isLoading || store.usersStore.isLoading) {
+    return <LoadingMessage>Loading teams...</LoadingMessage>;
   }
-);
+
+  if (store.rostersStore.error) {
+    return <LoadingMessage>Error loading teams</LoadingMessage>;
+  }
+
+  if (store.usersStore.error) {
+    return <LoadingMessage>Error loading users</LoadingMessage>;
+  }
+
+  const teams = sortByStandings(
+    store.rostersStore.rosters.map((roster) => ({
+      roster,
+      user: store.usersStore.getUserById(roster.owner_id),
+    }))
+  );
+
+  if (teams.length === 0) {
+    return <LoadingMessage>No teams found</LoadingMessage>;
+  }
+
+  return (
+    <TeamsSection>
+      <TeamsGrid>
+        {teams.map(({ roster, user }) => {
+          const isExpanded = expandedTeamId === roster.roster_id;
+          const record = formatRecord(
+            roster.settings.wins,
+            roster.settings.losses,
+            roster.settings.ties
+          );
+          const benchPlayers = isExpanded ? getBenchPlayers(roster) : [];
+          const taxiPlayers = isExpanded ? getTaxiPlayers(roster) : [];
+
+          return (
+            <TeamCard
+              key={roster.roster_id}
+              $isExpanded={isExpanded}
+              onClick={() => handleTeamClick(roster.roster_id)}
+            >
+              <TeamSummary>
+                <TeamAvatar>
+                  {user?.avatar ? (
+                    <img
+                      src={getAvatarUrl(user.avatar) || ""}
+                      alt={user.display_name}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "1.5rem" }}>👤</span>
+                  )}
+                </TeamAvatar>
+                <TeamInfo>
+                  <TeamName>
+                    {user?.metadata?.team_name || "Team " + roster.roster_id}
+                  </TeamName>
+                  <UserName>{user?.display_name || "Unknown User"}</UserName>
+                  <TeamRecord>Record: {record}</TeamRecord>
+                  <TeamRecord>
+                    Points For: {roster.settings.fpts} | Points Against:{" "}
+                    {roster.settings.fpts_against}
+                  </TeamRecord>
+                </TeamInfo>
+              </TeamSummary>
+
+              {isExpanded && (
+                <TeamDetails>
+                  {/* Starters */}
+                  <RosterSection>
+                    <RosterSectionTitle>
+                      Starters ({roster.starters.length})
+                    </RosterSectionTitle>
+                    {roster.starters.length > 0 ? (
+                      <PlayersList>
+                        {roster.starters.map((playerId) => (
+                          <PlayerChip key={playerId}>
+                            {formatPlayerDisplay(
+                              playerId,
+                              store.playersStore.getPlayerById
+                            )}
+                          </PlayerChip>
+                        ))}
+                      </PlayersList>
+                    ) : (
+                      <EmptyState>No starters</EmptyState>
+                    )}
+                  </RosterSection>
+
+                  {/* Bench */}
+                  <RosterSection>
+                    <RosterSectionTitle>
+                      Bench ({benchPlayers.length})
+                    </RosterSectionTitle>
+                    {benchPlayers.length > 0 ? (
+                      <PlayersList>
+                        {benchPlayers.map((playerId) => (
+                          <PlayerChip key={playerId}>
+                            {formatPlayerDisplay(
+                              playerId,
+                              store.playersStore.getPlayerById
+                            )}
+                          </PlayerChip>
+                        ))}
+                      </PlayersList>
+                    ) : (
+                      <EmptyState>No bench players</EmptyState>
+                    )}
+                  </RosterSection>
+
+                  {/* IR (Reserve) */}
+                  {roster.reserve && roster.reserve.length > 0 && (
+                    <RosterSection>
+                      <RosterSectionTitle>
+                        IR ({roster.reserve.length})
+                      </RosterSectionTitle>
+                      <PlayersList>
+                        {roster.reserve.map((playerId) => (
+                          <PlayerChip key={playerId}>
+                            {formatPlayerDisplay(
+                              playerId,
+                              store.playersStore.getPlayerById
+                            )}
+                          </PlayerChip>
+                        ))}
+                      </PlayersList>
+                    </RosterSection>
+                  )}
+
+                  {/* Taxi Squad */}
+                  {taxiPlayers.length > 0 && (
+                    <RosterSection>
+                      <RosterSectionTitle>
+                        Taxi Squad ({taxiPlayers.length})
+                      </RosterSectionTitle>
+                      <PlayersList>
+                        {taxiPlayers.map((playerId) => (
+                          <PlayerChip key={playerId}>
+                            {formatPlayerDisplay(
+                              playerId,
+                              store.playersStore.getPlayerById
+                            )}
+                          </PlayerChip>
+                        ))}
+                      </PlayersList>
+                    </RosterSection>
+                  )}
+                </TeamDetails>
+              )}
+            </TeamCard>
+          );
+        })}
+      </TeamsGrid>
+    </TeamsSection>
+  );
+});
+
+export default AllTeams;

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { COLORS } from "../../theme/colors";
 
-export const BreakingNewsSection = styled.section`
+export const TradesSection = styled.section`
   animation: fadeIn 0.5s ease-in;
 
   h2 {
