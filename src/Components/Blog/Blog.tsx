@@ -22,19 +22,29 @@ const Blog = () => {
   return (
     <BlogSection>
       <h2>Commissioner's Blog</h2>
-      <SectionDescription>
-        Updates from the Commissioner
-      </SectionDescription>
+      <SectionDescription>Updates from the Commissioner</SectionDescription>
       <BlogContent>
-        {blogPosts.map((post) => (
-          <BlogPostItem key={post.id}>
-            <h3>{post.title}</h3>
-            <PostDate as="time" dateTime={post.date}>
-              {post.date}
-            </PostDate>
-            <PostContent>{renderContentWithLinks(post.content)}</PostContent>
-          </BlogPostItem>
-        ))}
+        {blogPosts
+          .sort((a, b) => {
+            const aTime = new Date(a.date).getTime();
+            const bTime = new Date(b.date).getTime();
+
+            if (aTime === bTime) {
+              return 0;
+            }
+
+            // Newest posts first
+            return bTime - aTime;
+          })
+          .map((post) => (
+            <BlogPostItem key={post.id}>
+              <h3>{post.title}</h3>
+              <PostDate as="time" dateTime={post.date}>
+                {post.date}
+              </PostDate>
+              <PostContent>{renderContentWithLinks(post.content)}</PostContent>
+            </BlogPostItem>
+          ))}
       </BlogContent>
     </BlogSection>
   );

@@ -91,3 +91,8 @@ export const PostContent = styled.p`
     font-size: 0.95rem;
   }
 `;
+
+export const TextHighlight = styled.span`
+  font-weight: 700;
+  color: ${COLORS.accent};
+`;

@@ -1,6 +1,5 @@
 import { COLORS } from "../theme/colors";
-
-const urlRegex = /(https?:\/\/[^\s]+)/g;
+import { TextHighlight } from "../Components/Blog/Blog.styles";
 
 // Helper to validate URLs and ensure only http/https protocols
 const isValidUrl = (url: string): boolean => {
@@ -13,24 +12,15 @@ const isValidUrl = (url: string): boolean => {
 };
 
 /**
- * Renders a string content with URLs automatically converted to clickable links.
- *
- * @param content - The string content that may contain URLs to be converted to links.
- * @returns An array of React elements where URLs are rendered as anchor tags with
- *          accent color styling, and non-URL text is rendered as plain spans.
- *
- * @example
- * ```tsx
- * const text = "Check out https://example.com for more info";
- * return <p>{renderContentWithLinks(text)}</p>;
- * ```
+ * Renders a string segment with URLs automatically converted to clickable links.
  */
-const renderContentWithLinks = (content: string) => {
+const renderLinks = (content: string, keyPrefix: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = content.split(urlRegex);
   return parts.map((part, index) =>
     index % 2 === 1 && isValidUrl(part) ? (
       <a
-        key={index}
+        key={`${keyPrefix}-link-${index}`}
         href={part}
         target="_blank"
         rel="noopener noreferrer"
@@ -40,9 +30,55 @@ const renderContentWithLinks = (content: string) => {
         {part}
       </a>
     ) : (
-      <span key={index}>{part}</span>
+      <span key={`${keyPrefix}-text-${index}`}>{part}</span>
     )
   );
+};
+
+/**
+ * Renders a string content with URLs automatically converted to clickable links
+ * and <TextHighlight> tags converted to styled highlights.
+ *
+ * @param content - The string content that may contain URLs and TextHighlight tags.
+ * @returns An array of React elements where URLs are rendered as anchor tags,
+ *          TextHighlight tags are rendered with accent styling, and plain text as spans.
+ *
+ * @example
+ * ```tsx
+ * const text = "Check out https://example.com and <TextHighlight>important info</TextHighlight>";
+ * return <p>{renderContentWithLinks(text)}</p>;
+ * ```
+ */
+const renderContentWithLinks = (content: string) => {
+  const highlightRegex = /<TextHighlight>(.*?)<\/TextHighlight>/g;
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = highlightRegex.exec(content)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      const textBefore = content.slice(lastIndex, match.index);
+      elements.push(...renderLinks(textBefore, `before-${match.index}`));
+    }
+
+    // Add the highlighted text
+    elements.push(
+      <TextHighlight key={`highlight-${match.index}`}>
+        {renderLinks(match[1], `highlight-content-${match.index}`)}
+      </TextHighlight>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text after last match
+  if (lastIndex < content.length) {
+    const textAfter = content.slice(lastIndex);
+    elements.push(...renderLinks(textAfter, `after-${lastIndex}`));
+  }
+
+  return elements;
 };
 
 export default renderContentWithLinks;
