@@ -1,16 +1,16 @@
 import { useState } from "react";
 import GlobalStyles from "./GlobalStyles";
 import { AppContainer, MainContent } from "./App.styles";
-import Constitution from "./Components/Constitution/Constitution";
-import Champion from "./Components/Champion/Champion";
-import HallOfRecords from "./Components/HallOfRecords/HallOfRecords";
-import Home from "./Components/MainContent/MainContent";
-import Footer from "./Components/Footer/Footer";
-import Header from "./Components/Header/Header";
+import AllTeams from "./Components/AllTeams/AllTeams";
 import Blog from "./Components/Blog/Blog";
+import Champion from "./Components/Champion/Champion";
+import Constitution from "./Components/Constitution/Constitution";
+import Footer from "./Components/Footer/Footer";
+import HallOfRecords from "./Components/HallOfRecords/HallOfRecords";
+import Header from "./Components/Header/Header";
+import Home from "./Components/MainContent/MainContent";
 import Scouting from "./Components/Scouting/Scouting";
-import { AllTeams } from "./Components/AllTeams/AllTeams";
-import { BreakingNews } from "./Components/BreakingNews/BreakingNews";
+import Trades from "./Components/Trades/Trades";
 import { Section } from "./types";
 
 /**
@@ -48,7 +48,7 @@ function App() {
           {activeSection === "scouting" && <Scouting />}
           {activeSection === "blog" && <Blog />}
           {activeSection === "teams" && <AllTeams />}
-          {activeSection === "breaking-news" && <BreakingNews />}
+          {activeSection === "trades" && <Trades />}
         </MainContent>
 
         <Footer />

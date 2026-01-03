@@ -26,13 +26,13 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { section: "home", label: "Home" },
+  { section: "blog", label: "Blog" },
+  { section: "teams", label: "Teams" },
+  { section: "trades", label: "Trades" },
+  { section: "scouting", label: "Scouting" },
   { section: "records", label: "Hall of Records" },
   { section: "champion", label: "Current Champion" },
   { section: "constitution", label: "Constitution" },
-  { section: "scouting", label: "Scouting" },
-  { section: "blog", label: "Blog" },
-  { section: "teams", label: "Teams" },
-  { section: "breaking-news", label: "Breaking News" },
 ];
 
 /**

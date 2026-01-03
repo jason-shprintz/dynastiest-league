@@ -1,7 +1,7 @@
 {
   "name": "dynastiest-league",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
