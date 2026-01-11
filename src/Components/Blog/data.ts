@@ -20,7 +20,7 @@ const blogPosts: BlogPost[] = [
     title: "Draft Lottery Results and Final Draft Order",
     date: "2026-01-11",
     content:
-      "The draft lottery took place during halftime of the second wildcard game on January 11th. Here are the results of the lottery and the full draft order:\n\n1: Awco\n2: Casino1000rr\n3: RadLantern\n4: mrnickelz12\n5: dendenoodles\n6: swiff22\n7: ThatDudeStu\n8: UzUrHead\n9: JuiceGonLoose\n10: jeffgottfried\n\nCongratulations to Awco for securing the first overall pick (But really congratulations to RadLantern who has Awco's pick 😂! Stay tuned for the annual State of the League and any upcoming rule changes.",
+      "The draft lottery took place during halftime of the second wildcard game on January 11th. Here are the results of the lottery and the full draft order:\n\n1: Awco\n2: Casino1000rr\n3: RadLantern\n4: mrnickelz12\n5: dendenoodles\n6: swiff22\n7: ThatDudeStu\n8: UzUrHead\n9: JuiceGonLoose\n10: jeffgottfried\n\nCongratulations to Awco for securing the first overall pick (But really congratulations to RadLantern who has Awco's pick 😂)! Stay tuned for the annual State of the League and any upcoming rule changes.",
   },
 ];
 
