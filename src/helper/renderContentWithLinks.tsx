@@ -13,6 +13,8 @@ const isValidUrl = (url: string): boolean => {
 };
 
 // Valid section values
+// Note: This list must be kept in sync with the Section type in types.ts
+// TypeScript doesn't support runtime introspection of union types
 const VALID_SECTIONS: readonly Section[] = [
   "home",
   "records",
@@ -68,7 +70,7 @@ const renderLinks = (
     const sectionValue = match[1];
     if (!isValidSection(sectionValue)) {
       console.warn(
-        `Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(", ")}`,
+        `[renderContentWithLinks] Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(", ")}`,
       );
       // Treat invalid section as plain text
       processedParts.push({
