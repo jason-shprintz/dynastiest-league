@@ -72,10 +72,10 @@ const renderLinks = (
       console.warn(
         `[renderContentWithLinks] Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(", ")}`,
       );
-      // Treat invalid section as plain text
+      // Treat invalid section as plain text (use inner text, not raw tag)
       processedParts.push({
         type: "text",
-        content: match[0],
+        content: match[3],
       });
     } else {
       processedParts.push({
