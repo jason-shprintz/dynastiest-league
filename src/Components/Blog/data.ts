@@ -32,7 +32,7 @@ const blogPosts: BlogPost[] = [
     
     <TextHighlight>Rule Changes for 2026:</TextHighlight>
     
-    1. There will be Unsportsmanlike Conduct penalties that will be put in place moving forward. A full description of the Unsportsmanlike Conduct penalties is available in the <NavLink section="constitution" subsection="unsportsmanlike-conduct">Constitution section</NavLink>. It is every managers responsibility to understand what these rules are and how to abide by them.
+    1. There will be Unsportsmanlike Conduct penalties that will be put in place moving forward. A full description of the Unsportsmanlike Conduct penalties is available in the <NavLink section="constitution" subsection="unsportsmanlike-conduct">Constitution section</NavLink>. It is every manager's responsibility to understand what these rules are and how to abide by them.
     2. We will be instituting a loser's punishment moving forward for the team that finishes last in the losers' bracket. Moving forward, the champion will get to choose the team's name and avatar of the loser. Creativity is encouraged, as is embarrassment, provided it does not breach into the realm of Unsportsmanlike. Please refer to the <NavLink section="constitution" subsection="losers-punishment">Constitution section</NavLink> for additional information.
     
     <TextHighlight>Announcements:</TextHighlight>
