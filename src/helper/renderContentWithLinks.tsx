@@ -12,6 +12,25 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
+// Valid section values
+// Note: This list must be kept in sync with the Section type in types.ts
+// TypeScript doesn't support runtime introspection of union types
+const VALID_SECTIONS: readonly Section[] = [
+  "home",
+  "records",
+  "champion",
+  "constitution",
+  "scouting",
+  "blog",
+  "teams",
+  "trades",
+] as const;
+
+// Helper to validate if a string is a valid Section
+const isValidSection = (value: string): value is Section => {
+  return (VALID_SECTIONS as readonly string[]).includes(value);
+};
+
 // Type for navigation callback that supports both section and subsection
 type NavigationCallback = (target: NavigationTarget) => void;
 
@@ -47,12 +66,25 @@ const renderLinks = (
         content: content.slice(lastIndex, match.index),
       });
     }
-    processedParts.push({
-      type: "navlink",
-      content: match[3],
-      section: match[1] as Section,
-      subsection: match[2],
-    });
+    
+    const sectionValue = match[1];
+    if (!isValidSection(sectionValue)) {
+      console.warn(
+        `[renderContentWithLinks] Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(", ")}`,
+      );
+      // Treat invalid section as plain text (use inner text, not raw tag)
+      processedParts.push({
+        type: "text",
+        content: match[3],
+      });
+    } else {
+      processedParts.push({
+        type: "navlink",
+        content: match[3],
+        section: sectionValue,
+        subsection: match[2],
+      });
+    }
     lastIndex = match.index + match[0].length;
   }
 
