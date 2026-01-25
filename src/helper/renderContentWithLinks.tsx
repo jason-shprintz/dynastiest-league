@@ -103,7 +103,7 @@ const renderLinks = (
       elements.push(
         <a
           key={`${keyPrefix}-navlink-${partIndex}`}
-          href="#"
+          href={`#${part.section}`}
           onClick={(e) => {
             e.preventDefault();
             onNavigate?.({
