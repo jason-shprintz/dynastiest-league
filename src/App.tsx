@@ -39,6 +39,11 @@ function App() {
     setTargetSubsection(target.subsection);
   }, []);
 
+  const handleSectionChange = useCallback((section: Section) => {
+    setActiveSection(section);
+    setTargetSubsection(undefined);
+  }, []);
+
   const handleSubsectionViewed = useCallback(() => {
     setTargetSubsection(undefined);
   }, []);
@@ -49,7 +54,7 @@ function App() {
       <AppContainer>
         <Header
           activeSection={activeSection}
-          setActiveSection={setActiveSection}
+          setActiveSection={handleSectionChange}
         />
 
         <MainContent>
