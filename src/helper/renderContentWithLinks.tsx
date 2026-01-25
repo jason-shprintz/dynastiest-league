@@ -28,7 +28,7 @@ const renderLinks = (
   const elements: React.ReactNode[] = [];
   // Updated regex to support optional subsection attribute
   const navLinkRegex =
-    /<NavLink section="([^"]+)"(?:\s+subsection="([^"]+)")?>([^<]+)<\/NavLink>/g;
+    /<NavLink section="([^"]+)"(?:\s+subsection="([^"]+)")?>((?:(?!<\/NavLink>).)+)<\/NavLink>/g;
   let lastIndex = 0;
   let match;
 
