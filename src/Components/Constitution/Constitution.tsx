@@ -32,17 +32,25 @@ const Constitution = ({
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
+    let animationFrameId: number | undefined;
+
     if (targetSubsection && sectionRefs.current[targetSubsection]) {
-      // Small delay to ensure the component is fully rendered
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure the DOM has been painted before scrolling
+      animationFrameId = window.requestAnimationFrame(() => {
         sectionRefs.current[targetSubsection]?.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
         // Clear the target after scrolling
         onSubsectionViewed?.();
-      }, 100);
+      });
     }
+
+    return () => {
+      if (animationFrameId !== undefined) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [targetSubsection, onSubsectionViewed]);
 
   return (
