@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import GlobalStyles from "./GlobalStyles";
 import { AppContainer, MainContent } from "./App.styles";
 import AllTeams from "./Components/AllTeams/AllTeams";
@@ -11,7 +11,7 @@ import Header from "./Components/Header/Header";
 import Home from "./Components/MainContent/MainContent";
 import Scouting from "./Components/Scouting/Scouting";
 import Trades from "./Components/Trades/Trades";
-import { Section } from "./types";
+import { NavigationTarget, Section } from "./types";
 
 /**
  * Root application component that manages navigation state and renders the main layout.
@@ -30,6 +30,18 @@ import { Section } from "./types";
  */
 function App() {
   const [activeSection, setActiveSection] = useState<Section>("home");
+  const [targetSubsection, setTargetSubsection] = useState<string | undefined>(
+    undefined,
+  );
+
+  const handleNavigate = useCallback((target: NavigationTarget) => {
+    setActiveSection(target.section);
+    setTargetSubsection(target.subsection);
+  }, []);
+
+  const handleSubsectionViewed = useCallback(() => {
+    setTargetSubsection(undefined);
+  }, []);
 
   return (
     <>
@@ -44,9 +56,14 @@ function App() {
           {activeSection === "home" && <Home />}
           {activeSection === "records" && <HallOfRecords />}
           {activeSection === "champion" && <Champion />}
-          {activeSection === "constitution" && <Constitution />}
+          {activeSection === "constitution" && (
+            <Constitution
+              targetSubsection={targetSubsection}
+              onSubsectionViewed={handleSubsectionViewed}
+            />
+          )}
           {activeSection === "scouting" && <Scouting />}
-          {activeSection === "blog" && <Blog />}
+          {activeSection === "blog" && <Blog onNavigate={handleNavigate} />}
           {activeSection === "teams" && <AllTeams />}
           {activeSection === "trades" && <Trades />}
         </MainContent>
