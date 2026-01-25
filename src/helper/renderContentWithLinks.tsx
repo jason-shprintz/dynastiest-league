@@ -12,6 +12,23 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
+// Valid section values
+const VALID_SECTIONS: readonly Section[] = [
+  "home",
+  "records",
+  "champion",
+  "constitution",
+  "scouting",
+  "blog",
+  "teams",
+  "trades",
+] as const;
+
+// Helper to validate if a string is a valid Section
+const isValidSection = (value: string): value is Section => {
+  return VALID_SECTIONS.includes(value as Section);
+};
+
 // Type for navigation callback that supports both section and subsection
 type NavigationCallback = (target: NavigationTarget) => void;
 
@@ -47,12 +64,25 @@ const renderLinks = (
         content: content.slice(lastIndex, match.index),
       });
     }
-    processedParts.push({
-      type: "navlink",
-      content: match[3],
-      section: match[1] as Section,
-      subsection: match[2],
-    });
+    
+    const sectionValue = match[1];
+    if (!isValidSection(sectionValue)) {
+      console.warn(
+        `Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(", ")}`,
+      );
+      // Treat invalid section as plain text
+      processedParts.push({
+        type: "text",
+        content: match[0],
+      });
+    } else {
+      processedParts.push({
+        type: "navlink",
+        content: match[3],
+        section: sectionValue,
+        subsection: match[2],
+      });
+    }
     lastIndex = match.index + match[0].length;
   }
 
