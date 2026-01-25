@@ -29,7 +29,9 @@ import { LoadingSpinner } from "../../theme/shared.styles";
  */
 const MainContent = observer(() => {
   const leagueStore = useLeagueStore();
-  const numberOfSeasons: number | null = leagueStore.getNumberOfSeasons();
+  const numberOfSeasons: number | null = leagueStore.error
+    ? 6
+    : leagueStore.getNumberOfSeasons();
   return (
     <HomeSection>
       <Hero>
