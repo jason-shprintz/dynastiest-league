@@ -9,12 +9,12 @@ import { fetchLeague } from "../services/sleeperApi";
 
 /**
  * MobX store for managing Sleeper fantasy football league data.
- * 
+ *
  * @remarks
  * This store handles fetching, caching, and state management for league information
  * retrieved from the Sleeper API. It provides reactive state for loading status,
  * error handling, and the fetched league data.
- * 
+ *
  * @example
  * ```typescript
  * const leagueStore = new LeagueStore();
@@ -47,6 +47,16 @@ export class LeagueStore {
         this.isLoading = false;
       });
     }
+  }
+
+  public getNumberOfSeasons(): number | null {
+    console.log(this.league);
+    if (this.league && this.league.season) {
+      const thisSeason: number = Number(this.league.season);
+      const numOfSeasons: number = thisSeason - 2019;
+      return numOfSeasons;
+    }
+    return null;
   }
 
   reset(): void {
