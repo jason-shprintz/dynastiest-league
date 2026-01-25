@@ -28,7 +28,7 @@ const VALID_SECTIONS: readonly Section[] = [
 
 // Helper to validate if a string is a valid Section
 const isValidSection = (value: string): value is Section => {
-  return VALID_SECTIONS.includes(value as Section);
+  return (VALID_SECTIONS as readonly string[]).includes(value);
 };
 
 // Type for navigation callback that supports both section and subsection
