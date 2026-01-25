@@ -16,7 +16,7 @@ import {
 
 interface IHeaderProps {
   activeSection: Section;
-  setActiveSection: React.Dispatch<React.SetStateAction<Section>>;
+  setActiveSection: (section: Section) => void;
 }
 
 interface NavItem {
