@@ -2,21 +2,25 @@ import { ConstitutionSection } from "../../types";
 
 const constitutionSections: ConstitutionSection[] = [
   {
+    id: "league-structure",
     title: "1. League Structure",
     content:
       "The Dynastiest League is a 10-team dynasty fantasy football league. Each team maintains a roster year-over-year with an annual rookie draft. The league can be found on Sleeper: https://sleeper.com/leagues/1194516531404427264/league",
   },
   {
+    id: "roster-settings",
     title: "2. Roster Settings",
     content:
       "Starting lineup: 1 QB, 2 RB, 3 WR, 1 TE, 2 FLEX (RB/WR/TE). Bench spots: 14. IR spots: 6. Taxi squad: 4 rookies/sophomores.",
   },
   {
+    id: "scoring-system",
     title: "3. Scoring System",
     content:
       "HPPR scoring (0.5 point per reception). Passing: 4 pts/TD, 0.04 pts/yard. Rushing/Receiving: 6 pts/TD, 0.1 pts/yard.",
   },
   {
+    id: "draft-rules",
     title: "4. Draft Rules",
     content: `Annual rookie draft: 4 rounds, snake format. The draft order is partly based on the previous season's standings in the playoffs and partly based on a lottery system for non-playoff teams.
       
@@ -35,6 +39,7 @@ const constitutionSections: ConstitutionSection[] = [
     All lottery entries are combined into a single pool, and the draft order for picks 1-6 is determined by randomly drawing from this pool.`,
   },
   {
+    id: "trading-policy",
     title: "5. Trading Policy",
     content: `Trades are allowed from the start of the season until the trade deadline (the conclusion of Week 14). Trades are instantly processed.
       
@@ -44,16 +49,19 @@ const constitutionSections: ConstitutionSection[] = [
       `,
   },
   {
+    id: "playoffs",
     title: "6. Playoffs",
     content:
       "Top 4 teams make playoffs. Week 15: Semifinals. Week 16: Championship. Seeding by regular season record (weeks 1-14).",
   },
   {
+    id: "dues-payouts",
     title: "7. Dues & Payouts",
     content:
       "$110 annual dues. Payouts: 1st place: $700, 2nd place: $200. Regular season points winner: $100. The extra $10 per manager goes to the purchase of a ring and personalized ring case for the champion.",
   },
   {
+    id: "unsportsmanlike-conduct",
     title: "8. Unsportsmanlike Conduct",
     content: `The following actions are prohibited: collusion, not setting lineups, and any behavior detrimental to the league. Violations, depending on severity, will include, but are not limited to, a warning, loss of draft picks, or expulsion from the league.
       
@@ -73,6 +81,7 @@ const constitutionSections: ConstitutionSection[] = [
       `,
   },
   {
+    id: "chat-communication",
     title: "9. Chat / Communication",
     content: `We utilize a league group chat in WhatsApp for all league-related communication, including trade discussions, announcements, and general banter.
 
@@ -83,6 +92,14 @@ const constitutionSections: ConstitutionSection[] = [
     Important announcements will also be announced in the Sleeper app to ensure all members are informed, regardless of their participation in the chat.
 
     All league members are expected to maintain a respectful and sportsmanlike tone in all communications within the chat. Any violations of the Unsportsmanlike Conduct policy will be addressed by the commissioner as outlined in Section 8.
+      `,
+  },
+  {
+    id: "losers-punishment",
+    title: "10. Loser's Punishment",
+    content: `The champion will get to choose the team’s name and avatar of the manager who finishes last in the loser's bracket. Creativity is encouraged, as is embarrassment, provided it does not breach into the realm of Unsportsmanlike.
+
+    The champion should come up with the new name and avatar before the beginning of the next season (end of the Super Bowl). Once the name is in place, it cannot be changed until the beginning of the following season.
       `,
   },
 ];

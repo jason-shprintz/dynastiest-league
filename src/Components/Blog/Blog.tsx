@@ -8,6 +8,11 @@ import {
   PostContent,
 } from "./Blog.styles";
 import renderContentWithLinks from "../../helper/renderContentWithLinks";
+import { NavigationTarget } from "../../types";
+
+interface IBlogProps {
+  onNavigate?: (target: NavigationTarget) => void;
+}
 
 /**
  * Blog component that displays a list of blog posts for the Dynastiest League.
@@ -16,9 +21,11 @@ import renderContentWithLinks from "../../helper/renderContentWithLinks";
  * with their titles, dates, and content. Each post's content is processed to
  * render any embedded links.
  *
+ * @param props - The component props
+ * @param props.onNavigate - Optional callback function to handle internal navigation
  * @returns A React component displaying the league blog with all posts
  */
-const Blog = () => {
+const Blog = ({ onNavigate }: IBlogProps) => {
   return (
     <BlogSection>
       <h2>Commissioner's Blog</h2>
@@ -42,7 +49,9 @@ const Blog = () => {
               <PostDate as="time" dateTime={post.date}>
                 {post.date}
               </PostDate>
-              <PostContent>{renderContentWithLinks(post.content)}</PostContent>
+              <PostContent>
+                {renderContentWithLinks(post.content, onNavigate)}
+              </PostContent>
             </BlogPostItem>
           ))}
       </BlogContent>

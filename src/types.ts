@@ -8,7 +8,14 @@ type Section =
   | "teams"
   | "trades";
 
+// Navigation target that can include an optional subsection for deep linking
+interface NavigationTarget {
+  section: Section;
+  subsection?: string;
+}
+
 interface ConstitutionSection {
+  id: string;
   title: string;
   content: string;
 }
@@ -38,6 +45,7 @@ interface BlogPost {
 
 export type {
   Section,
+  NavigationTarget,
   ConstitutionSection,
   CurrentChampion,
   ChampionRecord,
