@@ -50,7 +50,6 @@ export class LeagueStore {
   }
 
   public getNumberOfSeasons(): number | null {
-    console.log(this.league);
     if (this.league && this.league.season) {
       const thisSeason: number = Number(this.league.season);
       const numOfSeasons: number = thisSeason - 2019;
