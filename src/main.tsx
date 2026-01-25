@@ -8,7 +8,9 @@ import { DEFAULT_LEAGUE_ID } from './constants'
 const rootStore = new RootStore();
 
 // Load league data at app startup
-rootStore.loadAllLeagueData(DEFAULT_LEAGUE_ID);
+rootStore.loadAllLeagueData(DEFAULT_LEAGUE_ID).catch((error) => {
+  console.error('Failed to load league data at startup:', error);
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
