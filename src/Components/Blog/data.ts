@@ -39,7 +39,7 @@ const blogPosts: BlogPost[] = [
     
     1. There was a vote to push the playoffs back one week starting in Week 16 instead of Week 15. That vote failed, and the playoffs will continue to start in Week 15.
     2. After reviewing the lottery process it is concluded that it is as fair as it can be. I will continue to review it for further improvements, and if any managers have suggestions, they are encouraged to share them, but there will be no changes regarding the draft lottery moving into this next year.
-    3. I am working to integrate more features in to the website that will make our league better than it has ever been. As always, suggestions are welcome.
+    3. I am working to integrate more features into the website that will make our league better than it has ever been. As always, suggestions are welcome.
     
     <TextHighlight>Draft Details:</TextHighlight>
     
