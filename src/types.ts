@@ -6,7 +6,8 @@ type Section =
   | "scouting"
   | "blog"
   | "teams"
-  | "trades";
+  | "trades"
+  | "previous-seasons";
 
 // Navigation target that can include an optional subsection for deep linking
 interface NavigationTarget {
