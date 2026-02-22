@@ -33,6 +33,7 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
     rostersStore,
     playersStore,
     leagueStore,
+    tradeAnalysisStore,
   } = useStore();
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const leagueYear: string =
@@ -68,6 +69,18 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
 
   const visibleTrades = allTrades.slice(0, visibleCount);
   const hasMore = visibleCount < allTrades.length;
+
+  // Fetch AI analyses for all currently visible trades
+  useEffect(() => {
+    const ids = allTrades
+      .slice(0, visibleCount)
+      .map((t) => t.transaction_id);
+    if (ids.length > 0) {
+      tradeAnalysisStore.loadAnalysesBatch(ids);
+    }
+    // allTrades.length used instead of allTrades to avoid firing on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleCount, allTrades.length, tradeAnalysisStore]);
 
   /**
    * Get roster name from roster ID
@@ -135,6 +148,8 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
             trade={trade}
             players={playersStore.players}
             getRosterName={getRosterName}
+            analysis={tradeAnalysisStore.getAnalysis(trade.transaction_id)}
+            isLoadingAnalysis={tradeAnalysisStore.isLoadingAnalysis(trade.transaction_id)}
           />
         ))}
       </TradesContainer>

@@ -12,6 +12,7 @@ import { DraftStore } from "./DraftStore";
 import { TransactionsStore } from "./TransactionsStore";
 import { TradedPicksStore } from "./TradedPicksStore";
 import { PlayersStore } from "./PlayersStore";
+import { TradeAnalysisStore } from "./TradeAnalysisStore";
 import { PreviousSeasonsStore } from "./PreviousSeasonsStore";
 
 export class RootStore {
@@ -24,6 +25,7 @@ export class RootStore {
   transactionsStore: TransactionsStore;
   tradedPicksStore: TradedPicksStore;
   playersStore: PlayersStore;
+  tradeAnalysisStore: TradeAnalysisStore;
   previousSeasonsStore: PreviousSeasonsStore;
 
   constructor() {
@@ -36,6 +38,7 @@ export class RootStore {
     this.transactionsStore = new TransactionsStore();
     this.tradedPicksStore = new TradedPicksStore();
     this.playersStore = new PlayersStore();
+    this.tradeAnalysisStore = new TradeAnalysisStore();
     this.previousSeasonsStore = new PreviousSeasonsStore();
   }
 
@@ -71,10 +74,7 @@ export class RootStore {
    * @param leagueId - The ID of the league
    * @param week - The week number
    */
-  async loadTransactionsForWeek(
-    leagueId: string,
-    week: number,
-  ): Promise<void> {
+  async loadTransactionsForWeek(leagueId: string, week: number): Promise<void> {
     await this.transactionsStore.loadTransactions(leagueId, week);
   }
 
@@ -91,6 +91,7 @@ export class RootStore {
     this.transactionsStore.reset();
     this.tradedPicksStore.reset();
     this.playersStore.reset();
+    this.tradeAnalysisStore.reset();
     this.previousSeasonsStore.reset();
   }
 }
