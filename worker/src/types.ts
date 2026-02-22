@@ -4,7 +4,7 @@
 
 export interface Env {
   DB: D1Database;
-  OPENAI_API_KEY: string;
+  ANTHROPIC_API_KEY: string;
   SLEEPER_LEAGUE_ID: string;
   ANALYSIS_VERSION: string;
 }

@@ -103,7 +103,7 @@ async function processWeekTrades(
           trade,
           rosters,
           users,
-          env.OPENAI_API_KEY
+          env.ANTHROPIC_API_KEY
         );
 
         // Use fallback for created timestamp

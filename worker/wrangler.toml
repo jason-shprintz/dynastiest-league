@@ -6,7 +6,7 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "dynastiest-league-db"
-database_id = "your-database-id" # Replace with actual D1 database ID after creation
+database_id = "d93d3be4-7f27-48f6-b8e6-5037abacac42"
 
 # Cron trigger - runs every 5 minutes
 [triggers]

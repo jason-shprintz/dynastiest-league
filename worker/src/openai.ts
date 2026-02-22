@@ -1,9 +1,9 @@
 /**
- * OpenAI Integration
- * Generates trade analysis using OpenAI API
+ * AI Integration (Anthropic Claude)
+ * Generates trade analysis using Anthropic Claude API
  */
 
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import type {
   SleeperTransaction,
   SleeperRoster,
@@ -12,10 +12,10 @@ import type {
 } from "./types";
 
 /**
- * JSON schema for structured OpenAI output
+ * JSON schema for structured Claude tool output
  */
 const ANALYSIS_SCHEMA = {
-  type: "object",
+  type: "object" as const,
   properties: {
     transaction_id: { type: "string" },
     timestamp: { type: "number" },
@@ -36,7 +36,7 @@ const ANALYSIS_SCHEMA = {
                   properties: {
                     name: { type: "string" },
                     position: { type: "string" },
-                    team: { type: ["string", "null"] },
+                    team: { type: "string" },
                   },
                   required: ["name", "position", "team"],
                 },
@@ -83,7 +83,7 @@ const ANALYSIS_SCHEMA = {
 };
 
 /**
- * Build context about the trade for OpenAI
+ * Build context about the trade for Claude
  */
 function buildTradeContext(
   trade: SleeperTransaction,
@@ -102,10 +102,8 @@ function buildTradeContext(
    * Attempt to resolve player name from trade metadata
    */
   const resolvePlayerName = (playerId: string): string => {
-    // Try to find player name in metadata
     const metadata = trade.metadata;
     if (metadata) {
-      // Common patterns in Sleeper metadata
       if (typeof metadata.players === "object" && metadata.players) {
         const playerInfo = (metadata.players as Record<string, unknown>)[
           playerId
@@ -118,12 +116,10 @@ function buildTradeContext(
         }
       }
 
-      // Sometimes metadata has player_id -> name direct mapping
       const directName = (metadata as Record<string, unknown>)[playerId];
       if (typeof directName === "string") return directName;
     }
 
-    // Fallback to player ID
     return `Player ID: ${playerId}`;
   };
 
@@ -144,7 +140,6 @@ function buildTradeContext(
     context += `${teamName} (${record}):\n`;
     context += `Received:\n`;
 
-    // Players received
     const adds = trade.adds ?? {};
     Object.entries(adds).forEach(([playerId, addedToRosterId]) => {
       if (addedToRosterId === rosterId) {
@@ -152,7 +147,6 @@ function buildTradeContext(
       }
     });
 
-    // Picks received
     const draftPicks = trade.draft_picks ?? [];
     draftPicks.forEach((pick) => {
       if (pick.owner_id === rosterId) {
@@ -161,7 +155,6 @@ function buildTradeContext(
       }
     });
 
-    // Check if team received nothing
     const receivedPlayers = Object.entries(adds).some(
       ([, r]) => r === rosterId
     );
@@ -175,7 +168,7 @@ function buildTradeContext(
 }
 
 /**
- * Generate AI analysis for a trade
+ * Generate AI analysis for a trade using Claude
  */
 export async function generateTradeAnalysis(
   trade: SleeperTransaction,
@@ -183,7 +176,7 @@ export async function generateTradeAnalysis(
   users: SleeperUser[],
   apiKey: string
 ): Promise<TradeAnalysis> {
-  const openai = new OpenAI({ apiKey });
+  const anthropic = new Anthropic({ apiKey });
 
   const context = buildTradeContext(trade, rosters, users);
 
@@ -222,39 +215,36 @@ IMPORTANT: Key the "teams" object by roster ID (as a string), not team name. For
       ...
     }
   }
-}
+}`;
 
-Return your analysis in the specified JSON format.`;
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
+  const response = await anthropic.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 2048,
+    system:
+      "You are a fantasy football analyst who provides entertaining, snarky trade analysis.",
+    tools: [
       {
-        role: "system",
-        content:
-          "You are a fantasy football analyst who provides entertaining, snarky trade analysis.",
+        name: "submit_trade_analysis",
+        description: "Submit the structured trade analysis",
+        input_schema: ANALYSIS_SCHEMA,
       },
+    ],
+    tool_choice: { type: "tool", name: "submit_trade_analysis" },
+    messages: [
       {
         role: "user",
         content: prompt,
       },
     ],
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "trade_analysis",
-        strict: true,
-        schema: ANALYSIS_SCHEMA,
-      },
-    },
-    temperature: 0.8,
   });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error("No content in OpenAI response");
+  const toolUseBlock = response.content.find(
+    (block) => block.type === "tool_use"
+  );
+  if (!toolUseBlock || toolUseBlock.type !== "tool_use") {
+    throw new Error("No tool use block in Claude response");
   }
 
-  const analysis = JSON.parse(content) as TradeAnalysis;
+  const analysis = toolUseBlock.input as TradeAnalysis;
   return analysis;
 }
