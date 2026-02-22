@@ -3,13 +3,13 @@
  * Polls Sleeper for new trades and generates analyses
  */
 
-import type { Env, SleeperTransaction } from "./types";
+import type { Env, SleeperTransaction, SleeperRoster, SleeperUser } from "./types";
 import {
   fetchTransactions,
   fetchRosters,
   fetchUsers,
   fetchPlayerNames,
-  getCurrentWeek,
+  fetchNflState,
 } from "./sleeper";
 import { generateTradeAnalysis } from "./openai";
 import { analysisExists, saveAnalysis } from "./db";
@@ -48,13 +48,15 @@ async function processWeekTrades(
   env: Env,
   leagueId: string,
   week: number,
+  rosters: SleeperRoster[],
+  users: SleeperUser[],
   seenTransactionIds: Set<string>
 ): Promise<number> {
   console.log(`Processing trades for week ${week}...`);
 
   try {
     const transactions = await fetchTransactions(leagueId, week);
-    
+
     // Defensive: treat null/undefined as empty array
     const safeTransactions = transactions ?? [];
 
@@ -69,12 +71,6 @@ async function processWeekTrades(
     console.log(
       `Found ${completedTrades.length} completed trades for week ${week}`
     );
-
-    // Fetch league data once for all trades
-    const [rosters, users] = await Promise.all([
-      fetchRosters(leagueId),
-      fetchUsers(leagueId),
-    ]);
 
     let processed = 0;
 
@@ -146,19 +142,41 @@ export async function handleScheduled(env: Env): Promise<void> {
   console.log("Cron job started");
 
   const leagueId = env.SLEEPER_LEAGUE_ID;
-  const currentWeek = await getCurrentWeek();
+  const nflState = await fetchNflState();
+  const currentWeek = nflState.week || 1;
+  const isOffseason = nflState.season_type === "off" || nflState.week === 0;
 
-  // Poll current week and previous week to avoid edge cases
-  const weeksToCheck = [currentWeek, Math.max(1, currentWeek - 1)];
+  // During the offseason dynasty leagues still trade, and Sleeper files those
+  // transactions across whatever week number is current (often 1–18). Scan all
+  // 18 weeks so no trade is missed. In-season, only current + previous week
+  // need checking since the cron runs every 5 minutes.
+  const weeksToCheck: number[] = isOffseason
+    ? Array.from({ length: 18 }, (_, i) => i + 1)
+    : [currentWeek, Math.max(1, currentWeek - 1)];
 
-  console.log(`Checking weeks: ${weeksToCheck.join(", ")}`);
+  console.log(
+    `Season type: ${nflState.season_type}, week: ${nflState.week}. Checking weeks: ${weeksToCheck.join(", ")}`
+  );
+
+  // Fetch league data once — shared across all week scans
+  const [rosters, users] = await Promise.all([
+    fetchRosters(leagueId),
+    fetchUsers(leagueId),
+  ]);
 
   // Track seen transaction IDs to avoid processing duplicates across weeks
   const seenTransactionIds = new Set<string>();
   let totalProcessed = 0;
 
   for (const week of weeksToCheck) {
-    const processed = await processWeekTrades(env, leagueId, week, seenTransactionIds);
+    const processed = await processWeekTrades(
+      env,
+      leagueId,
+      week,
+      rosters,
+      users,
+      seenTransactionIds
+    );
     totalProcessed += processed;
   }
 
