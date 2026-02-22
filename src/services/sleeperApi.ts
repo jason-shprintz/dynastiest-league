@@ -11,6 +11,7 @@ import type {
   User,
   PlayoffBracket,
   Draft,
+  DraftPick,
   Transaction,
   TradedPick,
   Player,
@@ -142,6 +143,19 @@ export async function fetchTradedPicks(
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch traded picks: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch all picks for a specific draft
+ * @param draftId - The ID of the draft
+ * @returns Array of draft pick data
+ */
+export async function fetchDraftPicks(draftId: string): Promise<DraftPick[]> {
+  const response = await fetch(`${SLEEPER_API_BASE}/draft/${draftId}/picks`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch draft picks: ${response.statusText}`);
   }
   return response.json();
 }

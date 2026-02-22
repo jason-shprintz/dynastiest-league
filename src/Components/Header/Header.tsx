@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
   { section: "scouting", label: "Scouting" },
   { section: "records", label: "Hall of Records" },
   { section: "champion", label: "Current Champion" },
+  { section: "previous-seasons", label: "Previous Seasons" },
   { section: "constitution", label: "Constitution" },
 ];
 

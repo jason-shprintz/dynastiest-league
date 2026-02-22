@@ -11,6 +11,7 @@ import Header from "./Components/Header/Header";
 import Home from "./Components/MainContent/MainContent";
 import Scouting from "./Components/Scouting/Scouting";
 import Trades from "./Components/Trades/Trades";
+import PreviousSeasons from "./Components/PreviousSeasons/PreviousSeasons";
 import { NavigationTarget, Section } from "./types";
 
 /**
@@ -71,6 +72,7 @@ function App() {
           {activeSection === "blog" && <Blog onNavigate={handleNavigate} />}
           {activeSection === "teams" && <AllTeams />}
           {activeSection === "trades" && <Trades />}
+          {activeSection === "previous-seasons" && <PreviousSeasons />}
         </MainContent>
 
         <Footer />
