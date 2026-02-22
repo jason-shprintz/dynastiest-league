@@ -388,7 +388,7 @@ const PreviousSeasons = () => {
         const totalWeeks = playoffWeekStart + PLAYOFF_WEEKS;
 
         const completedDraft =
-          (drafts as Draft[])
+          drafts
             .filter((d) => d.status === "complete")
             .sort((a, b) => b.start_time - a.start_time)[0] ?? null;
 
