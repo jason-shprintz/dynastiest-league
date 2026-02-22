@@ -412,8 +412,8 @@ const PreviousSeasons = () => {
           .sort((a, b) => b.created - a.created);
 
         setSeasonData({
-          rosters: rosters as Roster[],
-          users: users as User[],
+          rosters,
+          users,
           trades,
           draft: completedDraft,
           draftPicks: draftPicks as DraftPick[],
