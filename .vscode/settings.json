@@ -11,5 +11,7 @@
     "mrnickelz",
     "swiff",
     "Waxon"
-  ]
+  ],
+  "snyk.advanced.organization": "c86235ec-2d20-4de7-aa00-8e8a9223df5f",
+  "snyk.advanced.autoSelectOrganization": true
 }
