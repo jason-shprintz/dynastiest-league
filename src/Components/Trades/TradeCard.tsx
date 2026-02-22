@@ -218,17 +218,32 @@ export const TradeCard = ({
           </h3>
           <div style={{ marginBottom: "12px" }}>
             {analysis.conversation.map((msg, idx) => (
-              <div 
+              <div
                 key={idx}
                 style={{
-                  marginBottom: "8px",
-                  paddingLeft: msg.speaker === "Jim" ? "20px" : "0",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  marginBottom: "12px",
                 }}
               >
-                <strong style={{ color: msg.speaker === "Mike" ? "#1976d2" : "#d32f2f" }}>
-                  {msg.speaker}:
-                </strong>{" "}
-                {msg.text}
+                <img
+                  src={msg.speaker === "Mike" ? "/MikeFantasy.webp" : "/JimFantasy.webp"}
+                  alt={msg.speaker}
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    flexShrink: 0,
+                  }}
+                />
+                <div>
+                  <strong style={{ color: msg.speaker === "Mike" ? "#1976d2" : "#d32f2f" }}>
+                    {msg.speaker}:
+                  </strong>{" "}
+                  {msg.text}
+                </div>
               </div>
             ))}
           </div>
