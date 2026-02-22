@@ -1,22 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { usePlayersStore } from "../../stores";
-import { DEFAULT_LEAGUE_ID } from "../../constants";
-import {
-  fetchLeague,
-  fetchRosters,
-  fetchUsers,
-  fetchTransactions,
-  fetchDrafts,
-  fetchDraftPicks,
-} from "../../services/sleeperApi";
-import type {
-  Roster,
-  User,
-  Transaction,
-  Draft,
-  DraftPick,
-  Player,
-} from "../../types/sleeper";
+import { observer } from "mobx-react-lite";
+import { useStore, usePreviousSeasonsStore } from "../../stores";
+import type { Roster, Player, DraftPick, Transaction } from "../../types/sleeper";
 import { TradeCard } from "../Trades/TradeCard";
 import {
   PageSection,
@@ -39,19 +24,6 @@ import {
 } from "./PreviousSeasons.styles";
 
 type Tab = "standings" | "teams" | "trades" | "draft";
-
-interface SeasonInfo {
-  year: string;
-  leagueId: string;
-}
-
-interface SeasonData {
-  rosters: Roster[];
-  users: User[];
-  trades: Transaction[];
-  draft: Draft | null;
-  draftPicks: DraftPick[];
-}
 
 const ITEMS_PER_PAGE = 10;
 
@@ -311,102 +283,33 @@ const DraftView = ({ picks, year, getPickTeamName }: DraftViewProps) => {
 
 // --- Main component ---
 
-const PreviousSeasons = () => {
-  const playersStore = usePlayersStore();
+const PreviousSeasons = observer(() => {
+  const { playersStore } = useStore();
+  const previousSeasonsStore = usePreviousSeasonsStore();
 
-  const [seasons, setSeasons] = useState<SeasonInfo[]>([]);
-  const [selectedLeagueId, setSelectedLeagueId] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("standings");
-  const [isLoadingSeasons, setIsLoadingSeasons] = useState(true);
-  const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
-  const [isLoadingData, setIsLoadingData] = useState(false);
   const [visibleTrades, setVisibleTrades] = useState(ITEMS_PER_PAGE);
 
-  // Build season chain by traversing previous_league_id from the current league
+  const { selectedLeagueId } = previousSeasonsStore;
+
+  // Build season chain on mount
   useEffect(() => {
-    const buildSeasonChain = async () => {
-      setIsLoadingSeasons(true);
-      const chain: SeasonInfo[] = [];
+    if (previousSeasonsStore.seasons.length === 0 && !previousSeasonsStore.isLoadingSeasons) {
+      previousSeasonsStore.buildSeasonChain();
+    }
+    playersStore.loadPlayers();
+  }, [previousSeasonsStore, playersStore]);
 
-      try {
-        const currentLeague = await fetchLeague(DEFAULT_LEAGUE_ID);
-        let prevId = currentLeague.previous_league_id;
-
-        while (prevId) {
-          const league = await fetchLeague(prevId);
-          chain.push({ year: league.season, leagueId: prevId });
-          prevId = league.previous_league_id;
-        }
-
-        setSeasons(chain);
-        if (chain.length > 0) setSelectedLeagueId(chain[0].leagueId);
-      } catch (err) {
-        console.error("Failed to build season chain:", err);
-      } finally {
-        setIsLoadingSeasons(false);
-      }
-    };
-
-    buildSeasonChain();
-  }, []);
-
-  // Load all data for the selected season
+  // Load season data whenever the selected league changes
   useEffect(() => {
-    if (!selectedLeagueId) return;
-
-    const loadSeasonData = async () => {
-      setIsLoadingData(true);
-      setSeasonData(null);
+    if (selectedLeagueId) {
+      previousSeasonsStore.loadSeasonData();
       setVisibleTrades(ITEMS_PER_PAGE);
+    }
+  }, [previousSeasonsStore, selectedLeagueId]);
 
-      try {
-        const weekPromises = Array.from({ length: 18 }, (_, i) =>
-          fetchTransactions(selectedLeagueId, i + 1).catch(
-            () => [] as Transaction[]
-          )
-        );
-
-        const [rosters, users, drafts, ...weekResults] = await Promise.all([
-          fetchRosters(selectedLeagueId),
-          fetchUsers(selectedLeagueId),
-          fetchDrafts(selectedLeagueId),
-          ...weekPromises,
-        ]);
-
-        const trades = (weekResults as Transaction[][])
-          .flat()
-          .filter((tx) => tx.type === "trade")
-          .sort((a, b) => b.created - a.created);
-
-        const completedDraft =
-          (drafts as Draft[])
-            .filter((d) => d.status === "complete")
-            .sort((a, b) => b.start_time - a.start_time)[0] ?? null;
-
-        let draftPicks: DraftPick[] = [];
-        if (completedDraft) {
-          draftPicks = await fetchDraftPicks(completedDraft.draft_id);
-        }
-
-        setSeasonData({
-          rosters: rosters as Roster[],
-          users: users as User[],
-          trades,
-          draft: completedDraft,
-          draftPicks,
-        });
-      } catch (err) {
-        console.error("Failed to load season data:", err);
-        window.alert(
-          "Unable to load season data. Please check your internet connection and try again."
-        );
-      } finally {
-        setIsLoadingData(false);
-      }
-    };
-
-    loadSeasonData();
-  }, [selectedLeagueId]);
+  const { seasonData, isLoadingSeasons, isLoadingData, seasons, selectedYear } =
+    previousSeasonsStore;
 
   const getTeamName = useCallback(
     (roster: Roster): string => {
@@ -447,9 +350,6 @@ const PreviousSeasons = () => {
     [seasonData, getTeamName]
   );
 
-  const selectedYear =
-    seasons.find((s) => s.leagueId === selectedLeagueId)?.year ?? "";
-
   if (isLoadingSeasons) {
     return (
       <PageSection>
@@ -478,7 +378,7 @@ const PreviousSeasons = () => {
           id="season-select"
           value={selectedLeagueId}
           onChange={(e) => {
-            setSelectedLeagueId(e.target.value);
+            previousSeasonsStore.setSelectedLeagueId(e.target.value);
             setActiveTab("standings");
           }}
         >
@@ -545,6 +445,6 @@ const PreviousSeasons = () => {
       </ContentArea>
     </PageSection>
   );
-};
+});
 
 export default PreviousSeasons;
