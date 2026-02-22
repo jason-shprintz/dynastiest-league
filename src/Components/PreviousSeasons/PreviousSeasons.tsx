@@ -56,8 +56,8 @@ interface SeasonData {
 
 const ITEMS_PER_PAGE = 10;
 const MAX_SEASONS = 20;
-const DEFAULT_PLAYOFF_WEEK_START = 14;
-const PLAYOFF_WEEKS = 4;
+const DEFAULT_PLAYOFF_WEEK_START = 15;
+const PLAYOFF_WEEKS = 3;
 
 // --- Sub-view components ---
 
