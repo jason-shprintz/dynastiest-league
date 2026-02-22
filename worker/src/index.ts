@@ -23,7 +23,7 @@ export default {
 
     // Handle CORS preflight
     if (request.method === "OPTIONS") {
-      return handleOptions();
+      return handleOptions(request);
     }
 
     // Only allow GET requests
