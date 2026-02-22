@@ -397,6 +397,9 @@ const PreviousSeasons = () => {
         });
       } catch (err) {
         console.error("Failed to load season data:", err);
+        window.alert(
+          "Unable to load season data. Please check your internet connection and try again."
+        );
       } finally {
         setIsLoadingData(false);
       }
