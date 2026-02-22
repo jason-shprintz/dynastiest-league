@@ -10,6 +10,7 @@ import {
   fetchDraftPicks,
 } from "../../services/sleeperApi";
 import type {
+  League,
   Roster,
   User,
   Transaction,
@@ -54,6 +55,9 @@ interface SeasonData {
 }
 
 const ITEMS_PER_PAGE = 10;
+const MAX_SEASONS = 20;
+const DEFAULT_PLAYOFF_WEEK_START = 14;
+const PLAYOFF_WEEKS = 4;
 
 // --- Sub-view components ---
 
@@ -318,21 +322,26 @@ const PreviousSeasons = () => {
   const [selectedLeagueId, setSelectedLeagueId] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("standings");
   const [isLoadingSeasons, setIsLoadingSeasons] = useState(true);
+  const [seasonsError, setSeasonsError] = useState<string | null>(null);
   const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
   const [visibleTrades, setVisibleTrades] = useState(ITEMS_PER_PAGE);
 
   // Build season chain by traversing previous_league_id from the current league
   useEffect(() => {
     const buildSeasonChain = async () => {
       setIsLoadingSeasons(true);
+      setSeasonsError(null);
       const chain: SeasonInfo[] = [];
 
       try {
         const currentLeague = await fetchLeague(DEFAULT_LEAGUE_ID);
         let prevId = currentLeague.previous_league_id;
+        let iterations = 0;
 
-        while (prevId) {
+        while (prevId && iterations < MAX_SEASONS) {
+          iterations++;
           const league = await fetchLeague(prevId);
           chain.push({ year: league.season, leagueId: prevId });
           prevId = league.previous_league_id;
@@ -342,6 +351,9 @@ const PreviousSeasons = () => {
         if (chain.length > 0) setSelectedLeagueId(chain[0].leagueId);
       } catch (err) {
         console.error("Failed to build season chain:", err);
+        setSeasonsError(
+          "Failed to load season list. Please check your connection and refresh the page."
+        );
       } finally {
         setIsLoadingSeasons(false);
       }
@@ -357,19 +369,40 @@ const PreviousSeasons = () => {
     const loadSeasonData = async () => {
       setIsLoadingData(true);
       setSeasonData(null);
+      setDataError(null);
       setVisibleTrades(ITEMS_PER_PAGE);
 
       try {
-        const weekPromises = Array.from({ length: 18 }, (_, i) =>
+        // Stage 1: fetch league info and base data in parallel
+        const [league, rosters, users, drafts] = await Promise.all([
+          fetchLeague(selectedLeagueId),
+          fetchRosters(selectedLeagueId),
+          fetchUsers(selectedLeagueId),
+          fetchDrafts(selectedLeagueId),
+        ]);
+
+        // Derive total weeks from league settings to handle varying season lengths
+        const playoffWeekStart =
+          Number((league as League).settings.playoff_week_start) ||
+          DEFAULT_PLAYOFF_WEEK_START;
+        const totalWeeks = playoffWeekStart + PLAYOFF_WEEKS;
+
+        const completedDraft =
+          (drafts as Draft[])
+            .filter((d) => d.status === "complete")
+            .sort((a, b) => b.start_time - a.start_time)[0] ?? null;
+
+        // Stage 2: fetch transactions and draft picks in parallel
+        const weekPromises = Array.from({ length: totalWeeks }, (_, i) =>
           fetchTransactions(selectedLeagueId, i + 1).catch(
             () => [] as Transaction[]
           )
         );
 
-        const [rosters, users, drafts, ...weekResults] = await Promise.all([
-          fetchRosters(selectedLeagueId),
-          fetchUsers(selectedLeagueId),
-          fetchDrafts(selectedLeagueId),
+        const [draftPicks, ...weekResults] = await Promise.all([
+          completedDraft
+            ? fetchDraftPicks(completedDraft.draft_id)
+            : Promise.resolve([] as DraftPick[]),
           ...weekPromises,
         ]);
 
@@ -378,25 +411,18 @@ const PreviousSeasons = () => {
           .filter((tx) => tx.type === "trade")
           .sort((a, b) => b.created - a.created);
 
-        const completedDraft =
-          (drafts as Draft[])
-            .filter((d) => d.status === "complete")
-            .sort((a, b) => b.start_time - a.start_time)[0] ?? null;
-
-        let draftPicks: DraftPick[] = [];
-        if (completedDraft) {
-          draftPicks = await fetchDraftPicks(completedDraft.draft_id);
-        }
-
         setSeasonData({
           rosters: rosters as Roster[],
           users: users as User[],
           trades,
           draft: completedDraft,
-          draftPicks,
+          draftPicks: draftPicks as DraftPick[],
         });
       } catch (err) {
         console.error("Failed to load season data:", err);
+        setDataError(
+          "Failed to load season data. Please check your connection and try again."
+        );
       } finally {
         setIsLoadingData(false);
       }
@@ -456,6 +482,15 @@ const PreviousSeasons = () => {
     );
   }
 
+  if (seasonsError) {
+    return (
+      <PageSection>
+        <h2>Previous Seasons</h2>
+        <EmptyState>{seasonsError}</EmptyState>
+      </PageSection>
+    );
+  }
+
   if (seasons.length === 0) {
     return (
       <PageSection>
@@ -504,7 +539,11 @@ const PreviousSeasons = () => {
           <LoadingMessage>Loading {selectedYear} data...</LoadingMessage>
         )}
 
-        {!isLoadingData && seasonData && activeTab === "standings" && (
+        {!isLoadingData && dataError && (
+          <EmptyState>{dataError}</EmptyState>
+        )}
+
+        {!isLoadingData && !dataError && seasonData && activeTab === "standings" && (
           <StandingsView
             rosters={seasonData.rosters}
             getTeamName={getTeamName}
@@ -512,7 +551,7 @@ const PreviousSeasons = () => {
           />
         )}
 
-        {!isLoadingData && seasonData && activeTab === "teams" && (
+        {!isLoadingData && !dataError && seasonData && activeTab === "teams" && (
           <TeamsView
             rosters={seasonData.rosters}
             getTeamName={getTeamName}
@@ -521,7 +560,7 @@ const PreviousSeasons = () => {
           />
         )}
 
-        {!isLoadingData && seasonData && activeTab === "trades" && (
+        {!isLoadingData && !dataError && seasonData && activeTab === "trades" && (
           <TradesView
             trades={seasonData.trades}
             year={selectedYear}
@@ -532,7 +571,7 @@ const PreviousSeasons = () => {
           />
         )}
 
-        {!isLoadingData && seasonData && activeTab === "draft" && (
+        {!isLoadingData && !dataError && seasonData && activeTab === "draft" && (
           <DraftView
             picks={seasonData.draftPicks}
             year={selectedYear}
