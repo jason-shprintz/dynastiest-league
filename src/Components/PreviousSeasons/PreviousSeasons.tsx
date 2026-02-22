@@ -28,6 +28,7 @@ import {
   LoadingMessage,
   EmptyState,
   LoadMoreButton,
+  StandingsWrapper,
   StandingsTable,
   TeamsGrid,
   TeamCard,
@@ -78,42 +79,44 @@ const StandingsView = ({
   });
 
   return (
-    <StandingsTable>
-      <thead>
-        <tr>
-          <th className="rank">#</th>
-          <th>Team</th>
-          <th>Owner</th>
-          <th className="numeric">W</th>
-          <th className="numeric">L</th>
-          <th className="numeric">PF</th>
-          <th className="numeric">PA</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sorted.map((roster, i) => {
-          const pf = (
-            roster.settings.fpts +
-            roster.settings.fpts_decimal / 100
-          ).toFixed(2);
-          const pa = (
-            roster.settings.fpts_against +
-            roster.settings.fpts_against_decimal / 100
-          ).toFixed(2);
-          return (
-            <tr key={roster.roster_id}>
-              <td className="rank">{i + 1}</td>
-              <td className="team">{getTeamName(roster)}</td>
-              <td>{getOwnerName(roster)}</td>
-              <td className="numeric">{roster.settings.wins}</td>
-              <td className="numeric">{roster.settings.losses}</td>
-              <td className="numeric">{pf}</td>
-              <td className="numeric">{pa}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </StandingsTable>
+    <StandingsWrapper>
+      <StandingsTable>
+        <thead>
+          <tr>
+            <th className="rank">#</th>
+            <th>Team</th>
+            <th className="hide-mobile">Owner</th>
+            <th className="numeric">W</th>
+            <th className="numeric">L</th>
+            <th className="numeric">PF</th>
+            <th className="numeric">PA</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((roster, i) => {
+            const pf = (
+              roster.settings.fpts +
+              roster.settings.fpts_decimal / 100
+            ).toFixed(2);
+            const pa = (
+              roster.settings.fpts_against +
+              roster.settings.fpts_against_decimal / 100
+            ).toFixed(2);
+            return (
+              <tr key={roster.roster_id}>
+                <td className="rank">{i + 1}</td>
+                <td className="team">{getTeamName(roster)}</td>
+                <td className="hide-mobile">{getOwnerName(roster)}</td>
+                <td className="numeric">{roster.settings.wins}</td>
+                <td className="numeric">{roster.settings.losses}</td>
+                <td className="numeric">{pf}</td>
+                <td className="numeric">{pa}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </StandingsTable>
+    </StandingsWrapper>
   );
 };
 

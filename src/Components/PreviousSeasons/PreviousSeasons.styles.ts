@@ -135,6 +135,11 @@ export const LoadMoreButton = styled.button`
 
 /* --- Standings --- */
 
+export const StandingsWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+`;
+
 export const StandingsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -164,24 +169,37 @@ export const StandingsTable = styled.table`
 
   .rank {
     color: ${COLORS.textMuted};
-    width: 2.5rem;
+    width: 2rem;
   }
 
   .team {
     font-weight: 600;
     color: ${COLORS.textPrimary};
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .numeric {
     text-align: right;
   }
 
-  @media (max-width: 600px) {
-    font-size: 0.85rem;
+  /* Hide owner column on small screens — team name is sufficient */
+  @media (max-width: 480px) {
+    font-size: 0.82rem;
 
     th,
     td {
-      padding: 0.5rem;
+      padding: 0.45rem 0.4rem;
+    }
+
+    .team {
+      max-width: 110px;
+    }
+
+    .hide-mobile {
+      display: none;
     }
   }
 `;
