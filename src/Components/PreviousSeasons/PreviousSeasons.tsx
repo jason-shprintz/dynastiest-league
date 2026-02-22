@@ -383,7 +383,7 @@ const PreviousSeasons = () => {
 
         // Derive total weeks from league settings to handle varying season lengths
         const playoffWeekStart =
-          Number((league as League).settings.playoff_week_start) ||
+          Number(league.settings.playoff_week_start) ||
           DEFAULT_PLAYOFF_WEEK_START;
         const totalWeeks = playoffWeekStart + PLAYOFF_WEEKS;
 
