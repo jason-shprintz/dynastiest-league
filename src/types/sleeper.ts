@@ -297,6 +297,24 @@ export interface Transaction {
 }
 
 /**
+ * Represents an individual pick in a Sleeper draft.
+ */
+export interface DraftPick {
+  round: number;
+  roster_id: number;
+  player_id: string;
+  picked_by: string;
+  pick_no: number;
+  metadata: {
+    first_name?: string;
+    last_name?: string;
+    position?: string;
+    team?: string;
+    [key: string]: unknown;
+  } | null;
+}
+
+/**
  * Represents a draft pick that has been traded between teams in a Sleeper league.
  *
  * @interface TradedPick

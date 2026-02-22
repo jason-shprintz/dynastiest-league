@@ -1,3 +1,5 @@
+import { observer } from "mobx-react-lite";
+import { useLeagueStore } from "../../stores";
 import {
   HomeSection,
   Hero,
@@ -9,6 +11,7 @@ import {
   ContentSection,
   StyledParagraph,
 } from "./MainContent.styles";
+import { LoadingSpinner } from "../../theme/shared.styles";
 
 /**
  * MainContent component that displays the home page content for the Dynastiest League.
@@ -24,7 +27,11 @@ import {
  * <MainContent />
  * ```
  */
-const MainContent = () => {
+const MainContent = observer(() => {
+  const leagueStore = useLeagueStore();
+  const numberOfSeasons: number | null = leagueStore.error
+    ? 6
+    : leagueStore.getNumberOfSeasons();
   return (
     <HomeSection>
       <Hero>
@@ -36,7 +43,9 @@ const MainContent = () => {
             <StatLabel>Teams</StatLabel>
           </StatCard>
           <StatCard>
-            <StatNumber>6</StatNumber>
+            <StatNumber>
+              {numberOfSeasons !== null ? numberOfSeasons : <LoadingSpinner />}
+            </StatNumber>
             <StatLabel>Seasons</StatLabel>
           </StatCard>
           <StatCard>
@@ -69,6 +78,6 @@ const MainContent = () => {
       </ContentSection>
     </HomeSection>
   );
-};
+});
 
 export default MainContent;

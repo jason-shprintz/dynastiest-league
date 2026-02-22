@@ -58,3 +58,7 @@ export function useTradedPicksStore() {
 export function usePlayersStore() {
   return useStore().playersStore;
 }
+
+export function usePreviousSeasonsStore() {
+  return useStore().previousSeasonsStore;
+}
