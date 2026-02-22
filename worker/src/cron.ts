@@ -8,6 +8,7 @@ import {
   fetchTransactions,
   fetchRosters,
   fetchUsers,
+  fetchPlayerNames,
   getCurrentWeek,
 } from "./sleeper";
 import { generateTradeAnalysis } from "./openai";
@@ -98,11 +99,15 @@ async function processWeekTrades(
 
         console.log(`Generating analysis for trade ${trade.transaction_id}...`);
 
-        // Generate analysis (without full player database)
+        // Resolve player names for this trade via KV-cached player data
+        const playerIds = Object.keys(trade.adds ?? {});
+        const playerNames = await fetchPlayerNames(playerIds, env.PLAYERS_KV);
+
         const analysis = await generateTradeAnalysis(
           trade,
           rosters,
           users,
+          playerNames,
           env.ANTHROPIC_API_KEY
         );
 

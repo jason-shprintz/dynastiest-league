@@ -63,6 +63,60 @@ export async function fetchNflState(): Promise<SleeperNflState> {
   return response.json();
 }
 
+const PLAYERS_KV_KEY = "sleeper_players";
+const PLAYERS_TTL_SECONDS = 86400; // 24 hours
+
+/**
+ * Fetch player names for specific player IDs, using KV as a daily cache.
+ * Returns a map of playerId -> { name, position }
+ */
+export async function fetchPlayerNames(
+  playerIds: string[],
+  kv: KVNamespace
+): Promise<Record<string, { name: string; position: string }>> {
+  if (playerIds.length === 0) return {};
+
+  let playerMap: Record<string, { name: string; position: string }> = {};
+
+  // Try KV cache first
+  const cached = await kv.get(PLAYERS_KV_KEY, "json");
+  if (cached) {
+    playerMap = cached as Record<string, { name: string; position: string }>;
+  } else {
+    // Fetch all players from Sleeper and store slim version in KV
+    try {
+      const response = await fetch("https://api.sleeper.app/v1/players/nfl");
+      if (response.ok) {
+        const allPlayers = (await response.json()) as Record<
+          string,
+          { full_name?: string; position?: string }
+        >;
+        // Only store id -> { name, position } to keep KV entry small
+        for (const [id, p] of Object.entries(allPlayers)) {
+          if (p.full_name) {
+            playerMap[id] = {
+              name: p.full_name,
+              position: p.position ?? "?",
+            };
+          }
+        }
+        await kv.put(PLAYERS_KV_KEY, JSON.stringify(playerMap), {
+          expirationTtl: PLAYERS_TTL_SECONDS,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch /players/nfl:", err);
+    }
+  }
+
+  // Return only the requested players
+  const result: Record<string, { name: string; position: string }> = {};
+  for (const id of playerIds) {
+    if (playerMap[id]) result[id] = playerMap[id];
+  }
+  return result;
+}
+
 /**
  * Get the current NFL week from Sleeper API
  */

@@ -88,7 +88,8 @@ const ANALYSIS_SCHEMA = {
 function buildTradeContext(
   trade: SleeperTransaction,
   rosters: SleeperRoster[],
-  users: SleeperUser[]
+  users: SleeperUser[],
+  playerNames: Record<string, { name: string; position: string }>
 ): string {
   const getTeamName = (rosterId: number): string => {
     const roster = rosters.find((r) => r.roster_id === rosterId);
@@ -98,28 +99,11 @@ function buildTradeContext(
     return user.metadata?.team_name || user.display_name || user.username;
   };
 
-  /**
-   * Attempt to resolve player name from trade metadata
-   */
   const resolvePlayerName = (playerId: string): string => {
-    const metadata = trade.metadata;
-    if (metadata) {
-      if (typeof metadata.players === "object" && metadata.players) {
-        const playerInfo = (metadata.players as Record<string, unknown>)[
-          playerId
-        ];
-        if (typeof playerInfo === "string") return playerInfo;
-        if (playerInfo && typeof playerInfo === "object") {
-          const info = playerInfo as Record<string, unknown>;
-          if (typeof info.name === "string") return info.name;
-          if (typeof info.full_name === "string") return info.full_name;
-        }
-      }
-
-      const directName = (metadata as Record<string, unknown>)[playerId];
-      if (typeof directName === "string") return directName;
+    if (playerNames[playerId]) {
+      const { name, position } = playerNames[playerId];
+      return `${name} (${position})`;
     }
-
     return `Player ID: ${playerId}`;
   };
 
@@ -129,6 +113,9 @@ function buildTradeContext(
   context += `Teams involved:\n`;
 
   const rosterIds = trade.roster_ids ?? [];
+  const adds = trade.adds ?? {};
+  const draftPicks = trade.draft_picks ?? [];
+
   rosterIds.forEach((rosterId) => {
     const teamName = getTeamName(rosterId);
     const roster = rosters.find((r) => r.roster_id === rosterId);
@@ -138,30 +125,35 @@ function buildTradeContext(
 
     context += `\nRoster ID: ${rosterId}\n`;
     context += `${teamName} (${record}):\n`;
-    context += `Received:\n`;
 
-    const adds = trade.adds ?? {};
-    Object.entries(adds).forEach(([playerId, addedToRosterId]) => {
-      if (addedToRosterId === rosterId) {
-        context += `  - ${resolvePlayerName(playerId)}\n`;
-      }
-    });
-
-    const draftPicks = trade.draft_picks ?? [];
-    draftPicks.forEach((pick) => {
-      if (pick.owner_id === rosterId) {
-        const originalTeam = getTeamName(pick.roster_id);
-        context += `  - ${pick.season} Round ${pick.round} Pick (originally ${originalTeam}'s)\n`;
-      }
-    });
-
-    const receivedPlayers = Object.entries(adds).some(
-      ([, r]) => r === rosterId
-    );
-    const receivedPicks = draftPicks.some((p) => p.owner_id === rosterId);
-    if (!receivedPlayers && !receivedPicks) {
-      context += `  - Nothing\n`;
+    // What this team received
+    context += `  Received:\n`;
+    const gotPlayers = Object.entries(adds).filter(([, to]) => to === rosterId);
+    const gotPicks = draftPicks.filter((p) => p.owner_id === rosterId);
+    if (gotPlayers.length === 0 && gotPicks.length === 0) {
+      context += `    - Nothing\n`;
     }
+    gotPlayers.forEach(([playerId]) => {
+      context += `    - ${resolvePlayerName(playerId)}\n`;
+    });
+    gotPicks.forEach((pick) => {
+      const originalTeam = getTeamName(pick.roster_id);
+      context += `    - ${pick.season} Round ${pick.round} Pick (originally ${originalTeam}'s)\n`;
+    });
+
+    // What this team gave up
+    context += `  Gave up:\n`;
+    const sentPlayers = Object.entries(adds).filter(([, to]) => to !== rosterId && rosterIds.includes(to));
+    const sentPicks = draftPicks.filter((p) => p.previous_owner_id === rosterId);
+    if (sentPlayers.length === 0 && sentPicks.length === 0) {
+      context += `    - Nothing\n`;
+    }
+    sentPlayers.forEach(([playerId]) => {
+      context += `    - ${resolvePlayerName(playerId)}\n`;
+    });
+    sentPicks.forEach((pick) => {
+      context += `    - ${pick.season} Round ${pick.round} Pick\n`;
+    });
   });
 
   return context;
@@ -174,11 +166,12 @@ export async function generateTradeAnalysis(
   trade: SleeperTransaction,
   rosters: SleeperRoster[],
   users: SleeperUser[],
+  playerNames: Record<string, { name: string; position: string }>,
   apiKey: string
 ): Promise<TradeAnalysis> {
   const anthropic = new Anthropic({ apiKey });
 
-  const context = buildTradeContext(trade, rosters, users);
+  const context = buildTradeContext(trade, rosters, users, playerNames);
 
   const prompt = `You are analyzing a fantasy football trade for a dynasty league. Your job is to create an in-depth, snarky analysis written as a conversation between two sports analysts named Mike and Jim.
 

@@ -4,6 +4,7 @@
 
 export interface Env {
   DB: D1Database;
+  PLAYERS_KV: KVNamespace;
   ANTHROPIC_API_KEY: string;
   SLEEPER_LEAGUE_ID: string;
   ANALYSIS_VERSION: string;

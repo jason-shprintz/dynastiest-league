@@ -8,6 +8,11 @@ binding = "DB"
 database_name = "dynastiest-league-db"
 database_id = "d93d3be4-7f27-48f6-b8e6-5037abacac42"
 
+# KV namespace for caching Sleeper player data (refreshed daily)
+[[kv_namespaces]]
+binding = "PLAYERS_KV"
+id = "7a76420693ce4dcfb81667ea1727fd25"
+
 # Cron trigger - runs every 5 minutes
 [triggers]
 crons = ["*/5 * * * *"]
