@@ -252,10 +252,10 @@ export const AllTimeRow = styled(TableRow)<{ $isFormer?: boolean }>`
   & > div:nth-child(3),
   & > div:nth-child(4),
   & > div:nth-child(5) {
-    flex: 0 0 15%;
-    min-width: 15%;
-    max-width: 15%;
-    width: 15%;
+    flex: 0 0 20%;
+    min-width: 20%;
+    max-width: 20%;
+    width: 20%;
   }
   @media (max-width: 480px) {
     & > div:first-child {

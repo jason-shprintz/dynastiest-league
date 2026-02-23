@@ -92,8 +92,11 @@ const HallOfRecords = observer(() => {
   // Set of owner IDs who are in the current season.
   // Only populated once rosters have loaded; empty Set means "not yet known".
   const currentOwnerIds = useMemo(
-    () => new Set(rostersStore.rosters.filter((r) => r.owner_id).map((r) => r.owner_id)),
-    [rostersStore.rosters]
+    () =>
+      new Set(
+        rostersStore.rosters.filter((r) => r.owner_id).map((r) => r.owner_id),
+      ),
+    [rostersStore.rosters],
   );
 
   // Aggregate all-time standings from all historical seasons.
@@ -101,7 +104,13 @@ const HallOfRecords = observer(() => {
   const allTimeStandings = useMemo(() => {
     const map = new Map<
       string,
-      { displayName: string; wins: number; losses: number; pf: number; pa: number }
+      {
+        displayName: string;
+        wins: number;
+        losses: number;
+        pf: number;
+        pa: number;
+      }
     >();
 
     for (const { rosters, users } of previousSeasonsStore.allSeasonsData) {
@@ -110,8 +119,7 @@ const HallOfRecords = observer(() => {
         if (!ownerId) continue;
 
         const user = users.find((u) => u.user_id === ownerId);
-        const displayName =
-          user?.display_name || user?.username || ownerId;
+        const displayName = user?.display_name || user?.username || ownerId;
 
         const existing = map.get(ownerId) ?? {
           displayName,
@@ -121,8 +129,7 @@ const HallOfRecords = observer(() => {
           pa: 0,
         };
 
-        const pf =
-          roster.settings.fpts + roster.settings.fpts_decimal / 100;
+        const pf = roster.settings.fpts + roster.settings.fpts_decimal / 100;
         const pa =
           roster.settings.fpts_against +
           roster.settings.fpts_against_decimal / 100;
