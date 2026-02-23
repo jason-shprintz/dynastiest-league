@@ -210,66 +210,96 @@ export const AllTimeTable = styled(RecordsTable)``;
 
 export const AllTimeHeader = styled(TableHeader)`
   & > div:first-child {
-    flex: 0 0 40%;
-    min-width: 40%;
-    max-width: 40%;
-    width: 40%;
+    flex: 0 0 28%;
+    min-width: 28%;
+    max-width: 28%;
+    width: 28%;
   }
-  & > div:nth-child(2),
-  & > div:nth-child(3),
-  & > div:nth-child(4),
-  & > div:nth-child(5) {
-    flex: 0 0 15%;
-    min-width: 15%;
-    max-width: 15%;
-    width: 15%;
+  & > :nth-child(2),
+  & > :nth-child(3) {
+    flex: 0 0 12%;
+    min-width: 12%;
+    max-width: 12%;
+    width: 12%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  & > :nth-child(4),
+  & > :nth-child(5) {
+    flex: 0 0 24%;
+    min-width: 24%;
+    max-width: 24%;
+    width: 24%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   @media (max-width: 480px) {
     & > div:first-child {
-      flex: 0 0 28%;
-      min-width: 28%;
-      max-width: 28%;
-      width: 28%;
+      flex: 0 0 22%;
+      min-width: 22%;
+      max-width: 22%;
+      width: 22%;
     }
-    & > div:nth-child(2),
-    & > div:nth-child(3),
-    & > div:nth-child(4),
-    & > div:nth-child(5) {
-      flex: 1 1 0;
-      min-width: 0;
+    & > :nth-child(2),
+    & > :nth-child(3) {
+      flex: 0 0 10%;
+      min-width: 10%;
+      max-width: 10%;
+      width: 10%;
+    }
+    & > :nth-child(4),
+    & > :nth-child(5) {
+      flex: 0 0 29%;
+      min-width: 29%;
+      max-width: 29%;
+      width: 29%;
     }
   }
 `;
 
 export const AllTimeRow = styled(TableRow)<{ $isFormer?: boolean }>`
   & > div:first-child {
-    flex: 0 0 40%;
-    min-width: 40%;
-    max-width: 40%;
-    width: 40%;
+    flex: 0 0 28%;
+    min-width: 28%;
+    max-width: 28%;
+    width: 28%;
   }
   & > div:nth-child(2),
-  & > div:nth-child(3),
+  & > div:nth-child(3) {
+    flex: 0 0 12%;
+    min-width: 12%;
+    max-width: 12%;
+    width: 12%;
+  }
   & > div:nth-child(4),
   & > div:nth-child(5) {
-    flex: 0 0 15%;
-    min-width: 15%;
-    max-width: 15%;
-    width: 15%;
+    flex: 0 0 24%;
+    min-width: 24%;
+    max-width: 24%;
+    width: 24%;
   }
   @media (max-width: 480px) {
     & > div:first-child {
-      flex: 0 0 28%;
-      min-width: 28%;
-      max-width: 28%;
-      width: 28%;
+      flex: 0 0 22%;
+      min-width: 22%;
+      max-width: 22%;
+      width: 22%;
     }
     & > div:nth-child(2),
-    & > div:nth-child(3),
+    & > div:nth-child(3) {
+      flex: 0 0 10%;
+      min-width: 10%;
+      max-width: 10%;
+      width: 10%;
+    }
     & > div:nth-child(4),
     & > div:nth-child(5) {
-      flex: 1 1 0;
-      min-width: 0;
+      flex: 0 0 29%;
+      min-width: 29%;
+      max-width: 29%;
+      width: 29%;
     }
   }
   ${({ $isFormer }) =>
