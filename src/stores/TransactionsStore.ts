@@ -3,9 +3,9 @@
  * MobX store for managing transaction data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction, computed } from "mobx";
-import type { Transaction } from "../types/sleeper";
-import { fetchTransactions } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction, computed } from 'mobx';
+import type { Transaction } from '../types/sleeper';
+import { fetchTransactions } from '../services/sleeperApi';
 
 /**
  * MobX store for managing NFL fantasy league transactions.
@@ -57,7 +57,7 @@ export class TransactionsStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
     }
@@ -72,7 +72,7 @@ export class TransactionsStore {
   }
 
   get allTrades(): Transaction[] {
-    return this.allTransactions.filter((tx) => tx.type === "trade");
+    return this.allTransactions.filter((tx) => tx.type === 'trade');
   }
 
   get allTradesSorted(): Transaction[] {
@@ -93,7 +93,7 @@ export class TransactionsStore {
 
     runInAction(() => {
       results.forEach((result, index) => {
-        if (result.status === "fulfilled") {
+        if (result.status === 'fulfilled') {
           const week = index + 1;
           this.transactionsByWeek.set(week, result.value);
         }

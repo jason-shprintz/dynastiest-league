@@ -1,5 +1,5 @@
-import { observer } from "mobx-react-lite";
-import { useLeagueStore } from "../../stores";
+import { observer } from 'mobx-react-lite';
+import { useLeagueStore } from '../../stores';
 import {
   HomeSection,
   Hero,
@@ -10,8 +10,8 @@ import {
   StatLabel,
   ContentSection,
   StyledParagraph,
-} from "./MainContent.styles";
-import { LoadingSpinner } from "../../theme/shared.styles";
+} from './MainContent.styles';
+import { LoadingSpinner } from '../../theme/shared.styles';
 
 /**
  * MainContent component that displays the home page content for the Dynastiest League.

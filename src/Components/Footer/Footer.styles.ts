@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "../../theme/colors";
+import styled from 'styled-components';
+import { COLORS } from '../../theme/colors';
 
 export const FooterContainer = styled.footer`
   background: rgba(0, 0, 0, 0.4);

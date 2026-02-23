@@ -4,7 +4,7 @@ import {
   EmbedGrid,
   EmbedContainer,
   EmbedWrapper,
-} from "./Scouting.styles";
+} from './Scouting.styles';
 
 /**
  * Scouting component that displays player trending data and scouting tools.

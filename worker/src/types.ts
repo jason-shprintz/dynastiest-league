@@ -97,7 +97,7 @@ export interface TradeAnalysis {
     };
   };
   conversation: Array<{
-    speaker: "Mike" | "Jim";
+    speaker: 'Mike' | 'Jim';
     text: string;
   }>;
   overall_take: string;

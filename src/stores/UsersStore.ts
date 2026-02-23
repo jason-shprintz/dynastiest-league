@@ -3,9 +3,9 @@
  * MobX store for managing user data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
-import type { User } from "../types/sleeper";
-import { fetchUsers } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction } from 'mobx';
+import type { User } from '../types/sleeper';
+import { fetchUsers } from '../services/sleeperApi';
 
 /**
  * MobX store for managing Sleeper league users.
@@ -42,7 +42,7 @@ export class UsersStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
     }

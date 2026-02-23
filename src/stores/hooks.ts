@@ -3,9 +3,9 @@
  * Custom React hooks for accessing MobX stores
  */
 
-import { useContext } from "react";
-import { StoreContext } from "./StoreContext";
-import { RootStore } from "./RootStore";
+import { useContext } from 'react';
+import { StoreContext } from './StoreContext';
+import { RootStore } from './RootStore';
 
 /**
  * Hook to access the root store from any component
@@ -15,7 +15,7 @@ import { RootStore } from "./RootStore";
 export function useStore(): RootStore {
   const store = useContext(StoreContext);
   if (!store) {
-    throw new Error("useStore must be used within a StoreProvider");
+    throw new Error('useStore must be used within a StoreProvider');
   }
   return store;
 }

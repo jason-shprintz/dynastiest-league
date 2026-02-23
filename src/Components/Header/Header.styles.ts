@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "../../theme/colors";
+import styled from 'styled-components';
+import { COLORS } from '../../theme/colors';
 
 export const HeaderContainer = styled.header`
   background: rgba(0, 0, 0, 0.4);
@@ -35,7 +35,7 @@ export const Navigation = styled.nav`
 export const NavButton = styled.button<{ $isActive?: boolean }>`
   padding: 0.75rem 1.5rem;
   background: ${(props) =>
-    props.$isActive ? COLORS.secondary : "transparent"};
+    props.$isActive ? COLORS.secondary : 'transparent'};
   border: 2px solid
     ${(props) => (props.$isActive ? COLORS.accent : COLORS.secondary)};
   color: ${(props) => (props.$isActive ? COLORS.accent : COLORS.textMuted)};
@@ -125,8 +125,8 @@ export const MobileMenuOverlay = styled.div<{ $isOpen: boolean }>`
     background: rgba(0, 0, 0, 0.98);
     backdrop-filter: blur(10px);
     z-index: 9999;
-    opacity: ${(props) => (props.$isOpen ? "1" : "0")};
-    pointer-events: ${(props) => (props.$isOpen ? "auto" : "none")};
+    opacity: ${(props) => (props.$isOpen ? '1' : '0')};
+    pointer-events: ${(props) => (props.$isOpen ? 'auto' : 'none')};
     transition: opacity 0.3s ease;
   }
 `;

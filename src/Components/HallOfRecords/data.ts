@@ -1,42 +1,42 @@
-import { ChampionRecord } from "../../types";
+import { ChampionRecord } from '../../types';
 
 // Sample data - can be replaced with real data later
 const hallOfRecords: ChampionRecord[] = [
   {
-    year: "2025",
-    champion: "🥇 jeffgottfried",
-    second: "🥈 JuiceMarr",
-    third: "🥉 ThatDudeStu",
+    year: '2025',
+    champion: '🥇 jeffgottfried',
+    second: '🥈 JuiceMarr',
+    third: '🥉 ThatDudeStu',
   },
   {
-    year: "2024",
-    champion: "🥇 awco",
-    second: "🥈 UzUrHead",
-    third: "🥉 JuiceMarr",
+    year: '2024',
+    champion: '🥇 awco',
+    second: '🥈 UzUrHead',
+    third: '🥉 JuiceMarr',
   },
   {
-    year: "2023",
-    champion: "🥇 JuiceMarr",
-    second: "🥈 mrnickelz12",
-    third: "🥉 UzUrHead",
+    year: '2023',
+    champion: '🥇 JuiceMarr',
+    second: '🥈 mrnickelz12',
+    third: '🥉 UzUrHead',
   },
   {
-    year: "2022",
-    champion: "🥇 dendenoodles611",
-    second: "🥈 jeffgottfried",
-    third: "🥉 UzUrHead",
+    year: '2022',
+    champion: '🥇 dendenoodles611',
+    second: '🥈 jeffgottfried',
+    third: '🥉 UzUrHead',
   },
   {
-    year: "2021",
-    champion: "🥇 swiff22",
-    second: "🥈 dendenoodles611",
-    third: "🥉 ThatDudeStu",
+    year: '2021',
+    champion: '🥇 swiff22',
+    second: '🥈 dendenoodles611',
+    third: '🥉 ThatDudeStu',
   },
   {
-    year: "2020",
-    champion: "🥇 dendenoodles611",
-    second: "🥈 mrnickelz12",
-    third: "🥉 skiddy8",
+    year: '2020',
+    champion: '🥇 dendenoodles611',
+    second: '🥈 mrnickelz12',
+    third: '🥉 skiddy8',
   },
 ];
 

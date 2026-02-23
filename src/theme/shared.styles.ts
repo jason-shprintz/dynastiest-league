@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "./colors";
+import styled from 'styled-components';
+import { COLORS } from './colors';
 
 export const LoadingSpinner = styled.div`
   width: 2rem;

@@ -1,4 +1,4 @@
-import { FooterContainer } from "./Footer.styles";
+import { FooterContainer } from './Footer.styles';
 
 /**
  * Renders the site footer with a copyright notice for The Dynastiest League.

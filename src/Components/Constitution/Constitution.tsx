@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react";
-import { constitutionSections } from "./data";
+import { useEffect, useRef } from 'react';
+import { constitutionSections } from './data';
 import {
   ConstitutionSection,
   SectionDescription,
   ConstitutionContent,
   ConstitutionItem,
-} from "./Constitution.styles";
-import renderContentWithLinks from "../../helper/renderContentWithLinks";
+} from './Constitution.styles';
+import renderContentWithLinks from '../../helper/renderContentWithLinks';
 
 interface IConstitutionProps {
   targetSubsection?: string;
@@ -38,8 +38,8 @@ const Constitution = ({
       // Use requestAnimationFrame to ensure the DOM has been painted before scrolling
       animationFrameId = window.requestAnimationFrame(() => {
         sectionRefs.current[targetSubsection]?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
+          behavior: 'smooth',
+          block: 'start',
         });
         // Clear the target after scrolling
         onSubsectionViewed?.();

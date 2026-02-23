@@ -3,9 +3,9 @@
  * MobX store for managing playoff bracket data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
-import type { PlayoffBracket } from "../types/sleeper";
-import { fetchPlayoffBracket } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction } from 'mobx';
+import type { PlayoffBracket } from '../types/sleeper';
+import { fetchPlayoffBracket } from '../services/sleeperApi';
 
 /**
  * MobX store for managing playoff bracket data fetched from the Sleeper API.
@@ -42,7 +42,7 @@ export class PlayoffsStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
     }

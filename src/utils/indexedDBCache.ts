@@ -4,9 +4,9 @@
  * Used for caching Sleeper players data which exceeds localStorage limits
  */
 
-const DB_NAME = "sleeper_cache";
+const DB_NAME = 'sleeper_cache';
 const DB_VERSION = 1;
-const STORE_NAME = "cache";
+const STORE_NAME = 'cache';
 
 interface CacheEntry {
   key: string;
@@ -22,7 +22,7 @@ const openDatabase = (): Promise<IDBDatabase> => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onerror = () => {
-      reject(new Error("Failed to open IndexedDB"));
+      reject(new Error('Failed to open IndexedDB'));
     };
 
     request.onsuccess = () => {
@@ -32,7 +32,7 @@ const openDatabase = (): Promise<IDBDatabase> => {
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "key" });
+        db.createObjectStore(STORE_NAME, { keyPath: 'key' });
       }
     };
   });
@@ -49,19 +49,19 @@ interface ParsedCacheEntry<T> {
  * @returns The cached entry with parsed data or null if not found
  */
 export const getCachedData = async <T>(
-  key: string
+  key: string,
 ): Promise<ParsedCacheEntry<T> | null> => {
   let db: IDBDatabase | null = null;
   try {
     db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const transaction = db!.transaction(STORE_NAME, "readonly");
+      const transaction = db!.transaction(STORE_NAME, 'readonly');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.get(key);
 
       request.onerror = () => {
         db!.close();
-        reject(new Error("Failed to get cached data"));
+        reject(new Error('Failed to get cached data'));
       };
 
       request.onsuccess = () => {
@@ -90,7 +90,7 @@ export const getCachedData = async <T>(
     if (db) {
       db.close();
     }
-    console.error("IndexedDB get error:", err);
+    console.error('IndexedDB get error:', err);
     return null;
   }
 };
@@ -104,21 +104,21 @@ export const getCachedData = async <T>(
 export const setCachedData = async <T>(
   key: string,
   data: T,
-  timestamp: number
+  timestamp: number,
 ): Promise<void> => {
   let db: IDBDatabase | null = null;
   try {
     db = await openDatabase();
     const serializedData = JSON.stringify(data);
     return new Promise((resolve, reject) => {
-      const transaction = db!.transaction(STORE_NAME, "readwrite");
+      const transaction = db!.transaction(STORE_NAME, 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const entry: CacheEntry = { key, data: serializedData, timestamp };
       const request = store.put(entry);
 
       request.onerror = () => {
         db!.close();
-        reject(new Error("Failed to save cached data"));
+        reject(new Error('Failed to save cached data'));
       };
 
       request.onsuccess = () => {
@@ -137,7 +137,7 @@ export const setCachedData = async <T>(
     if (db) {
       db.close();
     }
-    console.error("IndexedDB set error:", err);
+    console.error('IndexedDB set error:', err);
   }
 };
 
@@ -150,13 +150,13 @@ export const deleteCachedData = async (key: string): Promise<void> => {
   try {
     db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const transaction = db!.transaction(STORE_NAME, "readwrite");
+      const transaction = db!.transaction(STORE_NAME, 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.delete(key);
 
       request.onerror = () => {
         db!.close();
-        reject(new Error("Failed to delete cached data"));
+        reject(new Error('Failed to delete cached data'));
       };
 
       request.onsuccess = () => {
@@ -175,7 +175,7 @@ export const deleteCachedData = async (key: string): Promise<void> => {
     if (db) {
       db.close();
     }
-    console.error("IndexedDB delete error:", err);
+    console.error('IndexedDB delete error:', err);
   }
 };
 
@@ -187,13 +187,13 @@ export const clearCache = async (): Promise<void> => {
   try {
     db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const transaction = db!.transaction(STORE_NAME, "readwrite");
+      const transaction = db!.transaction(STORE_NAME, 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.clear();
 
       request.onerror = () => {
         db!.close();
-        reject(new Error("Failed to clear cache"));
+        reject(new Error('Failed to clear cache'));
       };
 
       request.onsuccess = () => {
@@ -212,6 +212,6 @@ export const clearCache = async (): Promise<void> => {
     if (db) {
       db.close();
     }
-    console.error("IndexedDB clear error:", err);
+    console.error('IndexedDB clear error:', err);
   }
 };

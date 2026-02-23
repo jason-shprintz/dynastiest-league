@@ -1,18 +1,18 @@
-import { useState, useCallback } from "react";
-import GlobalStyles from "./GlobalStyles";
-import { AppContainer, MainContent } from "./App.styles";
-import AllTeams from "./Components/AllTeams/AllTeams";
-import Blog from "./Components/Blog/Blog";
-import Champion from "./Components/Champion/Champion";
-import Constitution from "./Components/Constitution/Constitution";
-import Footer from "./Components/Footer/Footer";
-import HallOfRecords from "./Components/HallOfRecords/HallOfRecords";
-import Header from "./Components/Header/Header";
-import Home from "./Components/MainContent/MainContent";
-import Scouting from "./Components/Scouting/Scouting";
-import Trades from "./Components/Trades/Trades";
-import PreviousSeasons from "./Components/PreviousSeasons/PreviousSeasons";
-import { NavigationTarget, Section } from "./types";
+import { useState, useCallback } from 'react';
+import GlobalStyles from './GlobalStyles';
+import { AppContainer, MainContent } from './App.styles';
+import AllTeams from './Components/AllTeams/AllTeams';
+import Blog from './Components/Blog/Blog';
+import Champion from './Components/Champion/Champion';
+import Constitution from './Components/Constitution/Constitution';
+import Footer from './Components/Footer/Footer';
+import HallOfRecords from './Components/HallOfRecords/HallOfRecords';
+import Header from './Components/Header/Header';
+import Home from './Components/MainContent/MainContent';
+import Scouting from './Components/Scouting/Scouting';
+import Trades from './Components/Trades/Trades';
+import PreviousSeasons from './Components/PreviousSeasons/PreviousSeasons';
+import { NavigationTarget, Section } from './types';
 
 /**
  * Root application component that manages navigation state and renders the main layout.
@@ -30,7 +30,7 @@ import { NavigationTarget, Section } from "./types";
  * ```
  */
 function App() {
-  const [activeSection, setActiveSection] = useState<Section>("home");
+  const [activeSection, setActiveSection] = useState<Section>('home');
   const [targetSubsection, setTargetSubsection] = useState<string | undefined>(
     undefined,
   );
@@ -59,20 +59,20 @@ function App() {
         />
 
         <MainContent>
-          {activeSection === "home" && <Home />}
-          {activeSection === "records" && <HallOfRecords />}
-          {activeSection === "champion" && <Champion />}
-          {activeSection === "constitution" && (
+          {activeSection === 'home' && <Home />}
+          {activeSection === 'records' && <HallOfRecords />}
+          {activeSection === 'champion' && <Champion />}
+          {activeSection === 'constitution' && (
             <Constitution
               targetSubsection={targetSubsection}
               onSubsectionViewed={handleSubsectionViewed}
             />
           )}
-          {activeSection === "scouting" && <Scouting />}
-          {activeSection === "blog" && <Blog onNavigate={handleNavigate} />}
-          {activeSection === "teams" && <AllTeams />}
-          {activeSection === "trades" && <Trades />}
-          {activeSection === "previous-seasons" && <PreviousSeasons />}
+          {activeSection === 'scouting' && <Scouting />}
+          {activeSection === 'blog' && <Blog onNavigate={handleNavigate} />}
+          {activeSection === 'teams' && <AllTeams />}
+          {activeSection === 'trades' && <Trades />}
+          {activeSection === 'previous-seasons' && <PreviousSeasons />}
         </MainContent>
 
         <Footer />

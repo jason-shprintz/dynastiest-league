@@ -3,7 +3,7 @@
  * MobX store for managing AI-generated trade analysis from Worker API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from 'mobx';
 
 /**
  * Trade analysis structure from Worker API
@@ -30,7 +30,7 @@ export interface TradeAnalysis {
     };
   };
   conversation: Array<{
-    speaker: "Mike" | "Jim";
+    speaker: 'Mike' | 'Jim';
     text: string;
   }>;
   overall_take: string;
@@ -50,7 +50,7 @@ export class TradeAnalysisStore {
     import.meta.env.VITE_WORKER_URL ||
     (() => {
       throw new Error(
-        "VITE_WORKER_URL environment variable is not set. Please configure it in .env.local"
+        'VITE_WORKER_URL environment variable is not set. Please configure it in .env.local',
       );
     })();
 
@@ -94,14 +94,17 @@ export class TradeAnalysisStore {
 
     try {
       const response = await fetch(
-        `${this.workerUrl}/api/trade-analysis?transaction_id=${encodeURIComponent(transactionId)}`
+        `${this.workerUrl}/api/trade-analysis?transaction_id=${encodeURIComponent(transactionId)}`,
       );
 
       if (response.status === 404) {
         // Analysis doesn't exist yet - cache null but schedule retry
         runInAction(() => {
           this.analysisByTransactionId.set(transactionId, null);
-          this.nextRetryAtById.set(transactionId, Date.now() + this.RETRY_DELAY_MS);
+          this.nextRetryAtById.set(
+            transactionId,
+            Date.now() + this.RETRY_DELAY_MS,
+          );
           this.loadingTransactionIds.delete(transactionId);
         });
         return;
@@ -120,7 +123,7 @@ export class TradeAnalysisStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.loadingTransactionIds.delete(transactionId);
       });
     }
@@ -132,8 +135,9 @@ export class TradeAnalysisStore {
   async loadAnalysesBatch(transactionIds: string[]): Promise<void> {
     // Filter out IDs we already have (unless retry is due)
     const idsToFetch = transactionIds.filter(
-      (id) => !this.analysisByTransactionId.has(id) || 
-             (this.analysisByTransactionId.get(id) === null && this.shouldRetry(id))
+      (id) =>
+        !this.analysisByTransactionId.has(id) ||
+        (this.analysisByTransactionId.get(id) === null && this.shouldRetry(id)),
     );
 
     if (idsToFetch.length === 0) {
@@ -147,7 +151,7 @@ export class TradeAnalysisStore {
 
     try {
       const response = await fetch(
-        `${this.workerUrl}/api/trade-analyses?ids=${idsToFetch.join(",")}`
+        `${this.workerUrl}/api/trade-analyses?ids=${idsToFetch.join(',')}`,
       );
 
       if (!response.ok) {
@@ -164,7 +168,10 @@ export class TradeAnalysisStore {
           this.analysisByTransactionId.set(transactionId, analysis);
           if (analysis === null) {
             // Schedule retry for null results
-            this.nextRetryAtById.set(transactionId, Date.now() + this.RETRY_DELAY_MS);
+            this.nextRetryAtById.set(
+              transactionId,
+              Date.now() + this.RETRY_DELAY_MS,
+            );
           } else {
             // Clear retry timer if we got analysis
             this.nextRetryAtById.delete(transactionId);
@@ -174,7 +181,7 @@ export class TradeAnalysisStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         idsToFetch.forEach((id) => this.loadingTransactionIds.delete(id));
       });
     }

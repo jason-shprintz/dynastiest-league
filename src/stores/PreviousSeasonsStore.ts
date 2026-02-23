@@ -3,8 +3,14 @@
  * MobX store for managing historical season data from the Sleeper API
  */
 
-import { makeAutoObservable, runInAction, computed } from "mobx";
-import type { Roster, User, Transaction, Draft, DraftPick } from "../types/sleeper";
+import { makeAutoObservable, runInAction, computed } from 'mobx';
+import type {
+  Roster,
+  User,
+  Transaction,
+  Draft,
+  DraftPick,
+} from '../types/sleeper';
 import {
   fetchLeague,
   fetchRosters,
@@ -12,8 +18,8 @@ import {
   fetchTransactions,
   fetchDrafts,
   fetchDraftPicks,
-} from "../services/sleeperApi";
-import { DEFAULT_LEAGUE_ID } from "../constants";
+} from '../services/sleeperApi';
+import { DEFAULT_LEAGUE_ID } from '../constants';
 
 const REGULAR_SEASON_WEEKS = 18;
 
@@ -55,7 +61,7 @@ export interface SeasonData {
  */
 export class PreviousSeasonsStore {
   seasons: SeasonInfo[] = [];
-  selectedLeagueId: string = "";
+  selectedLeagueId: string = '';
   seasonData: SeasonData | null = null;
   allSeasonsData: AllSeasonEntry[] = [];
   isLoadingSeasons = false;
@@ -95,7 +101,7 @@ export class PreviousSeasonsStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoadingSeasons = false;
       });
     }
@@ -124,8 +130,10 @@ export class PreviousSeasonsStore {
 
     try {
       const leagueId = this.selectedLeagueId;
-      const weekPromises = Array.from({ length: REGULAR_SEASON_WEEKS }, (_, i) =>
-        fetchTransactions(leagueId, i + 1).catch(() => [] as Transaction[])
+      const weekPromises = Array.from(
+        { length: REGULAR_SEASON_WEEKS },
+        (_, i) =>
+          fetchTransactions(leagueId, i + 1).catch(() => [] as Transaction[]),
       );
 
       const [rosters, users, drafts, ...weekResults] = await Promise.all([
@@ -137,12 +145,12 @@ export class PreviousSeasonsStore {
 
       const trades = (weekResults as Transaction[][])
         .flat()
-        .filter((tx) => tx.type === "trade")
+        .filter((tx) => tx.type === 'trade')
         .sort((a, b) => b.created - a.created);
 
       const completedDraft =
         (drafts as Draft[])
-          .filter((d) => d.status === "complete")
+          .filter((d) => d.status === 'complete')
           .sort((a, b) => b.start_time - a.start_time)[0] ?? null;
 
       let draftPicks: DraftPick[] = [];
@@ -162,7 +170,7 @@ export class PreviousSeasonsStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoadingData = false;
       });
     }
@@ -173,7 +181,7 @@ export class PreviousSeasonsStore {
    */
   get selectedYear(): string {
     return (
-      this.seasons.find((s) => s.leagueId === this.selectedLeagueId)?.year ?? ""
+      this.seasons.find((s) => s.leagueId === this.selectedLeagueId)?.year ?? ''
     );
   }
 
@@ -201,13 +209,13 @@ export class PreviousSeasonsStore {
             rosters: rosters as Roster[],
             users: users as User[],
           };
-        })
+        }),
       );
 
       const results: AllSeasonEntry[] = settled
         .filter(
           (r): r is PromiseFulfilledResult<AllSeasonEntry> =>
-            r.status === "fulfilled"
+            r.status === 'fulfilled',
         )
         .map((r) => r.value);
 
@@ -217,7 +225,7 @@ export class PreviousSeasonsStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoadingAllSeasons = false;
       });
     }
@@ -225,7 +233,7 @@ export class PreviousSeasonsStore {
 
   reset(): void {
     this.seasons = [];
-    this.selectedLeagueId = "";
+    this.selectedLeagueId = '';
     this.seasonData = null;
     this.allSeasonsData = [];
     this.isLoadingSeasons = false;

@@ -3,17 +3,17 @@
  * Combines all MobX stores for the Sleeper API data
  */
 
-import { LeagueStore } from "./LeagueStore";
-import { RostersStore } from "./RostersStore";
-import { MatchupsStore } from "./MatchupsStore";
-import { UsersStore } from "./UsersStore";
-import { PlayoffsStore } from "./PlayoffsStore";
-import { DraftStore } from "./DraftStore";
-import { TransactionsStore } from "./TransactionsStore";
-import { TradedPicksStore } from "./TradedPicksStore";
-import { PlayersStore } from "./PlayersStore";
-import { TradeAnalysisStore } from "./TradeAnalysisStore";
-import { PreviousSeasonsStore } from "./PreviousSeasonsStore";
+import { LeagueStore } from './LeagueStore';
+import { RostersStore } from './RostersStore';
+import { MatchupsStore } from './MatchupsStore';
+import { UsersStore } from './UsersStore';
+import { PlayoffsStore } from './PlayoffsStore';
+import { DraftStore } from './DraftStore';
+import { TransactionsStore } from './TransactionsStore';
+import { TradedPicksStore } from './TradedPicksStore';
+import { PlayersStore } from './PlayersStore';
+import { TradeAnalysisStore } from './TradeAnalysisStore';
+import { PreviousSeasonsStore } from './PreviousSeasonsStore';
 
 export class RootStore {
   leagueStore: LeagueStore;

@@ -3,9 +3,9 @@
  * MobX store for managing league data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
-import type { League } from "../types/sleeper";
-import { fetchLeague } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction } from 'mobx';
+import type { League } from '../types/sleeper';
+import { fetchLeague } from '../services/sleeperApi';
 
 /**
  * MobX store for managing Sleeper fantasy football league data.
@@ -43,7 +43,7 @@ export class LeagueStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
     }

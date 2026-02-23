@@ -3,9 +3,9 @@
  * Displays a single trade transaction with teams and items involved
  */
 
-import { Fragment } from "react";
-import type { Transaction, Player } from "../../types/sleeper";
-import type { TradeAnalysis } from "../../stores/TradeAnalysisStore";
+import { Fragment } from 'react';
+import type { Transaction, Player } from '../../types/sleeper';
+import type { TradeAnalysis } from '../../stores/TradeAnalysisStore';
 import {
   TradeCardContainer,
   TradeHeader,
@@ -19,7 +19,7 @@ import {
   ItemsTitle,
   Item,
   EmptyItems,
-} from "./TradeCard.styles";
+} from './TradeCard.styles';
 
 interface TradeCardProps {
   trade: Transaction;
@@ -35,22 +35,25 @@ interface TradeCardProps {
  */
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 };
 
 /**
  * Get player name from player ID
  */
-const getPlayerName = (playerId: string, players: Record<string, Player>): string => {
+const getPlayerName = (
+  playerId: string,
+  players: Record<string, Player>,
+): string => {
   const player = players[playerId];
   if (!player) return `Player ${playerId}`;
-  return `${player.full_name} (${player.position}${player.team ? ` - ${player.team}` : ""})`;
+  return `${player.full_name} (${player.position}${player.team ? ` - ${player.team}` : ''})`;
 };
 
 /**
@@ -64,10 +67,10 @@ const formatDraftPick = (
     previous_owner_id?: number;
     owner_id?: number;
   },
-  getRosterName: (rosterId: number) => string
+  getRosterName: (rosterId: number) => string,
 ): string => {
   const baseDescription = `${pick.season} Round ${pick.round} Pick`;
-  if (typeof pick.previous_owner_id === "number") {
+  if (typeof pick.previous_owner_id === 'number') {
     return `${baseDescription} (from ${getRosterName(pick.previous_owner_id)})`;
   }
   return baseDescription;
@@ -90,7 +93,7 @@ interface TradeItems {
 const getTradeItems = (
   trade: Transaction,
   rosterId: number,
-  players: Record<string, Player>
+  players: Record<string, Player>,
 ): TradeItems => {
   const items: TradeItems = {
     players: [],
@@ -121,9 +124,9 @@ const getTradeItems = (
 /**
  * TradeCard component that displays trade details in a card format
  */
-export const TradeCard = ({ 
-  trade, 
-  players, 
+export const TradeCard = ({
+  trade,
+  players,
   getRosterName,
   analysis,
   isLoadingAnalysis,
@@ -152,7 +155,7 @@ export const TradeCard = ({
                 <TeamName>
                   {teamName}
                   {teamAnalysis && (
-                    <span style={{ marginLeft: "8px", color: "#4CAF50" }}>
+                    <span style={{ marginLeft: '8px', color: '#4CAF50' }}>
                       Grade: {teamAnalysis.grade}
                     </span>
                   )}
@@ -172,12 +175,14 @@ export const TradeCard = ({
                   ))}
                 </ItemsList>
                 {teamAnalysis && (
-                  <div style={{ 
-                    marginTop: "8px", 
-                    fontSize: "14px", 
-                    fontStyle: "italic",
-                    color: "#666"
-                  }}>
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      fontSize: '14px',
+                      fontStyle: 'italic',
+                      color: '#666',
+                    }}
+                  >
                     {teamAnalysis.summary}
                   </div>
                 )}
@@ -189,71 +194,87 @@ export const TradeCard = ({
 
       {/* AI Analysis Section */}
       {isLoadingAnalysis && (
-        <div style={{
-          marginTop: "16px",
-          padding: "16px",
-          background: "#f5f5f5",
-          borderRadius: "8px",
-          textAlign: "center",
-          fontStyle: "italic",
-          color: "#666",
-        }}>
+        <div
+          style={{
+            marginTop: '16px',
+            padding: '16px',
+            background: '#f5f5f5',
+            borderRadius: '8px',
+            textAlign: 'center',
+            fontStyle: 'italic',
+            color: '#666',
+          }}
+        >
           🎬 Mike & Jim are in the film room analyzing this trade...
         </div>
       )}
 
       {analysis && (
-        <div style={{
-          marginTop: "16px",
-          padding: "16px",
-          background: "#f9f9f9",
-          borderRadius: "8px",
-        }}>
-          <h3 style={{ 
-            margin: "0 0 12px 0",
-            fontSize: "16px",
-            fontWeight: "bold",
-          }}>
+        <div
+          style={{
+            marginTop: '16px',
+            padding: '16px',
+            background: '#f9f9f9',
+            borderRadius: '8px',
+          }}
+        >
+          <h3
+            style={{
+              margin: '0 0 12px 0',
+              fontSize: '16px',
+              fontWeight: 'bold',
+            }}
+          >
             📺 Mike & Jim's Analysis
           </h3>
-          <div style={{ marginBottom: "12px" }}>
+          <div style={{ marginBottom: '12px' }}>
             {analysis.conversation.map((msg, idx) => (
               <div
                 key={idx}
                 style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "10px",
-                  marginBottom: "12px",
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                  marginBottom: '12px',
                 }}
               >
                 <img
-                  src={msg.speaker === "Mike" ? "/MikeFantasy.webp" : "/JimFantasy.webp"}
+                  src={
+                    msg.speaker === 'Mike'
+                      ? '/MikeFantasy.webp'
+                      : '/JimFantasy.webp'
+                  }
                   alt={msg.speaker}
                   style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
                     flexShrink: 0,
                   }}
                 />
                 <div>
-                  <strong style={{ color: msg.speaker === "Mike" ? "#1976d2" : "#d32f2f" }}>
+                  <strong
+                    style={{
+                      color: msg.speaker === 'Mike' ? '#1976d2' : '#d32f2f',
+                    }}
+                  >
                     {msg.speaker}:
-                  </strong>{" "}
+                  </strong>{' '}
                   {msg.text}
                 </div>
               </div>
             ))}
           </div>
-          <div style={{
-            marginTop: "12px",
-            paddingTop: "12px",
-            borderTop: "1px solid #ddd",
-            fontWeight: "bold",
-            fontSize: "14px",
-          }}>
+          <div
+            style={{
+              marginTop: '12px',
+              paddingTop: '12px',
+              borderTop: '1px solid #ddd',
+              fontWeight: 'bold',
+              fontSize: '14px',
+            }}
+          >
             Bottom Line: {analysis.overall_take}
           </div>
         </div>

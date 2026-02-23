@@ -1,4 +1,4 @@
-import { CurrentChampion } from "../../types";
+import { CurrentChampion } from '../../types';
 import {
   ChampionSection,
   ChampionCard,
@@ -8,15 +8,15 @@ import {
   ChampionStats,
   ChampionStat,
   PlayoffRun,
-} from "./Champion.styles";
+} from './Champion.styles';
 
 const currentChampion: CurrentChampion = {
-  team: "Jaxon Flaxon Waxon",
-  owner: "jeffgottfried",
-  year: "2025",
-  record: "12-2",
+  team: 'Jaxon Flaxon Waxon',
+  owner: 'jeffgottfried',
+  year: '2025',
+  record: '12-2',
   points: 1797.38,
-  playoffRun: "Won semifinals 130.40-94.76, Won finals 137.20-83.94",
+  playoffRun: 'Won semifinals 130.40-94.76, Won finals 137.20-83.94',
 };
 
 /**
@@ -54,9 +54,9 @@ const Champion = () => {
           </ChampionStat>
           <ChampionStat
             style={{
-              textAlign: "center",
-              width: "100%",
-              justifyContent: "center",
+              textAlign: 'center',
+              width: '100%',
+              justifyContent: 'center',
             }}
           >
             <span className="label">*Won Most Regular Season Points</span>
