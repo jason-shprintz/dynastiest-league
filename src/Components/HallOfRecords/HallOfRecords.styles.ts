@@ -252,10 +252,10 @@ export const AllTimeRow = styled(TableRow)<{ $isFormer?: boolean }>`
   & > div:nth-child(3),
   & > div:nth-child(4),
   & > div:nth-child(5) {
-    flex: 0 0 20%;
-    min-width: 20%;
-    max-width: 20%;
-    width: 20%;
+    flex: 0 0 15%;
+    min-width: 15%;
+    max-width: 15%;
+    width: 15%;
   }
   @media (max-width: 480px) {
     & > div:first-child {
@@ -282,11 +282,22 @@ export const AllTimeRow = styled(TableRow)<{ $isFormer?: boolean }>`
   `}
 `;
 
-export const SortableCell = styled.div`
+export const SortableCell = styled.button`
   cursor: pointer;
   user-select: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   &:hover {
     color: ${COLORS.accentHover};
+  }
+  &:focus-visible {
+    outline: 2px solid ${COLORS.accent};
+    outline-offset: 2px;
   }
 `;
 

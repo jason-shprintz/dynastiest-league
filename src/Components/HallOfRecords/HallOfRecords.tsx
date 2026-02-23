@@ -118,29 +118,32 @@ const HallOfRecords = observer(() => {
         const ownerId = roster.owner_id;
         if (!ownerId) continue;
 
-        const user = users.find((u) => u.user_id === ownerId);
-        const displayName = user?.display_name || user?.username || ownerId;
-
-        const existing = map.get(ownerId) ?? {
-          displayName,
-          wins: 0,
-          losses: 0,
-          pf: 0,
-          pa: 0,
-        };
+        const existing = map.get(ownerId);
 
         const pf = roster.settings.fpts + roster.settings.fpts_decimal / 100;
         const pa =
           roster.settings.fpts_against +
           roster.settings.fpts_against_decimal / 100;
 
-        map.set(ownerId, {
-          displayName,
-          wins: existing.wins + roster.settings.wins,
-          losses: existing.losses + roster.settings.losses,
-          pf: existing.pf + pf,
-          pa: existing.pa + pa,
-        });
+        if (existing) {
+          map.set(ownerId, {
+            displayName: existing.displayName,
+            wins: existing.wins + roster.settings.wins,
+            losses: existing.losses + roster.settings.losses,
+            pf: existing.pf + pf,
+            pa: existing.pa + pa,
+          });
+        } else {
+          const user = users.find((u) => u.user_id === ownerId);
+          const displayName = user?.display_name || user?.username || ownerId;
+          map.set(ownerId, {
+            displayName,
+            wins: roster.settings.wins,
+            losses: roster.settings.losses,
+            pf,
+            pa,
+          });
+        }
       }
     }
 
