@@ -205,3 +205,103 @@ export const CustomMedalRow = styled(TableRow)`
     width: 20%;
   }
 `;
+
+export const AllTimeTable = styled(RecordsTable)``;
+
+export const AllTimeHeader = styled(TableHeader)`
+  & > div:first-child {
+    flex: 0 0 40%;
+    min-width: 40%;
+    max-width: 40%;
+    width: 40%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 15%;
+    min-width: 15%;
+    max-width: 15%;
+    width: 15%;
+  }
+  @media (max-width: 480px) {
+    & > div:first-child {
+      flex: 0 0 28%;
+      min-width: 28%;
+      max-width: 28%;
+      width: 28%;
+    }
+    & > div:nth-child(2),
+    & > div:nth-child(3),
+    & > div:nth-child(4),
+    & > div:nth-child(5) {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+`;
+
+export const AllTimeRow = styled(TableRow)<{ $isFormer?: boolean }>`
+  & > div:first-child {
+    flex: 0 0 40%;
+    min-width: 40%;
+    max-width: 40%;
+    width: 40%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 15%;
+    min-width: 15%;
+    max-width: 15%;
+    width: 15%;
+  }
+  @media (max-width: 480px) {
+    & > div:first-child {
+      flex: 0 0 28%;
+      min-width: 28%;
+      max-width: 28%;
+      width: 28%;
+    }
+    & > div:nth-child(2),
+    & > div:nth-child(3),
+    & > div:nth-child(4),
+    & > div:nth-child(5) {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+  ${({ $isFormer }) =>
+    $isFormer &&
+    `
+    background: rgba(220, 60, 60, 0.12);
+    &:hover {
+      background: rgba(220, 60, 60, 0.22);
+    }
+  `}
+`;
+
+export const SortableCell = styled.button`
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  &:hover {
+    color: ${COLORS.accentHover};
+  }
+  &:focus-visible {
+    outline: 2px solid ${COLORS.accent};
+    outline-offset: 2px;
+  }
+`;
+
+export const StandingsLoadingRow = styled(AllTimeRow)`
+  justify-content: center;
+  color: ${COLORS.textMuted};
+`;
