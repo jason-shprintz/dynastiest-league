@@ -226,7 +226,7 @@ export const AllTimeHeader = styled(TableHeader)`
   }
 `;
 
-export const AllTimeRow = styled(TableRow)`
+export const AllTimeRow = styled(TableRow)<{ $isFormer?: boolean }>`
   & > div:first-child {
     flex: 0 0 40%;
     min-width: 40%;
@@ -242,6 +242,14 @@ export const AllTimeRow = styled(TableRow)`
     max-width: 15%;
     width: 15%;
   }
+  ${({ $isFormer }) =>
+    $isFormer &&
+    `
+    background: rgba(220, 60, 60, 0.12);
+    &:hover {
+      background: rgba(220, 60, 60, 0.22);
+    }
+  `}
 `;
 
 export const SortableCell = styled.div`

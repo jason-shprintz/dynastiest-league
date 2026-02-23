@@ -96,12 +96,9 @@ const HallOfRecords = observer(() => {
     [rostersStore.rosters]
   );
 
-  // Aggregate all-time standings from all historical seasons,
-  // filtering to only include owners who are active in the current season.
+  // Aggregate all-time standings from all historical seasons.
+  // All owners are included; isFormer flags those no longer in the current season.
   const allTimeStandings = useMemo(() => {
-    // Don't render any rows while we're still waiting for the current roster list
-    if (currentOwnerIds.size === 0) return [];
-
     const map = new Map<
       string,
       { displayName: string; wins: number; losses: number; pf: number; pa: number }
@@ -110,7 +107,7 @@ const HallOfRecords = observer(() => {
     for (const { rosters, users } of previousSeasonsStore.allSeasonsData) {
       for (const roster of rosters) {
         const ownerId = roster.owner_id;
-        if (!ownerId || !currentOwnerIds.has(ownerId)) continue;
+        if (!ownerId) continue;
 
         const user = users.find((u) => u.user_id === ownerId);
         const displayName =
@@ -140,7 +137,11 @@ const HallOfRecords = observer(() => {
       }
     }
 
-    return [...map.entries()].map(([ownerId, data]) => ({ ownerId, ...data }));
+    return [...map.entries()].map(([ownerId, data]) => ({
+      ownerId,
+      ...data,
+      isFormer: currentOwnerIds.size > 0 && !currentOwnerIds.has(ownerId),
+    }));
   }, [previousSeasonsStore.allSeasonsData, currentOwnerIds]);
 
   const sortedStandings = useMemo(() => {
@@ -244,7 +245,7 @@ const HallOfRecords = observer(() => {
           </StandingsLoadingRow>
         ) : (
           sortedStandings.map((entry) => (
-            <AllTimeRow key={entry.ownerId}>
+            <AllTimeRow key={entry.ownerId} $isFormer={entry.isFormer}>
               <div>{entry.displayName}</div>
               <div>{entry.wins}</div>
               <div>{entry.losses}</div>
