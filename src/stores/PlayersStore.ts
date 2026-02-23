@@ -4,16 +4,16 @@
  * Implements caching strategy using IndexedDB to minimize API calls (once per week)
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
-import type { Player } from "../types/sleeper";
-import { fetchAllPlayers } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction } from 'mobx';
+import type { Player } from '../types/sleeper';
+import { fetchAllPlayers } from '../services/sleeperApi';
 import {
   getCachedData,
   setCachedData,
   deleteCachedData,
-} from "../utils/indexedDBCache";
+} from '../utils/indexedDBCache';
 
-const PLAYERS_CACHE_KEY = "sleeper_players";
+const PLAYERS_CACHE_KEY = 'sleeper_players';
 const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 /**
@@ -55,8 +55,8 @@ export class PlayersStore {
    */
   private cleanupOldCache(): void {
     try {
-      localStorage.removeItem("sleeper_players_cache");
-      localStorage.removeItem("sleeper_players_cache_timestamp");
+      localStorage.removeItem('sleeper_players_cache');
+      localStorage.removeItem('sleeper_players_cache_timestamp');
     } catch {
       // Ignore errors during cleanup
     }
@@ -69,9 +69,8 @@ export class PlayersStore {
     if (this.cacheLoaded) return;
 
     try {
-      const cached = await getCachedData<Record<string, Player>>(
-        PLAYERS_CACHE_KEY
-      );
+      const cached =
+        await getCachedData<Record<string, Player>>(PLAYERS_CACHE_KEY);
 
       if (cached) {
         runInAction(() => {
@@ -82,7 +81,7 @@ export class PlayersStore {
         });
       }
     } catch (err) {
-      console.error("Failed to load players from cache:", err);
+      console.error('Failed to load players from cache:', err);
       // Try to clear invalid cache
       await deleteCachedData(PLAYERS_CACHE_KEY);
     } finally {
@@ -102,10 +101,10 @@ export class PlayersStore {
       await setCachedData(
         PLAYERS_CACHE_KEY,
         this.players,
-        this.lastFetchTimestamp || Date.now()
+        this.lastFetchTimestamp || Date.now(),
       );
     } catch (err) {
-      console.error("Failed to save players to cache:", err);
+      console.error('Failed to save players to cache:', err);
     }
   }
 
@@ -149,7 +148,7 @@ export class PlayersStore {
       this.saveToCache();
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
         // Keep existing cached data if fetch fails - stale data is better than no data
         // Only clear if we truly have no data
@@ -183,7 +182,7 @@ export class PlayersStore {
    */
   getPlayerPosition = (playerId: string): string => {
     const player = this.players[playerId];
-    return player?.position || "";
+    return player?.position || '';
   };
 
   /**
@@ -193,7 +192,7 @@ export class PlayersStore {
    */
   getPlayerTeam = (playerId: string): string => {
     const player = this.players[playerId];
-    return player?.team || "FA";
+    return player?.team || 'FA';
   };
 
   /**

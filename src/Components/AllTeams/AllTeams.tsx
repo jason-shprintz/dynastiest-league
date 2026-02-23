@@ -3,11 +3,11 @@
  * Displays all teams in the league with expandable cards showing roster details
  */
 
-import { useState, useEffect, useCallback } from "react";
-import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { DEFAULT_LEAGUE_ID } from "../../constants";
-import type { Roster, User, Player } from "../../types/sleeper";
+import { useState, useEffect, useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../../stores';
+import { DEFAULT_LEAGUE_ID } from '../../constants';
+import type { Roster, User, Player } from '../../types/sleeper';
 import {
   TeamsSection,
   TeamsGrid,
@@ -25,7 +25,7 @@ import {
   PlayerChip,
   EmptyState,
   LoadingMessage,
-} from "./AllTeams.styles";
+} from './AllTeams.styles';
 
 interface TeamData {
   roster: Roster;
@@ -56,7 +56,7 @@ const getBenchPlayers = (roster: Roster): string[] => {
     (playerId) =>
       !startersSet.has(playerId) &&
       !reserveSet.has(playerId) &&
-      !taxiSet.has(playerId)
+      !taxiSet.has(playerId),
   );
 };
 
@@ -71,7 +71,7 @@ const getTaxiPlayers = (roster: Roster): string[] => {
  * Format team record as "W-L" or "W-L-T" if there are ties
  */
 const formatRecord = (wins: number, losses: number, ties: number): string => {
-  return `${wins}-${losses}${ties > 0 ? `-${ties}` : ""}`;
+  return `${wins}-${losses}${ties > 0 ? `-${ties}` : ''}`;
 };
 
 /**
@@ -98,7 +98,7 @@ const sortByStandings = (teams: TeamData[]): TeamData[] => {
  */
 const formatPlayerDisplay = (
   playerId: string,
-  getPlayerById: (id: string) => Player | undefined
+  getPlayerById: (id: string) => Player | undefined,
 ): string => {
   const player = getPlayerById(playerId);
 
@@ -137,7 +137,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
       // Otherwise, expand the clicked team
       setExpandedTeamId(expandedTeamId === rosterId ? null : rosterId);
     },
-    [expandedTeamId]
+    [expandedTeamId],
   );
 
   if (store.rostersStore.isLoading || store.usersStore.isLoading) {
@@ -156,7 +156,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
     store.rostersStore.rosters.map((roster) => ({
       roster,
       user: store.usersStore.getUserById(roster.owner_id),
-    }))
+    })),
   );
 
   if (teams.length === 0) {
@@ -171,7 +171,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
           const record = formatRecord(
             roster.settings.wins,
             roster.settings.losses,
-            roster.settings.ties
+            roster.settings.ties,
           );
           const benchPlayers = isExpanded ? getBenchPlayers(roster) : [];
           const taxiPlayers = isExpanded ? getTaxiPlayers(roster) : [];
@@ -186,21 +186,21 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
                 <TeamAvatar>
                   {user?.avatar ? (
                     <img
-                      src={getAvatarUrl(user.avatar) || ""}
+                      src={getAvatarUrl(user.avatar) || ''}
                       alt={user.display_name}
                     />
                   ) : (
-                    <span style={{ fontSize: "1.5rem" }}>👤</span>
+                    <span style={{ fontSize: '1.5rem' }}>👤</span>
                   )}
                 </TeamAvatar>
                 <TeamInfo>
                   <TeamName>
-                    {user?.metadata?.team_name || "Team " + roster.roster_id}
+                    {user?.metadata?.team_name || 'Team ' + roster.roster_id}
                   </TeamName>
-                  <UserName>{user?.display_name || "Unknown User"}</UserName>
+                  <UserName>{user?.display_name || 'Unknown User'}</UserName>
                   <TeamRecord>Record: {record}</TeamRecord>
                   <TeamRecord>
-                    Points For: {roster.settings.fpts} | Points Against:{" "}
+                    Points For: {roster.settings.fpts} | Points Against:{' '}
                     {roster.settings.fpts_against}
                   </TeamRecord>
                 </TeamInfo>
@@ -219,7 +219,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
                           <PlayerChip key={playerId}>
                             {formatPlayerDisplay(
                               playerId,
-                              store.playersStore.getPlayerById
+                              store.playersStore.getPlayerById,
                             )}
                           </PlayerChip>
                         ))}
@@ -240,7 +240,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
                           <PlayerChip key={playerId}>
                             {formatPlayerDisplay(
                               playerId,
-                              store.playersStore.getPlayerById
+                              store.playersStore.getPlayerById,
                             )}
                           </PlayerChip>
                         ))}
@@ -261,7 +261,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
                           <PlayerChip key={playerId}>
                             {formatPlayerDisplay(
                               playerId,
-                              store.playersStore.getPlayerById
+                              store.playersStore.getPlayerById,
                             )}
                           </PlayerChip>
                         ))}
@@ -280,7 +280,7 @@ const AllTeams = observer(({ leagueId = DEFAULT_LEAGUE_ID }: AllTeamsProps) => {
                           <PlayerChip key={playerId}>
                             {formatPlayerDisplay(
                               playerId,
-                              store.playersStore.getPlayerById
+                              store.playersStore.getPlayerById,
                             )}
                           </PlayerChip>
                         ))}

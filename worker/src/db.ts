@@ -3,17 +3,17 @@
  * Functions to interact with D1 database
  */
 
-import type { Env, TradeAnalysis, TradeAnalysisRecord } from "./types";
+import type { Env, TradeAnalysis, TradeAnalysisRecord } from './types';
 
 /**
  * Get trade analysis by transaction ID
  */
 export async function getAnalysis(
   db: D1Database,
-  transactionId: string
+  transactionId: string,
 ): Promise<TradeAnalysis | null> {
   const result = await db
-    .prepare("SELECT * FROM trade_analysis WHERE transaction_id = ?")
+    .prepare('SELECT * FROM trade_analysis WHERE transaction_id = ?')
     .bind(transactionId)
     .first<TradeAnalysisRecord>();
 
@@ -29,14 +29,14 @@ export async function getAnalysis(
  */
 export async function getBatchAnalyses(
   db: D1Database,
-  transactionIds: string[]
+  transactionIds: string[],
 ): Promise<Record<string, TradeAnalysis | null>> {
   if (transactionIds.length === 0) {
     return {};
   }
 
   // Build parameterized query for batch fetch
-  const placeholders = transactionIds.map(() => "?").join(",");
+  const placeholders = transactionIds.map(() => '?').join(',');
   const query = `SELECT * FROM trade_analysis WHERE transaction_id IN (${placeholders})`;
 
   const result = await db
@@ -54,7 +54,7 @@ export async function getBatchAnalyses(
   // Fill in the ones we found
   result.results.forEach((record) => {
     analyses[record.transaction_id] = JSON.parse(
-      record.analysis_json
+      record.analysis_json,
     ) as TradeAnalysis;
   });
 
@@ -70,7 +70,7 @@ export async function saveAnalysis(
   leagueId: string,
   createdAt: number,
   analysis: TradeAnalysis,
-  version: string
+  version: string,
 ): Promise<void> {
   const now = Date.now();
   await db
@@ -81,7 +81,7 @@ export async function saveAnalysis(
        ON CONFLICT(transaction_id) DO UPDATE SET
        analysis_json = excluded.analysis_json,
        analysis_version = excluded.analysis_version,
-       updated_at = excluded.updated_at`
+       updated_at = excluded.updated_at`,
     )
     .bind(
       transactionId,
@@ -89,7 +89,7 @@ export async function saveAnalysis(
       createdAt,
       JSON.stringify(analysis),
       version,
-      now
+      now,
     )
     .run();
 }
@@ -99,10 +99,10 @@ export async function saveAnalysis(
  */
 export async function analysisExists(
   db: D1Database,
-  transactionId: string
+  transactionId: string,
 ): Promise<boolean> {
   const result = await db
-    .prepare("SELECT 1 FROM trade_analysis WHERE transaction_id = ? LIMIT 1")
+    .prepare('SELECT 1 FROM trade_analysis WHERE transaction_id = ? LIMIT 1')
     .bind(transactionId)
     .first();
 
@@ -115,16 +115,16 @@ export async function analysisExists(
 export async function getLeagueAnalyses(
   db: D1Database,
   leagueId: string,
-  limit: number = 100
+  limit: number = 100,
 ): Promise<TradeAnalysis[]> {
   const result = await db
     .prepare(
-      "SELECT analysis_json FROM trade_analysis WHERE league_id = ? ORDER BY created_at DESC LIMIT ?"
+      'SELECT analysis_json FROM trade_analysis WHERE league_id = ? ORDER BY created_at DESC LIMIT ?',
     )
     .bind(leagueId, limit)
     .all<{ analysis_json: string }>();
 
   return result.results.map(
-    (r) => JSON.parse(r.analysis_json) as TradeAnalysis
+    (r) => JSON.parse(r.analysis_json) as TradeAnalysis,
   );
 }

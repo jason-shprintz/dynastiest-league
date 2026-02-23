@@ -3,9 +3,9 @@
  * MobX store for managing traded pick data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction } from "mobx";
-import type { TradedPick } from "../types/sleeper";
-import { fetchTradedPicks } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction } from 'mobx';
+import type { TradedPick } from '../types/sleeper';
+import { fetchTradedPicks } from '../services/sleeperApi';
 
 /**
  * MobX store for managing traded draft picks data from the Sleeper API.
@@ -42,7 +42,7 @@ export class TradedPicksStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
     }

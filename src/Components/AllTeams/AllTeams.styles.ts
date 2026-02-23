@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "../../theme/colors";
+import styled from 'styled-components';
+import { COLORS } from '../../theme/colors';
 
 export const TeamsSection = styled.section`
   animation: fadeIn 0.5s ease-in;
@@ -20,15 +20,16 @@ export const TeamsGrid = styled.div`
 
 export const TeamCard = styled.div<{ $isExpanded: boolean }>`
   background: rgba(15, 52, 96, 0.4);
-  border: 2px solid ${(props) => (props.$isExpanded ? COLORS.accent : "rgba(255, 215, 0, 0.3)")};
+  border: 2px solid
+    ${(props) => (props.$isExpanded ? COLORS.accent : 'rgba(255, 215, 0, 0.3)')};
   border-radius: 12px;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: ${(props) =>
     props.$isExpanded
-      ? "0 8px 24px rgba(255, 215, 0, 0.3)"
-      : "0 4px 12px rgba(0, 0, 0, 0.2)"};
+      ? '0 8px 24px rgba(255, 215, 0, 0.3)'
+      : '0 4px 12px rgba(0, 0, 0, 0.2)'};
 
   &:hover {
     border-color: ${COLORS.accent};

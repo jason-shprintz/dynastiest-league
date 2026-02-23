@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "../../theme/colors";
+import styled from 'styled-components';
+import { COLORS } from '../../theme/colors';
 
 export const TradeCardContainer = styled.div`
   background: rgba(15, 52, 96, 0.3);

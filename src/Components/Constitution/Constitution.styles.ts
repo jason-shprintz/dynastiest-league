@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "../../theme/colors";
+import styled from 'styled-components';
+import { COLORS } from '../../theme/colors';
 
 export const ConstitutionSection = styled.section`
   animation: fadeIn 0.5s ease-in;

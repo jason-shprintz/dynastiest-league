@@ -3,9 +3,9 @@
  * MobX store for managing draft data from Sleeper API
  */
 
-import { makeAutoObservable, runInAction, computed } from "mobx";
-import type { Draft } from "../types/sleeper";
-import { fetchDrafts } from "../services/sleeperApi";
+import { makeAutoObservable, runInAction, computed } from 'mobx';
+import type { Draft } from '../types/sleeper';
+import { fetchDrafts } from '../services/sleeperApi';
 
 /**
  * MobX store for managing NFL fantasy draft data from the Sleeper API.
@@ -44,7 +44,7 @@ export class DraftStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
     }

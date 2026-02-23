@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { observer } from "mobx-react-lite";
-import { hallOfRecords, medalCounts } from "./data";
-import { useStore, usePreviousSeasonsStore } from "../../stores";
-import { DEFAULT_LEAGUE_ID } from "../../constants";
+import { useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { hallOfRecords, medalCounts } from './data';
+import { useStore, usePreviousSeasonsStore } from '../../stores';
+import { DEFAULT_LEAGUE_ID } from '../../constants';
 import {
   RecordsSection,
   RecordsTable,
@@ -21,10 +21,10 @@ import {
   AllTimeRow,
   SortableCell,
   StandingsLoadingRow,
-} from "./HallOfRecords.styles";
+} from './HallOfRecords.styles';
 
-type SortField = "wins" | "losses" | "pf" | "pa";
-type SortDir = "asc" | "desc";
+type SortField = 'wins' | 'losses' | 'pf' | 'pa';
+type SortDir = 'asc' | 'desc';
 
 /**
  * Displays the Hall of Records component featuring championship history, all-time medal rankings,
@@ -44,8 +44,8 @@ type SortDir = "asc" | "desc";
 const HallOfRecords = observer(() => {
   const { rostersStore } = useStore();
   const previousSeasonsStore = usePreviousSeasonsStore();
-  const [sortField, setSortField] = useState<SortField>("wins");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortField, setSortField] = useState<SortField>('wins');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   // Load current season rosters to know which owners are active this year
   useEffect(() => {
@@ -77,16 +77,16 @@ const HallOfRecords = observer(() => {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDir((d: SortDir) => (d === "desc" ? "asc" : "desc"));
+      setSortDir((d: SortDir) => (d === 'desc' ? 'asc' : 'desc'));
     } else {
       setSortField(field);
-      setSortDir("desc");
+      setSortDir('desc');
     }
   };
 
   const sortIndicator = (field: SortField) => {
     if (sortField !== field) return null;
-    return sortDir === "desc" ? " ▼" : " ▲";
+    return sortDir === 'desc' ? ' ▼' : ' ▲';
   };
 
   // Set of owner IDs who are in the current season.
@@ -156,10 +156,10 @@ const HallOfRecords = observer(() => {
 
   const sortedStandings = useMemo(() => {
     return [...allTimeStandings].sort((a, b) => {
-      const mult = sortDir === "desc" ? -1 : 1;
-      if (sortField === "wins") return mult * (a.wins - b.wins);
-      if (sortField === "losses") return mult * (a.losses - b.losses);
-      if (sortField === "pf") return mult * (a.pf - b.pf);
+      const mult = sortDir === 'desc' ? -1 : 1;
+      if (sortField === 'wins') return mult * (a.wins - b.wins);
+      if (sortField === 'losses') return mult * (a.losses - b.losses);
+      if (sortField === 'pf') return mult * (a.pf - b.pf);
       return mult * (a.pa - b.pa);
     });
   }, [allTimeStandings, sortField, sortDir]);
@@ -210,7 +210,7 @@ const HallOfRecords = observer(() => {
         ))}
       </RecordsTable>
 
-      <h2 style={{ marginTop: "2.5rem" }}>All-Time Medal Rankings</h2>
+      <h2 style={{ marginTop: '2.5rem' }}>All-Time Medal Rankings</h2>
       <CustomMedalTable>
         <CustomMedalHeader>
           <div>Rank</div>
@@ -230,21 +230,21 @@ const HallOfRecords = observer(() => {
         ))}
       </CustomMedalTable>
 
-      <h2 style={{ marginTop: "2.5rem" }}>All-Time Standings</h2>
+      <h2 style={{ marginTop: '2.5rem' }}>All-Time Standings</h2>
       <AllTimeTable>
         <AllTimeHeader>
           <div>Owner</div>
-          <SortableCell onClick={() => handleSort("wins")}>
-            W{sortIndicator("wins")}
+          <SortableCell onClick={() => handleSort('wins')}>
+            W{sortIndicator('wins')}
           </SortableCell>
-          <SortableCell onClick={() => handleSort("losses")}>
-            L{sortIndicator("losses")}
+          <SortableCell onClick={() => handleSort('losses')}>
+            L{sortIndicator('losses')}
           </SortableCell>
-          <SortableCell onClick={() => handleSort("pf")}>
-            PF{sortIndicator("pf")}
+          <SortableCell onClick={() => handleSort('pf')}>
+            PF{sortIndicator('pf')}
           </SortableCell>
-          <SortableCell onClick={() => handleSort("pa")}>
-            PA{sortIndicator("pa")}
+          <SortableCell onClick={() => handleSort('pa')}>
+            PA{sortIndicator('pa')}
           </SortableCell>
         </AllTimeHeader>
         {previousSeasonsStore.isLoadingSeasons ||

@@ -28,7 +28,7 @@ const rootStore = new RootStore();
 
 <StoreProvider value={rootStore}>
   <App />
-</StoreProvider>
+</StoreProvider>;
 ```
 
 ### Using Stores in Components
@@ -45,7 +45,7 @@ const MyComponent = observer(() => {
   useEffect(() => {
     // Load all league data
     store.loadAllLeagueData('1194516531404427264');
-    
+
     // Load matchups for a specific week
     store.loadMatchupsForWeek('1194516531404427264', 1);
   }, [store]);

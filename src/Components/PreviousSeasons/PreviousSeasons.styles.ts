@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { COLORS } from "../../theme/colors";
+import styled from 'styled-components';
+import { COLORS } from '../../theme/colors';
 
 export const PageSection = styled.section`
   animation: fadeIn 0.5s ease-in;
@@ -65,9 +65,8 @@ export const TabButton = styled.button<{ $isActive: boolean }>`
   border-radius: 8px;
   border: 1px solid
     ${({ $isActive }) =>
-      $isActive ? COLORS.accent : "rgba(255, 215, 0, 0.25)"};
-  background: ${({ $isActive }) =>
-    $isActive ? COLORS.accent : "transparent"};
+      $isActive ? COLORS.accent : 'rgba(255, 215, 0, 0.25)'};
+  background: ${({ $isActive }) => ($isActive ? COLORS.accent : 'transparent')};
   color: ${({ $isActive }) =>
     $isActive ? COLORS.background : COLORS.textSecondary};
   font-size: 0.95rem;
@@ -77,7 +76,8 @@ export const TabButton = styled.button<{ $isActive: boolean }>`
 
   &:hover {
     border-color: ${COLORS.accent};
-    color: ${({ $isActive }) => ($isActive ? COLORS.background : COLORS.accent)};
+    color: ${({ $isActive }) =>
+      $isActive ? COLORS.background : COLORS.accent};
   }
 
   &:focus-visible {

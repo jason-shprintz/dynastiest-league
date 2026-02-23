@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "clean:appledouble": "find . -type f -name '._*' -delete"
+    "clean:appledouble": "find . -type f -name '._*' -delete",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "mobx": "^6.15.0",
@@ -28,6 +29,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1",
     "vite": "^7.2.4"

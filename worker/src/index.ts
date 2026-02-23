@@ -3,13 +3,13 @@
  * Handles HTTP requests and scheduled cron jobs
  */
 
-import type { Env } from "./types";
-import { handleScheduled } from "./cron";
+import type { Env } from './types';
+import { handleScheduled } from './cron';
 import {
   handleOptions,
   handleGetAnalysis,
   handleGetBatchAnalyses,
-} from "./api";
+} from './api';
 
 /**
  * Worker export interface
@@ -22,46 +22,46 @@ export default {
     const url = new URL(request.url);
 
     // Handle CORS preflight
-    if (request.method === "OPTIONS") {
+    if (request.method === 'OPTIONS') {
       return handleOptions(request);
     }
 
     // Only allow GET requests
-    if (request.method !== "GET") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+    if (request.method !== 'GET') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // Route requests
-    if (url.pathname === "/api/trade-analysis") {
+    if (url.pathname === '/api/trade-analysis') {
       return handleGetAnalysis(request, env);
     }
 
-    if (url.pathname === "/api/trade-analyses") {
+    if (url.pathname === '/api/trade-analyses') {
       return handleGetBatchAnalyses(request, env);
     }
 
     // Health check endpoint
-    if (url.pathname === "/health" || url.pathname === "/") {
+    if (url.pathname === '/health' || url.pathname === '/') {
       return new Response(
         JSON.stringify({
-          status: "ok",
-          service: "dynastiest-league-worker",
+          status: 'ok',
+          service: 'dynastiest-league-worker',
           version: env.ANALYSIS_VERSION,
         }),
         {
           status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
+          headers: { 'Content-Type': 'application/json' },
+        },
       );
     }
 
     // 404 for unknown routes
-    return new Response(JSON.stringify({ error: "Not found" }), {
+    return new Response(JSON.stringify({ error: 'Not found' }), {
       status: 404,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   },
 
@@ -72,7 +72,7 @@ export default {
     try {
       await handleScheduled(env);
     } catch (error) {
-      console.error("Error in scheduled handler:", error);
+      console.error('Error in scheduled handler:', error);
     }
   },
 };

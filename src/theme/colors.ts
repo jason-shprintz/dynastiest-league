@@ -1,16 +1,16 @@
 export const COLORS = {
   // Primary colors
-  background: "#1a1a2e",
-  backgroundGradientEnd: "#16213e",
-  accent: "#ffd700", // Gold
-  accentHover: "#ffed4e", // Lighter gold for hover
-  white: "#ffffff",
+  background: '#1a1a2e',
+  backgroundGradientEnd: '#16213e',
+  accent: '#ffd700', // Gold
+  accentHover: '#ffed4e', // Lighter gold for hover
+  white: '#ffffff',
 
   // Secondary colors
-  secondary: "#0f3460",
+  secondary: '#0f3460',
 
   // Text colors
-  textPrimary: "#ffffff",
-  textSecondary: "#ccd6f6",
-  textMuted: "#a8b2d1",
+  textPrimary: '#ffffff',
+  textSecondary: '#ccd6f6',
+  textMuted: '#a8b2d1',
 } as const;

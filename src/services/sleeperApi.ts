@@ -15,9 +15,9 @@ import type {
   Transaction,
   TradedPick,
   Player,
-} from "../types/sleeper";
+} from '../types/sleeper';
 
-const SLEEPER_API_BASE = "https://api.sleeper.app/v1";
+const SLEEPER_API_BASE = 'https://api.sleeper.app/v1';
 
 /**
  * Fetch a specific league by ID
@@ -102,9 +102,7 @@ export async function fetchPlayoffBracket(
  * @returns Array of draft data
  */
 export async function fetchDrafts(leagueId: string): Promise<Draft[]> {
-  const response = await fetch(
-    `${SLEEPER_API_BASE}/league/${leagueId}/drafts`,
-  );
+  const response = await fetch(`${SLEEPER_API_BASE}/league/${leagueId}/drafts`);
   if (!response.ok) {
     throw new Error(`Failed to fetch drafts: ${response.statusText}`);
   }

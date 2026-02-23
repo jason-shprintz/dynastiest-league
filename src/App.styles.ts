@@ -1,11 +1,15 @@
-import styled from "styled-components";
-import { COLORS } from "./theme/colors";
+import styled from 'styled-components';
+import { COLORS } from './theme/colors';
 
 export const AppContainer = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, ${COLORS.background} 0%, ${COLORS.backgroundGradientEnd} 100%);
+  background: linear-gradient(
+    135deg,
+    ${COLORS.background} 0%,
+    ${COLORS.backgroundGradientEnd} 100%
+  );
   color: ${COLORS.textPrimary};
 `;
 

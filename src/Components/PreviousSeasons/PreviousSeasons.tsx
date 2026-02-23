@@ -1,8 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
-import { observer } from "mobx-react-lite";
-import { useStore, usePreviousSeasonsStore } from "../../stores";
-import type { Roster, Player, DraftPick, Transaction } from "../../types/sleeper";
-import { TradeCard } from "../Trades/TradeCard";
+import { useEffect, useState, useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useStore, usePreviousSeasonsStore } from '../../stores';
+import type {
+  Roster,
+  Player,
+  DraftPick,
+  Transaction,
+} from '../../types/sleeper';
+import { TradeCard } from '../Trades/TradeCard';
 import {
   PageSection,
   SeasonSelectorRow,
@@ -21,9 +26,9 @@ import {
   PlayerGroupLabel,
   PlayerRow,
   DraftTable,
-} from "./PreviousSeasons.styles";
+} from './PreviousSeasons.styles';
 
-type Tab = "standings" | "teams" | "trades" | "draft";
+type Tab = 'standings' | 'teams' | 'trades' | 'draft';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -112,7 +117,7 @@ const TeamsView = ({
   };
 
   const getPlayerPos = (playerId: string) => {
-    return players[playerId]?.position ?? "—";
+    return players[playerId]?.position ?? '—';
   };
 
   return (
@@ -122,7 +127,8 @@ const TeamsView = ({
         const taxiSet = new Set(roster.taxi ?? []);
         const reserveSet = new Set(roster.reserve ?? []);
         const bench = (roster.players ?? []).filter(
-          (id) => !starterSet.has(id) && !taxiSet.has(id) && !reserveSet.has(id)
+          (id) =>
+            !starterSet.has(id) && !taxiSet.has(id) && !reserveSet.has(id),
         );
         const starters = roster.starters ?? [];
 
@@ -205,9 +211,7 @@ const TradesView = ({
   onLoadMore,
 }: TradesViewProps) => {
   if (trades.length === 0) {
-    return (
-      <EmptyState>No trades were made in the {year} season.</EmptyState>
-    );
+    return <EmptyState>No trades were made in the {year} season.</EmptyState>;
   }
 
   const visible = trades.slice(0, visibleCount);
@@ -260,11 +264,13 @@ const DraftView = ({ picks, year, getPickTeamName }: DraftViewProps) => {
       </thead>
       <tbody>
         {sorted.map((pick) => {
-          const firstName = pick.metadata?.first_name ?? "";
-          const lastName = pick.metadata?.last_name ?? "";
+          const firstName = pick.metadata?.first_name ?? '';
+          const lastName = pick.metadata?.last_name ?? '';
           const playerName =
-            firstName || lastName ? `${firstName} ${lastName}`.trim() : pick.player_id;
-          const position = pick.metadata?.position ?? "—";
+            firstName || lastName
+              ? `${firstName} ${lastName}`.trim()
+              : pick.player_id;
+          const position = pick.metadata?.position ?? '—';
 
           return (
             <tr key={pick.pick_no}>
@@ -287,14 +293,17 @@ const PreviousSeasons = observer(() => {
   const { playersStore } = useStore();
   const previousSeasonsStore = usePreviousSeasonsStore();
 
-  const [activeTab, setActiveTab] = useState<Tab>("standings");
+  const [activeTab, setActiveTab] = useState<Tab>('standings');
   const [visibleTrades, setVisibleTrades] = useState(ITEMS_PER_PAGE);
 
   const { selectedLeagueId } = previousSeasonsStore;
 
   // Build season chain on mount
   useEffect(() => {
-    if (previousSeasonsStore.seasons.length === 0 && !previousSeasonsStore.isLoadingSeasons) {
+    if (
+      previousSeasonsStore.seasons.length === 0 &&
+      !previousSeasonsStore.isLoadingSeasons
+    ) {
       previousSeasonsStore.buildSeasonChain();
     }
     playersStore.loadPlayers();
@@ -317,15 +326,15 @@ const PreviousSeasons = observer(() => {
       if (!user) return `Team ${roster.roster_id}`;
       return user.metadata?.team_name || user.display_name || user.username;
     },
-    [seasonData]
+    [seasonData],
   );
 
   const getOwnerName = useCallback(
     (roster: Roster): string => {
       const user = seasonData?.users.find((u) => u.user_id === roster.owner_id);
-      return user?.display_name || user?.username || "";
+      return user?.display_name || user?.username || '';
     },
-    [seasonData]
+    [seasonData],
   );
 
   const getRosterName = useCallback(
@@ -335,19 +344,19 @@ const PreviousSeasons = observer(() => {
       if (!roster) return `Team ${rosterId}`;
       return getTeamName(roster);
     },
-    [seasonData, getTeamName]
+    [seasonData, getTeamName],
   );
 
   const getPickTeamName = useCallback(
     (pick: DraftPick): string => {
       if (!seasonData) return `Team ${pick.roster_id}`;
       const roster = seasonData.rosters.find(
-        (r) => r.roster_id === pick.roster_id
+        (r) => r.roster_id === pick.roster_id,
       );
       if (!roster) return `Team ${pick.roster_id}`;
       return getTeamName(roster);
     },
-    [seasonData, getTeamName]
+    [seasonData, getTeamName],
   );
 
   if (isLoadingSeasons) {
@@ -379,7 +388,7 @@ const PreviousSeasons = observer(() => {
           value={selectedLeagueId}
           onChange={(e) => {
             previousSeasonsStore.setSelectedLeagueId(e.target.value);
-            setActiveTab("standings");
+            setActiveTab('standings');
           }}
         >
           {seasons.map((s) => (
@@ -391,7 +400,7 @@ const PreviousSeasons = observer(() => {
       </SeasonSelectorRow>
 
       <TabBar>
-        {(["standings", "teams", "trades", "draft"] as Tab[]).map((tab) => (
+        {(['standings', 'teams', 'trades', 'draft'] as Tab[]).map((tab) => (
           <TabButton
             key={tab}
             $isActive={activeTab === tab}
@@ -407,7 +416,7 @@ const PreviousSeasons = observer(() => {
           <LoadingMessage>Loading {selectedYear} data...</LoadingMessage>
         )}
 
-        {!isLoadingData && seasonData && activeTab === "standings" && (
+        {!isLoadingData && seasonData && activeTab === 'standings' && (
           <StandingsView
             rosters={seasonData.rosters}
             getTeamName={getTeamName}
@@ -415,7 +424,7 @@ const PreviousSeasons = observer(() => {
           />
         )}
 
-        {!isLoadingData && seasonData && activeTab === "teams" && (
+        {!isLoadingData && seasonData && activeTab === 'teams' && (
           <TeamsView
             rosters={seasonData.rosters}
             getTeamName={getTeamName}
@@ -424,7 +433,7 @@ const PreviousSeasons = observer(() => {
           />
         )}
 
-        {!isLoadingData && seasonData && activeTab === "trades" && (
+        {!isLoadingData && seasonData && activeTab === 'trades' && (
           <TradesView
             trades={seasonData.trades}
             year={selectedYear}
@@ -435,7 +444,7 @@ const PreviousSeasons = observer(() => {
           />
         )}
 
-        {!isLoadingData && seasonData && activeTab === "draft" && (
+        {!isLoadingData && seasonData && activeTab === 'draft' && (
           <DraftView
             picks={seasonData.draftPicks}
             year={selectedYear}

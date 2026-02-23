@@ -3,11 +3,11 @@
  * Displays all trades in the league with pagination/lazy loading
  */
 
-import { useEffect, useState, useCallback } from "react";
-import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { DEFAULT_LEAGUE_ID } from "../../constants";
-import { TradeCard } from "./TradeCard";
+import { useEffect, useState, useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../../stores';
+import { DEFAULT_LEAGUE_ID } from '../../constants';
+import { TradeCard } from './TradeCard';
 import {
   TradesSection,
   SectionDescription,
@@ -15,7 +15,7 @@ import {
   LoadingMessage,
   EmptyState,
   LoadMoreButton,
-} from "./Trades.styles";
+} from './Trades.styles';
 
 interface TradesProps {
   leagueId?: string;
@@ -72,9 +72,7 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
 
   // Fetch AI analyses for all currently visible trades
   useEffect(() => {
-    const ids = allTrades
-      .slice(0, visibleCount)
-      .map((t) => t.transaction_id);
+    const ids = allTrades.slice(0, visibleCount).map((t) => t.transaction_id);
     if (ids.length > 0) {
       tradeAnalysisStore.loadAnalysesBatch(ids);
     }
@@ -95,7 +93,7 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
 
       return user.metadata?.team_name || user.display_name || user.username;
     },
-    [rostersStore.rosters, usersStore.users]
+    [rostersStore.rosters, usersStore.users],
   );
 
   if (
@@ -137,7 +135,7 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
     <TradesSection>
       <h2>Trades</h2>
       <SectionDescription>
-        {allTrades.length} {allTrades.length === 1 ? "trade" : "trades"}
+        {allTrades.length} {allTrades.length === 1 ? 'trade' : 'trades'}
         &nbsp;in&nbsp;
         {leagueYear}
       </SectionDescription>
@@ -149,7 +147,9 @@ const Trades = observer(({ leagueId = DEFAULT_LEAGUE_ID }: TradesProps) => {
             players={playersStore.players}
             getRosterName={getRosterName}
             analysis={tradeAnalysisStore.getAnalysis(trade.transaction_id)}
-            isLoadingAnalysis={tradeAnalysisStore.isLoadingAnalysis(trade.transaction_id)}
+            isLoadingAnalysis={tradeAnalysisStore.isLoadingAnalysis(
+              trade.transaction_id,
+            )}
           />
         ))}
       </TradesContainer>

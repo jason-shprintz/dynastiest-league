@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
-import { Section } from "../../types";
-import { useMobileMenuAccessibility } from "../../hooks/useMobileMenuAccessibility";
+import { useState, useCallback, useRef } from 'react';
+import { Section } from '../../types';
+import { useMobileMenuAccessibility } from '../../hooks/useMobileMenuAccessibility';
 import {
   HeaderContainer,
   HeaderContent,
@@ -12,7 +12,7 @@ import {
   MobileMenuOverlay,
   MobileMenuContainer,
   CloseButton,
-} from "./Header.styles";
+} from './Header.styles';
 
 interface IHeaderProps {
   activeSection: Section;
@@ -25,15 +25,15 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { section: "home", label: "Home" },
-  { section: "blog", label: "Blog" },
-  { section: "teams", label: "Teams" },
-  { section: "trades", label: "Trades" },
-  { section: "scouting", label: "Scouting" },
-  { section: "records", label: "Hall of Records" },
-  { section: "champion", label: "Current Champion" },
-  { section: "previous-seasons", label: "Previous Seasons" },
-  { section: "constitution", label: "Constitution" },
+  { section: 'home', label: 'Home' },
+  { section: 'blog', label: 'Blog' },
+  { section: 'teams', label: 'Teams' },
+  { section: 'trades', label: 'Trades' },
+  { section: 'scouting', label: 'Scouting' },
+  { section: 'records', label: 'Hall of Records' },
+  { section: 'champion', label: 'Current Champion' },
+  { section: 'previous-seasons', label: 'Previous Seasons' },
+  { section: 'constitution', label: 'Constitution' },
 ];
 
 /**
@@ -61,7 +61,7 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
 
   // Get label for current section
   const currentLabel =
-    navItems.find((item) => item.section === activeSection)?.label || "Home";
+    navItems.find((item) => item.section === activeSection)?.label || 'Home';
 
   // Handle keyboard interactions for mobile menu (Escape to close, Tab to trap focus)
   useMobileMenuAccessibility({
@@ -84,10 +84,10 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
             alt="Dynastiest League Hero"
             fetchPriority="high"
             style={{
-              width: "50%",
-              maxWidth: "300px",
-              height: "auto",
-              borderRadius: "12px",
+              width: '50%',
+              maxWidth: '300px',
+              height: 'auto',
+              borderRadius: '12px',
             }}
           />
         </picture>

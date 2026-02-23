@@ -1,13 +1,13 @@
 type Section =
-  | "home"
-  | "records"
-  | "champion"
-  | "constitution"
-  | "scouting"
-  | "blog"
-  | "teams"
-  | "trades"
-  | "previous-seasons";
+  | 'home'
+  | 'records'
+  | 'champion'
+  | 'constitution'
+  | 'scouting'
+  | 'blog'
+  | 'teams'
+  | 'trades'
+  | 'previous-seasons';
 
 // Navigation target that can include an optional subsection for deep linking
 interface NavigationTarget {

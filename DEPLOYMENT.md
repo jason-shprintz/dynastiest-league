@@ -278,7 +278,7 @@ Update `worker/src/api.ts` CORS_HEADERS to include your domain:
 
 ```typescript
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "https://yourdomain.com",  // Update this
+  'Access-Control-Allow-Origin': 'https://yourdomain.com', // Update this
   // ...
 };
 ```
@@ -300,7 +300,7 @@ Edit `worker/src/openai.ts`:
 
 ```typescript
 const response = await openai.chat.completions.create({
-  model: "gpt-4",  // Use GPT-4 for better quality (higher cost)
+  model: 'gpt-4', // Use GPT-4 for better quality (higher cost)
   // ...
 });
 ```

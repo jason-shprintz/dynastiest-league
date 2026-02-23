@@ -1,4 +1,4 @@
-import { useEffect, RefObject } from "react";
+import { useEffect, RefObject } from 'react';
 
 interface UseMobileMenuAccessibilityOptions {
   isOpen: boolean;
@@ -30,15 +30,15 @@ export const useMobileMenuAccessibility = ({
     if (!isOpen) return;
 
     const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         onClose();
         return;
       }
 
-      if (event.key !== "Tab") {
+      if (event.key !== 'Tab') {
         return;
       }
 
@@ -47,7 +47,7 @@ export const useMobileMenuAccessibility = ({
         return;
       }
 
-      const focusableElements = overlay.querySelectorAll("button");
+      const focusableElements = overlay.querySelectorAll('button');
       if (!focusableElements.length) {
         return;
       }
@@ -73,10 +73,10 @@ export const useMobileMenuAccessibility = ({
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     // Focus the specified button (skip close button by default)
-    const navButtons = overlayRef.current?.querySelectorAll("button");
+    const navButtons = overlayRef.current?.querySelectorAll('button');
     if (navButtons && navButtons.length > initialFocusIndex) {
       (navButtons[initialFocusIndex] as HTMLButtonElement).focus();
     } else if (navButtons && navButtons.length > 0) {
@@ -84,7 +84,7 @@ export const useMobileMenuAccessibility = ({
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
       // Restore original body scroll behavior
       document.body.style.overflow = originalOverflow;
     };

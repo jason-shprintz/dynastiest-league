@@ -3,29 +3,34 @@
  * Polls Sleeper for new trades and generates analyses
  */
 
-import type { Env, SleeperTransaction, SleeperRoster, SleeperUser } from "./types";
+import type {
+  Env,
+  SleeperTransaction,
+  SleeperRoster,
+  SleeperUser,
+} from './types';
 import {
   fetchTransactions,
   fetchRosters,
   fetchUsers,
   fetchPlayerNames,
   fetchNflState,
-} from "./sleeper";
-import { generateTradeAnalysis } from "./openai";
-import { analysisExists, saveAnalysis } from "./db";
+} from './sleeper';
+import { generateTradeAnalysis } from './openai';
+import { analysisExists, saveAnalysis } from './db';
 
 /**
  * Check if a transaction is a processed trade
  */
 function isProcessedTrade(tx: SleeperTransaction): boolean {
   // Must be a trade
-  if (tx.type !== "trade") {
+  if (tx.type !== 'trade') {
     return false;
   }
 
   // Accept multiple status values that indicate completion
-  const validStatuses = ["complete", "completed"];
-  const hasValidStatus = validStatuses.includes(tx.status?.toLowerCase() || "");
+  const validStatuses = ['complete', 'completed'];
+  const hasValidStatus = validStatuses.includes(tx.status?.toLowerCase() || '');
 
   // Also check if status_updated has a positive value (indicates processing)
   const hasStatusUpdate = !!(tx.status_updated && tx.status_updated > 0);
@@ -33,7 +38,7 @@ function isProcessedTrade(tx: SleeperTransaction): boolean {
   // Only log unexpected status if status is defined but status_updated is missing/0
   if (!hasValidStatus && !hasStatusUpdate && tx.status && tx.status.trim()) {
     console.log(
-      `Trade ${tx.transaction_id} has unexpected status: "${tx.status}", status_updated: ${tx.status_updated}`
+      `Trade ${tx.transaction_id} has unexpected status: "${tx.status}", status_updated: ${tx.status_updated}`,
     );
   }
 
@@ -50,7 +55,7 @@ async function processWeekTrades(
   week: number,
   rosters: SleeperRoster[],
   users: SleeperUser[],
-  seenTransactionIds: Set<string>
+  seenTransactionIds: Set<string>,
 ): Promise<number> {
   console.log(`Processing trades for week ${week}...`);
 
@@ -69,7 +74,7 @@ async function processWeekTrades(
     }
 
     console.log(
-      `Found ${completedTrades.length} completed trades for week ${week}`
+      `Found ${completedTrades.length} completed trades for week ${week}`,
     );
 
     let processed = 0;
@@ -79,7 +84,9 @@ async function processWeekTrades(
       try {
         // Skip if we've already seen this transaction (dedupe across weeks)
         if (seenTransactionIds.has(trade.transaction_id)) {
-          console.log(`Already processed ${trade.transaction_id} in another week, skipping`);
+          console.log(
+            `Already processed ${trade.transaction_id} in another week, skipping`,
+          );
           continue;
         }
         seenTransactionIds.add(trade.transaction_id);
@@ -88,7 +95,7 @@ async function processWeekTrades(
         const exists = await analysisExists(env.DB, trade.transaction_id);
         if (exists) {
           console.log(
-            `Analysis already exists for ${trade.transaction_id}, skipping`
+            `Analysis already exists for ${trade.transaction_id}, skipping`,
           );
           continue;
         }
@@ -104,7 +111,7 @@ async function processWeekTrades(
           rosters,
           users,
           playerNames,
-          env.ANTHROPIC_API_KEY
+          env.ANTHROPIC_API_KEY,
         );
 
         // Use fallback for created timestamp
@@ -117,7 +124,7 @@ async function processWeekTrades(
           leagueId,
           createdAt,
           analysis,
-          env.ANALYSIS_VERSION
+          env.ANALYSIS_VERSION,
         );
 
         console.log(`Successfully saved analysis for ${trade.transaction_id}`);
@@ -139,12 +146,12 @@ async function processWeekTrades(
  * Handle scheduled cron trigger
  */
 export async function handleScheduled(env: Env): Promise<void> {
-  console.log("Cron job started");
+  console.log('Cron job started');
 
   const leagueId = env.SLEEPER_LEAGUE_ID;
   const nflState = await fetchNflState();
   const currentWeek = nflState.week || 1;
-  const isOffseason = nflState.season_type === "off" || nflState.week === 0;
+  const isOffseason = nflState.season_type === 'off' || nflState.week === 0;
 
   // During the offseason dynasty leagues still trade, and Sleeper files those
   // transactions across whatever week number is current (often 1–18). Scan all
@@ -155,7 +162,7 @@ export async function handleScheduled(env: Env): Promise<void> {
     : [currentWeek, Math.max(1, currentWeek - 1)];
 
   console.log(
-    `Season type: ${nflState.season_type}, week: ${nflState.week}. Checking weeks: ${weeksToCheck.join(", ")}`
+    `Season type: ${nflState.season_type}, week: ${nflState.week}. Checking weeks: ${weeksToCheck.join(', ')}`,
   );
 
   // Fetch league data once — shared across all week scans
@@ -175,7 +182,7 @@ export async function handleScheduled(env: Env): Promise<void> {
       week,
       rosters,
       users,
-      seenTransactionIds
+      seenTransactionIds,
     );
     totalProcessed += processed;
   }

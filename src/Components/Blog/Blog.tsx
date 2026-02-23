@@ -1,4 +1,4 @@
-import { blogPosts } from "./data";
+import { blogPosts } from './data';
 import {
   BlogSection,
   SectionDescription,
@@ -6,9 +6,9 @@ import {
   BlogPostItem,
   PostDate,
   PostContent,
-} from "./Blog.styles";
-import renderContentWithLinks from "../../helper/renderContentWithLinks";
-import { NavigationTarget } from "../../types";
+} from './Blog.styles';
+import renderContentWithLinks from '../../helper/renderContentWithLinks';
+import { NavigationTarget } from '../../types';
 
 interface IBlogProps {
   onNavigate?: (target: NavigationTarget) => void;

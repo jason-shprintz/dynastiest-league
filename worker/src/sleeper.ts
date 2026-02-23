@@ -8,19 +8,19 @@ import type {
   SleeperRoster,
   SleeperUser,
   SleeperNflState,
-} from "./types";
+} from './types';
 
-const SLEEPER_API_BASE = "https://api.sleeper.app/v1";
+const SLEEPER_API_BASE = 'https://api.sleeper.app/v1';
 
 /**
  * Fetch transactions for a specific week
  */
 export async function fetchTransactions(
   leagueId: string,
-  week: number
+  week: number,
 ): Promise<SleeperTransaction[]> {
   const response = await fetch(
-    `${SLEEPER_API_BASE}/league/${leagueId}/transactions/${week}`
+    `${SLEEPER_API_BASE}/league/${leagueId}/transactions/${week}`,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch transactions: ${response.statusText}`);
@@ -33,7 +33,7 @@ export async function fetchTransactions(
  */
 export async function fetchRosters(leagueId: string): Promise<SleeperRoster[]> {
   const response = await fetch(
-    `${SLEEPER_API_BASE}/league/${leagueId}/rosters`
+    `${SLEEPER_API_BASE}/league/${leagueId}/rosters`,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch rosters: ${response.statusText}`);
@@ -63,7 +63,7 @@ export async function fetchNflState(): Promise<SleeperNflState> {
   return response.json();
 }
 
-const PLAYERS_KV_KEY = "sleeper_players";
+const PLAYERS_KV_KEY = 'sleeper_players';
 const PLAYERS_TTL_SECONDS = 86400; // 24 hours
 
 /**
@@ -72,20 +72,20 @@ const PLAYERS_TTL_SECONDS = 86400; // 24 hours
  */
 export async function fetchPlayerNames(
   playerIds: string[],
-  kv: KVNamespace
+  kv: KVNamespace,
 ): Promise<Record<string, { name: string; position: string }>> {
   if (playerIds.length === 0) return {};
 
   let playerMap: Record<string, { name: string; position: string }> = {};
 
   // Try KV cache first
-  const cached = await kv.get(PLAYERS_KV_KEY, "json");
+  const cached = await kv.get(PLAYERS_KV_KEY, 'json');
   if (cached) {
     playerMap = cached as Record<string, { name: string; position: string }>;
   } else {
     // Fetch all players from Sleeper and store slim version in KV
     try {
-      const response = await fetch("https://api.sleeper.app/v1/players/nfl");
+      const response = await fetch('https://api.sleeper.app/v1/players/nfl');
       if (response.ok) {
         const allPlayers = (await response.json()) as Record<
           string,
@@ -96,7 +96,7 @@ export async function fetchPlayerNames(
           if (p.full_name) {
             playerMap[id] = {
               name: p.full_name,
-              position: p.position ?? "?",
+              position: p.position ?? '?',
             };
           }
         }
@@ -105,7 +105,7 @@ export async function fetchPlayerNames(
         });
       }
     } catch (err) {
-      console.error("Failed to fetch /players/nfl:", err);
+      console.error('Failed to fetch /players/nfl:', err);
     }
   }
 
@@ -126,8 +126,8 @@ export async function getCurrentWeek(): Promise<number> {
     return state.week || 1;
   } catch (error) {
     console.error(
-      "Failed to fetch current week from Sleeper, defaulting to week 1:",
-      error
+      'Failed to fetch current week from Sleeper, defaulting to week 1:',
+      error,
     );
     return 1;
   }

@@ -1,12 +1,12 @@
-import { COLORS } from "../theme/colors";
-import { TextHighlight } from "../Components/Blog/Blog.styles";
-import { NavigationTarget, Section } from "../types";
+import { COLORS } from '../theme/colors';
+import { TextHighlight } from '../Components/Blog/Blog.styles';
+import { NavigationTarget, Section } from '../types';
 
 // Helper to validate URLs and ensure only http/https protocols
 const isValidUrl = (url: string): boolean => {
   try {
     const parsedUrl = new URL(url);
-    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
   } catch {
     return false;
   }
@@ -16,14 +16,14 @@ const isValidUrl = (url: string): boolean => {
 // Note: This list must be kept in sync with the Section type in types.ts
 // TypeScript doesn't support runtime introspection of union types
 const VALID_SECTIONS: readonly Section[] = [
-  "home",
-  "records",
-  "champion",
-  "constitution",
-  "scouting",
-  "blog",
-  "teams",
-  "trades",
+  'home',
+  'records',
+  'champion',
+  'constitution',
+  'scouting',
+  'blog',
+  'teams',
+  'trades',
 ] as const;
 
 // Helper to validate if a string is a valid Section
@@ -53,7 +53,7 @@ const renderLinks = (
 
   // First, process NavLink tags
   const processedParts: {
-    type: "text" | "navlink";
+    type: 'text' | 'navlink';
     content: string;
     section?: Section;
     subsection?: string;
@@ -62,24 +62,24 @@ const renderLinks = (
   while ((match = navLinkRegex.exec(content)) !== null) {
     if (match.index > lastIndex) {
       processedParts.push({
-        type: "text",
+        type: 'text',
         content: content.slice(lastIndex, match.index),
       });
     }
-    
+
     const sectionValue = match[1];
     if (!isValidSection(sectionValue)) {
       console.warn(
-        `[renderContentWithLinks] Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(", ")}`,
+        `[renderContentWithLinks] Invalid section "${sectionValue}" in NavLink tag. Valid sections are: ${VALID_SECTIONS.join(', ')}`,
       );
       // Treat invalid section as plain text (use inner text, not raw tag)
       processedParts.push({
-        type: "text",
+        type: 'text',
         content: match[3],
       });
     } else {
       processedParts.push({
-        type: "navlink",
+        type: 'navlink',
         content: match[3],
         section: sectionValue,
         subsection: match[2],
@@ -89,17 +89,17 @@ const renderLinks = (
   }
 
   if (lastIndex < content.length) {
-    processedParts.push({ type: "text", content: content.slice(lastIndex) });
+    processedParts.push({ type: 'text', content: content.slice(lastIndex) });
   }
 
   // If no NavLinks were found, just process URLs
   if (processedParts.length === 0) {
-    processedParts.push({ type: "text", content });
+    processedParts.push({ type: 'text', content });
   }
 
   // Process each part
   processedParts.forEach((part, partIndex) => {
-    if (part.type === "navlink" && part.section) {
+    if (part.type === 'navlink' && part.section) {
       elements.push(
         <a
           key={`${keyPrefix}-navlink-${partIndex}`}
@@ -113,8 +113,8 @@ const renderLinks = (
           }}
           style={{
             color: COLORS.accent,
-            textDecoration: "underline",
-            cursor: "pointer",
+            textDecoration: 'underline',
+            cursor: 'pointer',
           }}
           aria-label={`Navigate to ${part.content}`}
         >
@@ -133,7 +133,7 @@ const renderLinks = (
               href={urlPart}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: COLORS.accent, textDecoration: "underline" }}
+              style={{ color: COLORS.accent, textDecoration: 'underline' }}
               aria-label={`${urlPart} (opens in a new tab)`}
             >
               {urlPart}
