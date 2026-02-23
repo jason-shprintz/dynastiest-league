@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { hallOfRecords, medalCounts } from "./data";
-import { usePreviousSeasonsStore } from "../../stores";
+import { useStore, usePreviousSeasonsStore } from "../../stores";
+import { DEFAULT_LEAGUE_ID } from "../../constants";
 import {
   RecordsSection,
   RecordsTable,
@@ -41,9 +42,17 @@ type SortDir = "asc" | "desc";
  * @returns A React component displaying the Hall of Records with championship history and medal standings
  */
 const HallOfRecords = observer(() => {
+  const { rostersStore } = useStore();
   const previousSeasonsStore = usePreviousSeasonsStore();
   const [sortField, setSortField] = useState<SortField>("wins");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // Load current season rosters to know which owners are active this year
+  useEffect(() => {
+    if (rostersStore.rosters.length === 0 && !rostersStore.isLoading) {
+      rostersStore.loadRosters(DEFAULT_LEAGUE_ID);
+    }
+  }, [rostersStore]);
 
   // Build the season chain on mount if not already loaded
   useEffect(() => {
@@ -80,8 +89,19 @@ const HallOfRecords = observer(() => {
     return sortDir === "desc" ? " ▼" : " ▲";
   };
 
-  // Aggregate all-time standings from all historical seasons
+  // Set of owner IDs who are in the current season.
+  // Only populated once rosters have loaded; empty Set means "not yet known".
+  const currentOwnerIds = useMemo(
+    () => new Set(rostersStore.rosters.filter((r) => r.owner_id).map((r) => r.owner_id)),
+    [rostersStore.rosters]
+  );
+
+  // Aggregate all-time standings from all historical seasons,
+  // filtering to only include owners who are active in the current season.
   const allTimeStandings = useMemo(() => {
+    // Don't render any rows while we're still waiting for the current roster list
+    if (currentOwnerIds.size === 0) return [];
+
     const map = new Map<
       string,
       { displayName: string; wins: number; losses: number; pf: number; pa: number }
@@ -90,7 +110,7 @@ const HallOfRecords = observer(() => {
     for (const { rosters, users } of previousSeasonsStore.allSeasonsData) {
       for (const roster of rosters) {
         const ownerId = roster.owner_id;
-        if (!ownerId) continue;
+        if (!ownerId || !currentOwnerIds.has(ownerId)) continue;
 
         const user = users.find((u) => u.user_id === ownerId);
         const displayName =
@@ -121,7 +141,7 @@ const HallOfRecords = observer(() => {
     }
 
     return [...map.entries()].map(([ownerId, data]) => ({ ownerId, ...data }));
-  }, [previousSeasonsStore.allSeasonsData]);
+  }, [previousSeasonsStore.allSeasonsData, currentOwnerIds]);
 
   const sortedStandings = useMemo(() => {
     return [...allTimeStandings].sort((a, b) => {
@@ -217,7 +237,8 @@ const HallOfRecords = observer(() => {
           </SortableCell>
         </AllTimeHeader>
         {previousSeasonsStore.isLoadingSeasons ||
-        previousSeasonsStore.isLoadingAllSeasons ? (
+        previousSeasonsStore.isLoadingAllSeasons ||
+        rostersStore.isLoading ? (
           <StandingsLoadingRow>
             <div>Loading standings…</div>
           </StandingsLoadingRow>
