@@ -22,6 +22,13 @@ export interface SeasonInfo {
   leagueId: string;
 }
 
+export interface AllSeasonEntry {
+  leagueId: string;
+  year: string;
+  rosters: Roster[];
+  users: User[];
+}
+
 export interface SeasonData {
   rosters: Roster[];
   users: User[];
@@ -50,7 +57,9 @@ export class PreviousSeasonsStore {
   seasons: SeasonInfo[] = [];
   selectedLeagueId: string = "";
   seasonData: SeasonData | null = null;
+  allSeasonsData: AllSeasonEntry[] = [];
   isLoadingSeasons = false;
+  isLoadingAllSeasons = false;
   isLoadingData = false;
   error: string | null = null;
 
@@ -168,11 +177,50 @@ export class PreviousSeasonsStore {
     );
   }
 
+  /**
+   * Load rosters and users for all seasons in the chain and store them for
+   * all-time aggregations (e.g. all-time standings on the Hall of Records).
+   */
+  async loadAllSeasonsData(): Promise<void> {
+    if (this.seasons.length === 0) return;
+
+    this.isLoadingAllSeasons = true;
+
+    try {
+      const results = await Promise.all(
+        this.seasons.map(async ({ leagueId, year }) => {
+          const [rosters, users] = await Promise.all([
+            fetchRosters(leagueId),
+            fetchUsers(leagueId),
+          ]);
+          return {
+            leagueId,
+            year,
+            rosters: rosters as Roster[],
+            users: users as User[],
+          };
+        })
+      );
+
+      runInAction(() => {
+        this.allSeasonsData = results;
+        this.isLoadingAllSeasons = false;
+      });
+    } catch (err) {
+      runInAction(() => {
+        this.error = err instanceof Error ? err.message : "Unknown error";
+        this.isLoadingAllSeasons = false;
+      });
+    }
+  }
+
   reset(): void {
     this.seasons = [];
     this.selectedLeagueId = "";
     this.seasonData = null;
+    this.allSeasonsData = [];
     this.isLoadingSeasons = false;
+    this.isLoadingAllSeasons = false;
     this.isLoadingData = false;
     this.error = null;
   }

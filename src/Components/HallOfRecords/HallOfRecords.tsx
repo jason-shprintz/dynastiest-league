@@ -1,4 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { hallOfRecords, medalCounts } from "./data";
+import { usePreviousSeasonsStore } from "../../stores";
 import {
   RecordsSection,
   RecordsTable,
@@ -12,21 +15,123 @@ import {
   CustomMedalHeader,
   CustomMedalRow,
   CustomMedalTable,
+  AllTimeTable,
+  AllTimeHeader,
+  AllTimeRow,
+  SortableCell,
+  StandingsLoadingRow,
 } from "./HallOfRecords.styles";
 
+type SortField = "wins" | "losses" | "pf" | "pa";
+type SortDir = "asc" | "desc";
+
 /**
- * Displays the Hall of Records component featuring championship history and all-time medal rankings.
+ * Displays the Hall of Records component featuring championship history, all-time medal rankings,
+ * and all-time regular season standings aggregated across all historical seasons.
  *
- * This component renders two main sections:
+ * This component renders three main sections:
  * 1. A historical table showing yearly champions, second, and third place finishers
  * 2. An all-time medal rankings table with gold, silver, and bronze counts per user
+ * 3. An all-time standings table aggregating wins, losses, points for, and points against
+ *    per owner across all seasons in which they participated
  *
  * Medal rankings are sorted by gold count first, then silver, then bronze,
  * with alphabetical ordering as a tiebreaker. Tied entries share the same rank.
  *
  * @returns A React component displaying the Hall of Records with championship history and medal standings
  */
-const HallOfRecords = () => {
+const HallOfRecords = observer(() => {
+  const previousSeasonsStore = usePreviousSeasonsStore();
+  const [sortField, setSortField] = useState<SortField>("wins");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // Build the season chain on mount if not already loaded
+  useEffect(() => {
+    if (
+      previousSeasonsStore.seasons.length === 0 &&
+      !previousSeasonsStore.isLoadingSeasons
+    ) {
+      previousSeasonsStore.buildSeasonChain();
+    }
+  }, [previousSeasonsStore]);
+
+  // Once seasons are available, load all-seasons data for standings aggregation
+  useEffect(() => {
+    if (
+      previousSeasonsStore.seasons.length > 0 &&
+      previousSeasonsStore.allSeasonsData.length === 0 &&
+      !previousSeasonsStore.isLoadingAllSeasons
+    ) {
+      previousSeasonsStore.loadAllSeasonsData();
+    }
+  }, [previousSeasonsStore, previousSeasonsStore.seasons.length]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir((d: SortDir) => (d === "desc" ? "asc" : "desc"));
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  };
+
+  const sortIndicator = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDir === "desc" ? " ▼" : " ▲";
+  };
+
+  // Aggregate all-time standings from all historical seasons
+  const allTimeStandings = useMemo(() => {
+    const map = new Map<
+      string,
+      { displayName: string; wins: number; losses: number; pf: number; pa: number }
+    >();
+
+    for (const { rosters, users } of previousSeasonsStore.allSeasonsData) {
+      for (const roster of rosters) {
+        const ownerId = roster.owner_id;
+        if (!ownerId) continue;
+
+        const user = users.find((u) => u.user_id === ownerId);
+        const displayName =
+          user?.display_name || user?.username || ownerId;
+
+        const existing = map.get(ownerId) ?? {
+          displayName,
+          wins: 0,
+          losses: 0,
+          pf: 0,
+          pa: 0,
+        };
+
+        const pf =
+          roster.settings.fpts + roster.settings.fpts_decimal / 100;
+        const pa =
+          roster.settings.fpts_against +
+          roster.settings.fpts_against_decimal / 100;
+
+        map.set(ownerId, {
+          displayName,
+          wins: existing.wins + roster.settings.wins,
+          losses: existing.losses + roster.settings.losses,
+          pf: existing.pf + pf,
+          pa: existing.pa + pa,
+        });
+      }
+    }
+
+    return [...map.entries()].map(([ownerId, data]) => ({ ownerId, ...data }));
+  }, [previousSeasonsStore.allSeasonsData]);
+
+  const sortedStandings = useMemo(() => {
+    return [...allTimeStandings].sort((a, b) => {
+      const mult = sortDir === "desc" ? -1 : 1;
+      if (sortField === "wins") return mult * (a.wins - b.wins);
+      if (sortField === "losses") return mult * (a.losses - b.losses);
+      if (sortField === "pf") return mult * (a.pf - b.pf);
+      return mult * (a.pa - b.pa);
+    });
+  }, [allTimeStandings, sortField, sortDir]);
   // Prepare sorted rankings array
   const rankingsRaw = Object.entries(medalCounts)
     .map(([user, medals]) => ({ user, ...medals }))
@@ -93,8 +198,43 @@ const HallOfRecords = () => {
           </CustomMedalRow>
         ))}
       </CustomMedalTable>
+
+      <h2 style={{ marginTop: "2.5rem" }}>All-Time Standings</h2>
+      <AllTimeTable>
+        <AllTimeHeader>
+          <div>Owner</div>
+          <SortableCell onClick={() => handleSort("wins")}>
+            W{sortIndicator("wins")}
+          </SortableCell>
+          <SortableCell onClick={() => handleSort("losses")}>
+            L{sortIndicator("losses")}
+          </SortableCell>
+          <SortableCell onClick={() => handleSort("pf")}>
+            PF{sortIndicator("pf")}
+          </SortableCell>
+          <SortableCell onClick={() => handleSort("pa")}>
+            PA{sortIndicator("pa")}
+          </SortableCell>
+        </AllTimeHeader>
+        {previousSeasonsStore.isLoadingSeasons ||
+        previousSeasonsStore.isLoadingAllSeasons ? (
+          <StandingsLoadingRow>
+            <div>Loading standings…</div>
+          </StandingsLoadingRow>
+        ) : (
+          sortedStandings.map((entry) => (
+            <AllTimeRow key={entry.ownerId}>
+              <div>{entry.displayName}</div>
+              <div>{entry.wins}</div>
+              <div>{entry.losses}</div>
+              <div>{entry.pf.toFixed(2)}</div>
+              <div>{entry.pa.toFixed(2)}</div>
+            </AllTimeRow>
+          ))
+        )}
+      </AllTimeTable>
     </RecordsSection>
   );
-};
+});
 
 export default HallOfRecords;

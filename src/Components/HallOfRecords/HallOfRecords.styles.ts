@@ -205,3 +205,54 @@ export const CustomMedalRow = styled(TableRow)`
     width: 20%;
   }
 `;
+
+export const AllTimeTable = styled(RecordsTable)``;
+
+export const AllTimeHeader = styled(TableHeader)`
+  & > div:first-child {
+    flex: 0 0 40%;
+    min-width: 40%;
+    max-width: 40%;
+    width: 40%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 15%;
+    min-width: 15%;
+    max-width: 15%;
+    width: 15%;
+  }
+`;
+
+export const AllTimeRow = styled(TableRow)`
+  & > div:first-child {
+    flex: 0 0 40%;
+    min-width: 40%;
+    max-width: 40%;
+    width: 40%;
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(3),
+  & > div:nth-child(4),
+  & > div:nth-child(5) {
+    flex: 0 0 15%;
+    min-width: 15%;
+    max-width: 15%;
+    width: 15%;
+  }
+`;
+
+export const SortableCell = styled.div`
+  cursor: pointer;
+  user-select: none;
+  &:hover {
+    color: ${COLORS.accentHover};
+  }
+`;
+
+export const StandingsLoadingRow = styled(AllTimeRow)`
+  justify-content: center;
+  color: ${COLORS.textMuted};
+`;
