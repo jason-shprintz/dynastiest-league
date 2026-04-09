@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import GlobalStyles from './GlobalStyles';
 import { AppContainer, MainContent } from './App.styles';
 import AllTeams from './Components/AllTeams/AllTeams';
@@ -13,6 +13,7 @@ import Scouting from './Components/Scouting/Scouting';
 import Trades from './Components/Trades/Trades';
 import PreviousSeasons from './Components/PreviousSeasons/PreviousSeasons';
 import { NavigationTarget, Section } from './types';
+import usePageMeta from './hooks/usePageMeta';
 
 /**
  * Root application component that manages navigation state and renders the main layout.
@@ -29,11 +30,53 @@ import { NavigationTarget, Section } from './types';
  * <App />
  * ```
  */
+const isValidSection = (value: string): value is Section => {
+  const validSections: Section[] = [
+    'home',
+    'blog',
+    'teams',
+    'trades',
+    'scouting',
+    'records',
+    'champion',
+    'previous-seasons',
+    'constitution',
+  ];
+  return validSections.includes(value as Section);
+};
+
 function App() {
-  const [activeSection, setActiveSection] = useState<Section>('home');
+  const initialSection = (): Section => {
+    const hash = window.location.hash.replace('#', '');
+    return isValidSection(hash) ? hash : 'home';
+  };
+
+  const [activeSection, setActiveSection] = useState<Section>(initialSection);
   const [targetSubsection, setTargetSubsection] = useState<string | undefined>(
     undefined,
   );
+
+  // Sync URL hash whenever the active section changes
+  useEffect(() => {
+    const newHash = activeSection === 'home' ? '' : `#${activeSection}`;
+    if (window.location.hash !== newHash) {
+      window.history.pushState(null, '', newHash || window.location.pathname);
+    }
+  }, [activeSection]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      const hash = window.location.hash.replace('#', '');
+      const section = isValidSection(hash) ? hash : 'home';
+      setActiveSection(section);
+      setTargetSubsection(undefined);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  usePageMeta(activeSection);
 
   const handleNavigate = useCallback((target: NavigationTarget) => {
     setActiveSection(target.section);
