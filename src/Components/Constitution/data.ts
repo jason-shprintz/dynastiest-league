@@ -5,7 +5,7 @@ const constitutionSections: ConstitutionSection[] = [
     id: 'league-structure',
     title: '1. League Structure',
     content:
-      'The Dynastiest League is a 10-team dynasty fantasy football league. Each team maintains a roster year-over-year with an annual rookie draft. The league can be found on Sleeper: https://sleeper.com/leagues/1194516531404427264/league',
+      'The Dynastiest League is a 10-team dynasty fantasy football league. Each team maintains a roster year-over-year with an annual rookie draft. The league can be found on Sleeper: https://sleeper.com/leagues/1326434695138787328/league',
   },
   {
     id: 'roster-settings',
