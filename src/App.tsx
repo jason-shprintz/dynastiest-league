@@ -14,6 +14,7 @@ import Trades from './Components/Trades/Trades';
 import PreviousSeasons from './Components/PreviousSeasons/PreviousSeasons';
 import { NavigationTarget, Section } from './types';
 import usePageMeta from './hooks/usePageMeta';
+import { isValidSection } from './constants';
 
 /**
  * Root application component that manages navigation state and renders the main layout.
@@ -30,47 +31,45 @@ import usePageMeta from './hooks/usePageMeta';
  * <App />
  * ```
  */
-const isValidSection = (value: string): value is Section => {
-  const validSections: Section[] = [
-    'home',
-    'blog',
-    'teams',
-    'trades',
-    'scouting',
-    'records',
-    'champion',
-    'previous-seasons',
-    'constitution',
-  ];
-  return validSections.includes(value as Section);
+
+/**
+ * Parses `window.location.hash` into a validated section and an optional
+ * subsection. Supports both plain hashes (`#blog`) and compound hashes
+ * (`#constitution/unsportsmanlike-conduct`).
+ */
+const parseHash = (): { section: Section; subsection?: string } => {
+  const hash = window.location.hash.replace('#', '');
+  const [sectionPart, subsectionPart] = hash.split('/');
+  const section = isValidSection(sectionPart) ? sectionPart : 'home';
+  return { section, subsection: subsectionPart || undefined };
 };
 
 function App() {
-  const initialSection = (): Section => {
-    const hash = window.location.hash.replace('#', '');
-    return isValidSection(hash) ? hash : 'home';
-  };
+  const { section: initialSectionValue, subsection: initialSubsection } =
+    parseHash();
 
-  const [activeSection, setActiveSection] = useState<Section>(initialSection);
+  const [activeSection, setActiveSection] = useState<Section>(initialSectionValue);
   const [targetSubsection, setTargetSubsection] = useState<string | undefined>(
-    undefined,
+    initialSubsection,
   );
 
   // Sync URL hash whenever the active section changes
   useEffect(() => {
     const newHash = activeSection === 'home' ? '' : `#${activeSection}`;
     if (window.location.hash !== newHash) {
-      window.history.pushState(null, '', newHash || window.location.pathname);
+      const newUrl = newHash
+        ? newHash
+        : `${window.location.pathname}${window.location.search}`;
+      window.history.pushState(null, '', newUrl);
     }
   }, [activeSection]);
 
   // Handle browser back/forward navigation
   useEffect(() => {
     const onPopState = () => {
-      const hash = window.location.hash.replace('#', '');
-      const section = isValidSection(hash) ? hash : 'home';
+      const { section, subsection } = parseHash();
       setActiveSection(section);
-      setTargetSubsection(undefined);
+      setTargetSubsection(subsection);
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);

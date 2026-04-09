@@ -51,7 +51,7 @@ const Blog = ({ onNavigate }: IBlogProps) => {
         '@type': 'BlogPosting',
         headline: post.title,
         datePublished: post.date,
-        url: `https://dynastiestleague.com/#blog/${post.id}`,
+        url: 'https://dynastiestleague.com/#blog',
         publisher: {
           '@type': 'Organization',
           name: 'The Dynastiest League',

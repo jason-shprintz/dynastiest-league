@@ -1,6 +1,7 @@
 import { COLORS } from '../theme/colors';
 import { TextHighlight } from '../Components/Blog/Blog.styles';
 import { NavigationTarget, Section } from '../types';
+import { VALID_SECTIONS, isValidSection } from '../constants';
 
 // Helper to validate URLs and ensure only http/https protocols
 const isValidUrl = (url: string): boolean => {
@@ -10,25 +11,6 @@ const isValidUrl = (url: string): boolean => {
   } catch {
     return false;
   }
-};
-
-// Valid section values
-// Note: This list must be kept in sync with the Section type in types.ts
-// TypeScript doesn't support runtime introspection of union types
-const VALID_SECTIONS: readonly Section[] = [
-  'home',
-  'records',
-  'champion',
-  'constitution',
-  'scouting',
-  'blog',
-  'teams',
-  'trades',
-] as const;
-
-// Helper to validate if a string is a valid Section
-const isValidSection = (value: string): value is Section => {
-  return (VALID_SECTIONS as readonly string[]).includes(value);
 };
 
 // Type for navigation callback that supports both section and subsection
