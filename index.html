@@ -21,7 +21,6 @@
     <meta name="author" content="The Dynastiest League" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
     <meta name="rating" content="general" />
 
     <!-- Open Graph / Facebook -->
@@ -35,7 +34,9 @@
       property="og:description"
       content="The Dynastiest League is a 10-team dynasty fantasy football league established in 2020. View our Hall of Records, current champion, league constitution, and $1,000 annual prize pool."
     />
-    <meta property="og:image" content="https://dynastiestleague.com/Logo.png" />
+    <meta property="og:image" content="https://dynastiestleague.com/Logo.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="The Dynastiest League Logo" />
     <meta property="og:site_name" content="The Dynastiest League" />
     <meta property="og:locale" content="en_US" />
@@ -53,7 +54,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://dynastiestleague.com/Logo.png"
+      content="https://dynastiestleague.com/Logo.webp"
     />
     <meta name="twitter:image:alt" content="The Dynastiest League Logo" />
 
@@ -69,17 +70,17 @@
     <!-- Preload critical fonts -->
     <link
       rel="preload"
-      href="/fonts/Inter-VariableFont_opsz,wght.ttf"
+      href="/fonts/Inter-VariableFont_opsz,wght.woff2"
       as="font"
-      type="font/ttf"
+      type="font/woff2"
       crossorigin="anonymous"
       fetchpriority="high"
     />
     <link
       rel="preload"
-      href="/fonts/Anton-Regular.ttf"
+      href="/fonts/Anton-Regular.woff2"
       as="font"
-      type="font/ttf"
+      type="font/woff2"
       crossorigin="anonymous"
       fetchpriority="high"
     />
@@ -92,13 +93,18 @@
         "name": "The Dynastiest League",
         "description": "A 10-team dynasty fantasy football league established in 2020 with a $1,000 annual prize pool.",
         "url": "https://dynastiestleague.com/",
-        "logo": "https://dynastiestleague.com/Logo.png",
+        "logo": "https://dynastiestleague.com/Logo.webp",
         "foundingDate": "2020",
-        "sport": "Fantasy Football"
+        "sport": "Fantasy Football",
+        "numberOfEmployees": { "@type": "QuantitativeValue", "value": 10 },
+        "award": "jeffgottfried — 2025 Champion"
       }
     </script>
   </head>
   <body>
+    <noscript>
+      <p>The Dynastiest League — Dynasty Fantasy Football Since 2020. Please enable JavaScript to view this site.</p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

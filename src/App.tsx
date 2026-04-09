@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import GlobalStyles from './GlobalStyles';
 import { AppContainer, MainContent } from './App.styles';
 import AllTeams from './Components/AllTeams/AllTeams';
@@ -13,6 +13,8 @@ import Scouting from './Components/Scouting/Scouting';
 import Trades from './Components/Trades/Trades';
 import PreviousSeasons from './Components/PreviousSeasons/PreviousSeasons';
 import { NavigationTarget, Section } from './types';
+import usePageMeta from './hooks/usePageMeta';
+import { isValidSection } from './constants';
 
 /**
  * Root application component that manages navigation state and renders the main layout.
@@ -29,11 +31,51 @@ import { NavigationTarget, Section } from './types';
  * <App />
  * ```
  */
+
+/**
+ * Parses `window.location.hash` into a validated section and an optional
+ * subsection. Supports both plain hashes (`#blog`) and compound hashes
+ * (`#constitution/unsportsmanlike-conduct`).
+ */
+const parseHash = (): { section: Section; subsection?: string } => {
+  const hash = window.location.hash.replace('#', '');
+  const [sectionPart, subsectionPart] = hash.split('/');
+  const section = isValidSection(sectionPart) ? sectionPart : 'home';
+  return { section, subsection: subsectionPart || undefined };
+};
+
 function App() {
-  const [activeSection, setActiveSection] = useState<Section>('home');
+  const { section: initialSectionValue, subsection: initialSubsection } =
+    parseHash();
+
+  const [activeSection, setActiveSection] = useState<Section>(initialSectionValue);
   const [targetSubsection, setTargetSubsection] = useState<string | undefined>(
-    undefined,
+    initialSubsection,
   );
+
+  // Sync URL hash whenever the active section changes
+  useEffect(() => {
+    const newHash = activeSection === 'home' ? '' : `#${activeSection}`;
+    if (window.location.hash !== newHash) {
+      const newUrl = newHash
+        ? newHash
+        : `${window.location.pathname}${window.location.search}`;
+      window.history.pushState(null, '', newUrl);
+    }
+  }, [activeSection]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      const { section, subsection } = parseHash();
+      setActiveSection(section);
+      setTargetSubsection(subsection);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  usePageMeta(activeSection);
 
   const handleNavigate = useCallback((target: NavigationTarget) => {
     setActiveSection(target.section);

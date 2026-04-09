@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { blogPosts } from './data';
 import {
   BlogSection,
@@ -19,13 +20,52 @@ interface IBlogProps {
  *
  * Renders a section containing a header, description, and a list of blog posts
  * with their titles, dates, and content. Each post's content is processed to
- * render any embedded links.
+ * render any embedded links. Injects BlogPosting JSON-LD structured data for
+ * each post to improve AI engine and search crawler visibility.
  *
  * @param props - The component props
  * @param props.onNavigate - Optional callback function to handle internal navigation
  * @returns A React component displaying the league blog with all posts
  */
 const Blog = ({ onNavigate }: IBlogProps) => {
+  useEffect(() => {
+    const schemaId = 'blog-jsonld';
+    let script = document.getElementById(schemaId) as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = schemaId;
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+
+    const blogSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: "Commissioner's Blog",
+      url: 'https://dynastiestleague.com/#blog',
+      publisher: {
+        '@type': 'Organization',
+        name: 'The Dynastiest League',
+      },
+      blogPost: blogPosts.map((post) => ({
+        '@type': 'BlogPosting',
+        headline: post.title,
+        datePublished: post.date,
+        url: 'https://dynastiestleague.com/#blog',
+        publisher: {
+          '@type': 'Organization',
+          name: 'The Dynastiest League',
+        },
+      })),
+    };
+
+    script.textContent = JSON.stringify(blogSchema);
+
+    return () => {
+      document.getElementById(schemaId)?.remove();
+    };
+  }, []);
+
   return (
     <BlogSection>
       <h2>Commissioner's Blog</h2>

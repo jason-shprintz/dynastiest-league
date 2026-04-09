@@ -81,7 +81,7 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
           />
           <img
             src="/Hero-medium.webp"
-            alt="Dynastiest League Hero"
+            alt="The Dynastiest League fantasy football league banner"
             fetchPriority="high"
             style={{
               width: '50%',
