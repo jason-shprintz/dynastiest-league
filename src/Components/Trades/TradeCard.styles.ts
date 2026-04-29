@@ -145,3 +145,71 @@ export const EmptyItems = styled.div`
     font-size: 0.9rem;
   }
 `;
+
+export const GradeSpan = styled.span`
+  margin-left: 8px;
+  color: ${COLORS.success};
+`;
+
+export const AnalysisSummaryText = styled.div`
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: ${COLORS.textMuted};
+`;
+
+export const LoadingAnalysis = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(15, 52, 96, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  font-style: italic;
+  color: ${COLORS.textMuted};
+`;
+
+export const AnalysisContainer = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(15, 52, 96, 0.3);
+  border-radius: 8px;
+`;
+
+export const AnalysisTitle = styled.h3`
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: bold;
+  color: ${COLORS.textPrimary};
+`;
+
+export const ConversationContainer = styled.div`
+  margin-bottom: 0.75rem;
+`;
+
+export const MessageRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 0.75rem;
+`;
+
+export const SpeakerAvatar = styled.img`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+`;
+
+export const SpeakerName = styled.strong<{ $isMike: boolean }>`
+  color: ${({ $isMike }) => ($isMike ? COLORS.textSecondary : COLORS.accent)};
+`;
+
+export const BottomLine = styled.div`
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid ${COLORS.secondary};
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: ${COLORS.textSecondary};
+`;
