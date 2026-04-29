@@ -208,7 +208,7 @@ export const SpeakerName = styled.strong<{ $isMike: boolean }>`
 export const BottomLine = styled.div`
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid ${COLORS.secondary};
+  border-top: 1px solid rgba(168, 178, 209, 0.2);
   font-weight: bold;
   font-size: 0.875rem;
   color: ${COLORS.textSecondary};
