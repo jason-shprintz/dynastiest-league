@@ -13,4 +13,7 @@ export const COLORS = {
   textPrimary: '#ffffff',
   textSecondary: '#ccd6f6',
   textMuted: '#a8b2d1',
+
+  // Semantic colors
+  success: '#4caf50',
 } as const;

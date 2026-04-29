@@ -19,6 +19,16 @@ import {
   ItemsTitle,
   Item,
   EmptyItems,
+  GradeSpan,
+  AnalysisSummaryText,
+  LoadingAnalysis,
+  AnalysisContainer,
+  AnalysisTitle,
+  ConversationContainer,
+  MessageRow,
+  SpeakerAvatar,
+  SpeakerName,
+  BottomLine,
 } from './TradeCard.styles';
 
 interface TradeCardProps {
@@ -155,9 +165,9 @@ export const TradeCard = ({
                 <TeamName>
                   {teamName}
                   {teamAnalysis && (
-                    <span style={{ marginLeft: '8px', color: '#4CAF50' }}>
+                    <GradeSpan>
                       Grade: {teamAnalysis.grade}
-                    </span>
+                    </GradeSpan>
                   )}
                 </TeamName>
                 <ItemsList>
@@ -175,16 +185,9 @@ export const TradeCard = ({
                   ))}
                 </ItemsList>
                 {teamAnalysis && (
-                  <div
-                    style={{
-                      marginTop: '8px',
-                      fontSize: '14px',
-                      fontStyle: 'italic',
-                      color: '#666',
-                    }}
-                  >
+                  <AnalysisSummaryText>
                     {teamAnalysis.summary}
-                  </div>
+                  </AnalysisSummaryText>
                 )}
               </TeamSection>
             </Fragment>
@@ -194,90 +197,40 @@ export const TradeCard = ({
 
       {/* AI Analysis Section */}
       {isLoadingAnalysis && (
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '16px',
-            background: '#f5f5f5',
-            borderRadius: '8px',
-            textAlign: 'center',
-            fontStyle: 'italic',
-            color: '#666',
-          }}
-        >
-          🎬 Mike & Jim are in the film room analyzing this trade...
-        </div>
+        <LoadingAnalysis>
+          🎬 Mike &amp; Jim are in the film room analyzing this trade...
+        </LoadingAnalysis>
       )}
 
       {analysis && (
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '16px',
-            background: '#f9f9f9',
-            borderRadius: '8px',
-          }}
-        >
-          <h3
-            style={{
-              margin: '0 0 12px 0',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            }}
-          >
-            📺 Mike & Jim's Analysis
-          </h3>
-          <div style={{ marginBottom: '12px' }}>
+        <AnalysisContainer>
+          <AnalysisTitle>
+            📺 Mike &amp; Jim's Analysis
+          </AnalysisTitle>
+          <ConversationContainer>
             {analysis.conversation.map((msg, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  marginBottom: '12px',
-                }}
-              >
-                <img
+              <MessageRow key={idx}>
+                <SpeakerAvatar
                   src={
                     msg.speaker === 'Mike'
                       ? '/MikeFantasy.webp'
                       : '/JimFantasy.webp'
                   }
                   alt={msg.speaker}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    flexShrink: 0,
-                  }}
                 />
                 <div>
-                  <strong
-                    style={{
-                      color: msg.speaker === 'Mike' ? '#1976d2' : '#d32f2f',
-                    }}
-                  >
+                  <SpeakerName $isMike={msg.speaker === 'Mike'}>
                     {msg.speaker}:
-                  </strong>{' '}
+                  </SpeakerName>{' '}
                   {msg.text}
                 </div>
-              </div>
+              </MessageRow>
             ))}
-          </div>
-          <div
-            style={{
-              marginTop: '12px',
-              paddingTop: '12px',
-              borderTop: '1px solid #ddd',
-              fontWeight: 'bold',
-              fontSize: '14px',
-            }}
-          >
+          </ConversationContainer>
+          <BottomLine>
             Bottom Line: {analysis.overall_take}
-          </div>
-        </div>
+          </BottomLine>
+        </AnalysisContainer>
       )}
     </TradeCardContainer>
   );
