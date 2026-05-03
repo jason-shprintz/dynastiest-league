@@ -42,7 +42,7 @@
 │  │                                                              │   │
 │  │  1. Poll Sleeper API for new trades                          │   │
 │  │  2. Check if analysis exists in D1                           │   │
-│  │  3. If new: Generate analysis via OpenAI                     │   │
+│  │  3. If new: Generate analysis via Anthropic Claude                │   │
 │  │  4. Store result in D1                                       │   │
 │  └──────────────────────────────────────────────────────────────┘   │
 │                              │                                      │
@@ -53,7 +53,7 @@
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    OpenAI API (GPT-4o-mini)                         │
+│                    Anthropic API (Claude Haiku 4.5)                         │
 │                                                                     │
 │  Generates:                                                         │
 │  - Team grades (A+, B-, etc.)                                       │
@@ -91,7 +91,7 @@ Check if analysis exists in D1
     ↓
 If not exists:
     ↓
-Generate analysis via OpenAI
+Generate analysis via Anthropic Claude
     ↓
 Store in D1 database
 ```
@@ -117,13 +117,13 @@ Display in TradeCard components
 ### 1. Idempotency
 
 - **Transaction ID as Primary Key**: Ensures only one analysis per trade
-- **Check before generate**: Worker checks D1 before calling OpenAI
+- **Check before generate**: Worker checks D1 before calling Anthropic Claude
 - **Result**: No duplicate analyses, predictable costs
 
 ### 2. Consistency
 
 - **Cached analyses**: All users see the same analysis
-- **No client-side OpenAI calls**: Avoids inconsistent results
+- **No client-side Anthropic calls**: Avoids inconsistent results
 - **Versioned schema**: Analysis version tracked for future updates
 
 ### 3. Performance
@@ -134,7 +134,7 @@ Display in TradeCard components
 
 ### 4. Security
 
-- **API key in Worker**: OpenAI key never reaches browser
+- **API key in Worker**: Anthropic key never reaches browser
 - **CORS headers**: Can be restricted to specific domain
 - **Environment variables**: Sensitive data stored as secrets
 
@@ -170,17 +170,17 @@ Display in TradeCard components
 - D1: 5M reads/day, 5GB storage ✅
 - Cron: ~8,640 runs/month ✅
 
-### OpenAI (Paid)
+### Anthropic (Paid)
 
-- Model: GPT-4o-mini
-- Cost per analysis: ~$0.01-0.05
-- Typical monthly cost: $0.10-1.00 (5-20 trades/month)
+- Model: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+- Cost per analysis: ~$0.007 (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
+- Typical monthly cost: $0.05-0.20 (5-20 trades/month)
 
 ## Deployment Checklist
 
 - [ ] Create D1 database
 - [ ] Run migrations
-- [ ] Set OpenAI API key as secret
+- [ ] Set Anthropic API key as secret
 - [ ] Update wrangler.toml with database_id
 - [ ] Deploy worker
 - [ ] Set VITE_WORKER_URL in frontend
@@ -210,9 +210,9 @@ wrangler d1 execute dynastiest-league-db --remote \
   --command "SELECT COUNT(*) FROM trade_analysis"
 ```
 
-### OpenAI Usage
+### Anthropic Usage
 
-- Monitor costs in OpenAI dashboard
+- Monitor costs in [Anthropic Console](https://console.anthropic.com/)
 - Check token usage per request
 - Set spending limits if needed
 
@@ -242,7 +242,7 @@ wrangler d1 execute dynastiest-league-db --remote \
 
 - **Backend**: Cloudflare Workers (TypeScript)
 - **Database**: Cloudflare D1 (SQLite)
-- **AI**: OpenAI GPT-4o-mini
+- **AI**: Anthropic Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
 - **Frontend**: React 19, MobX 6, TypeScript 5
 - **API**: Sleeper Fantasy Football API
 
@@ -256,7 +256,7 @@ wrangler d1 execute dynastiest-league-db --remote \
     cron.ts         # Scheduled job logic
     db.ts           # D1 operations
     sleeper.ts      # Sleeper API client
-    openai.ts       # OpenAI integration
+    anthropic.ts    # Anthropic Claude integration
     types.ts        # TypeScript definitions
   migrations/
     0001_create_trade_analysis.sql
@@ -277,6 +277,6 @@ wrangler d1 execute dynastiest-league-db --remote \
 
 - [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
 - [D1 Database Docs](https://developers.cloudflare.com/d1/)
-- [OpenAI API Docs](https://platform.openai.com/docs)
+- [Anthropic API Docs](https://docs.claude.com/)
 - [Sleeper API Docs](https://docs.sleeper.com/)
 - [Wrangler CLI Docs](https://developers.cloudflare.com/workers/wrangler/)

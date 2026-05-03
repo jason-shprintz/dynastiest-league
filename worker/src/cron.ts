@@ -16,7 +16,7 @@ import {
   fetchPlayerNames,
   fetchNflState,
 } from './sleeper';
-import { generateTradeAnalysis } from './openai';
+import { generateTradeAnalysis } from './anthropic';
 import { analysisExists, saveAnalysis } from './db';
 
 /**

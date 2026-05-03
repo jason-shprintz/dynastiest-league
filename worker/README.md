@@ -5,7 +5,7 @@ Cloudflare Worker that generates AI-powered trade analysis for Sleeper fantasy f
 ## Features
 
 - **Scheduled Cron Job**: Polls Sleeper API every 5 minutes for new trades
-- **AI Analysis**: Generates snarky, in-depth trade analysis using OpenAI
+- **AI Analysis**: Generates snarky, in-depth trade analysis using Anthropic Claude
 - **D1 Database**: Stores analyses to ensure one generation per trade
 - **HTTP API**: Provides endpoints for fetching cached analyses
 
@@ -16,7 +16,7 @@ Cloudflare Worker that generates AI-powered trade analysis for Sleeper fantasy f
 - Node.js 18+
 - Cloudflare account
 - Wrangler CLI installed (`npm install -g wrangler`)
-- OpenAI API key
+- Anthropic API key
 
 ### Installation
 
@@ -56,8 +56,8 @@ npm run d1:migrations:apply:remote
 ### Set Secrets
 
 ```bash
-# Set OpenAI API key
-wrangler secret put OPENAI_API_KEY
+# Set Anthropic API key
+wrangler secret put ANTHROPIC_API_KEY
 # Enter your API key when prompted
 ```
 
@@ -154,7 +154,7 @@ worker/
 │   ├── cron.ts       # Scheduled job handler
 │   ├── db.ts         # D1 database operations
 │   ├── sleeper.ts    # Sleeper API client
-│   ├── openai.ts     # OpenAI integration
+│   ├── anthropic.ts  # Anthropic Claude integration
 │   └── types.ts      # TypeScript types
 ├── migrations/
 │   └── 0001_create_trade_analysis.sql
@@ -172,7 +172,7 @@ Set in `wrangler.toml`:
 
 Set as secrets:
 
-- `OPENAI_API_KEY`: Your OpenAI API key
+- `ANTHROPIC_API_KEY`: Your Anthropic API key
 
 ## Troubleshooting
 
@@ -201,7 +201,7 @@ curl -X GET "https://your-worker.workers.dev/api/trade-analyses?ids=transaction_
 
 - **D1**: First 5GB storage free, first 5 million reads free
 - **Workers**: First 100,000 requests/day free
-- **OpenAI**: Costs per token (use gpt-4o-mini for lower costs)
+- **Anthropic**: Costs per token (Claude Haiku 4.5 is cost-effective)
 - **Cron**: Runs every 5 minutes = ~8,640 invocations/month
 
 Monitor your usage in the Cloudflare dashboard.

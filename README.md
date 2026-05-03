@@ -10,7 +10,7 @@ A fantasy football league landing page built with Vite, React, and TypeScript. F
 - Current Champion spotlight
 - League Constitution with rules and regulations
 - Blog section for news and updates
-- **Breaking News with AI Trade Analysis** - Powered by Cloudflare Workers and OpenAI
+- **Breaking News with AI Trade Analysis** - Powered by Cloudflare Workers and Anthropic Claude
 - Fully responsive design for desktop, tablet, and mobile devices
 
 ## AI Trade Analyzer
@@ -19,7 +19,7 @@ The Breaking News page features AI-powered trade analysis using:
 
 - **Cloudflare Workers** - Serverless backend for API and scheduled jobs
 - **D1 Database** - Stores cached analyses (one per trade)
-- **OpenAI GPT-4o-mini** - Generates snarky, in-depth analysis as a conversation between two talking heads (Mike & Jim)
+- **Anthropic Claude Haiku 4.5** - Generates snarky, in-depth analysis as a conversation between two talking heads (Mike & Jim)
 
 When a trade happens in your Sleeper league, the worker automatically:
 
@@ -67,6 +67,6 @@ npm run clean:appledouble
 - Styled Components
 - Cloudflare Workers (Serverless API)
 - Cloudflare D1 (SQLite Database)
-- OpenAI API (GPT-4o-mini)
+- Anthropic API (Claude Haiku 4.5)
 - CSS3 with responsive design
 - ESLint for code quality
