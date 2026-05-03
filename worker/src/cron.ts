@@ -17,7 +17,7 @@ import {
   fetchUsers,
   fetchLeague,
   fetchNflState,
-  fetchPlayerNames,
+  filterPlayerMap,
   getPlayerMap,
 } from './sleeper';
 import { generateTradeAnalysis } from './anthropic';
@@ -127,9 +127,9 @@ async function processWeekTrades(
 
         console.log(`Generating analysis for trade ${trade.transaction_id}...`);
 
-        // Resolve enriched player names for this trade
+        // Filter the already-loaded player map — no extra KV round-trip needed
         const playerIds = Object.keys(trade.adds ?? {});
-        const playerNames = await fetchPlayerNames(playerIds, env.PLAYERS_KV);
+        const playerNames = filterPlayerMap(playerIds, allPlayers);
 
         // Compute roster shape (position counts) for each team involved
         const rosterShapes: Record<number, Record<string, number>> = {};

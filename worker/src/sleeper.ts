@@ -126,30 +126,37 @@ export async function getPlayerMap(
       });
     }
   } catch (err) {
-    console.error('Failed to fetch /players/nfl:', err);
+    console.error('Failed to fetch or cache /players/nfl:', err);
   }
 
   return playerMap;
 }
 
 /**
- * Fetch enriched player info for specific player IDs, using KV as a daily cache.
- * Returns a map of playerId -> PlayerInfo
+ * Filter an in-memory player map to only the requested player IDs.
+ * Use this when you already have the full player map loaded to avoid re-reading KV.
  */
-export async function fetchPlayerNames(
+export function filterPlayerMap(
   playerIds: string[],
-  kv: KVNamespace,
-): Promise<Record<string, PlayerInfo>> {
-  if (playerIds.length === 0) return {};
-
-  const playerMap = await getPlayerMap(kv);
-
-  // Return only the requested players
+  playerMap: Record<string, PlayerInfo>,
+): Record<string, PlayerInfo> {
   const result: Record<string, PlayerInfo> = {};
   for (const id of playerIds) {
     if (playerMap[id]) result[id] = playerMap[id];
   }
   return result;
+}
+
+/**
+ * Fetch enriched player info for specific player IDs, using KV as a daily cache.
+ * Returns a map of playerId -> PlayerInfo
+ */
+export async function fetchPlayerInfoByIds(
+  playerIds: string[],
+  kv: KVNamespace,
+): Promise<Record<string, PlayerInfo>> {
+  if (playerIds.length === 0) return {};
+  return filterPlayerMap(playerIds, await getPlayerMap(kv));
 }
 
 /**
