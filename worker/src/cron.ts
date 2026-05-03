@@ -167,7 +167,7 @@ async function processWeekTrades(
           leagueId,
           createdAt,
           analysis,
-          env.TRADE_ANALYSIS_VERSION || env.ANALYSIS_VERSION,
+          env.TRADE_ANALYSIS_VERSION,
         );
 
         console.log(`Successfully saved analysis for ${trade.transaction_id}`);
@@ -281,7 +281,11 @@ export async function handleScheduled(env: Env): Promise<void> {
 
 /**
  * Process draft picks — generates per-pick analyses and, when complete, per-team grades.
+ * Per-tick caps prevent Worker timeout and runaway Anthropic spend.
  */
+const MAX_PICKS_PER_TICK = 3;
+const MAX_GRADES_PER_TICK = 2;
+
 async function processDraftAnalysis(
   env: Env,
   draftId: string,
@@ -304,9 +308,14 @@ async function processDraftAnalysis(
 
   const version = env.DRAFT_ANALYSIS_VERSION || 'v1';
 
-  // Process each pick that doesn't have an analysis yet
+  // Process each pick that doesn't have an analysis yet (capped per tick)
   let picksAnalyzed = 0;
   for (let i = 0; i < picks.length; i++) {
+    if (picksAnalyzed >= MAX_PICKS_PER_TICK) {
+      console.log(`Reached per-tick pick cap (${MAX_PICKS_PER_TICK}); remaining picks will be processed next tick`);
+      break;
+    }
+
     const pick = picks[i];
     try {
       const exists = await pickAnalysisExists(env.DB, draftId, pick.pick_no);
@@ -362,6 +371,11 @@ async function processDraftAnalysis(
 
   let teamsGraded = 0;
   for (const [rosterIdStr, teamPicks] of Object.entries(picksByRoster)) {
+    if (teamsGraded >= MAX_GRADES_PER_TICK) {
+      console.log(`Reached per-tick grade cap (${MAX_GRADES_PER_TICK}); remaining grades will be processed next tick`);
+      break;
+    }
+
     const rosterId = Number(rosterIdStr);
     try {
       const exists = await teamDraftGradeExists(env.DB, draftId, rosterId);

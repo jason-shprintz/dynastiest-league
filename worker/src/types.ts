@@ -7,10 +7,12 @@ export interface Env {
   PLAYERS_KV: KVNamespace;
   ANTHROPIC_API_KEY: string;
   SLEEPER_LEAGUE_ID: string;
-  ANALYSIS_VERSION: string;
+  /** @deprecated Use TRADE_ANALYSIS_VERSION instead */
+  ANALYSIS_VERSION?: string;
   TRADE_ANALYSIS_VERSION: string;
   DRAFT_ANALYSIS_VERSION: string;
-  LEAGUE_DRAFT_ID: string;
+  /** Set to the active draft's Sleeper ID to enable draft analysis; omit to disable */
+  LEAGUE_DRAFT_ID?: string;
 }
 
 /**

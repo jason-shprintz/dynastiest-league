@@ -18,7 +18,6 @@ import type {
 const PICK_ANALYSIS_SCHEMA = {
   type: 'object' as const,
   properties: {
-    pick_id: { type: 'string' },
     grade: { type: 'string' },
     value_vs_adp: { type: 'string' },
     conversation: {
@@ -34,7 +33,7 @@ const PICK_ANALYSIS_SCHEMA = {
     },
     hot_take: { type: 'string' },
   },
-  required: ['pick_id', 'grade', 'value_vs_adp', 'conversation', 'hot_take'],
+  required: ['grade', 'value_vs_adp', 'conversation', 'hot_take'],
 };
 
 function getTeamName(
@@ -119,9 +118,11 @@ function buildPickContext(
   }
   if (rank) {
     const expectedSlot = playerInfo!.search_rank!;
-    const delta = expectedSlot - pick.pick_no;
+    // Positive delta = player fell further than expected = good value for the drafter
+    // Negative delta = player taken earlier than ranked = reach
+    const delta = pick.pick_no - expectedSlot;
     if (Math.abs(delta) >= 3) {
-      context += `Value note: Ranked #${expectedSlot} overall; picked at slot ${pick.pick_no} (${delta > 0 ? `${delta} picks early / good value` : `${Math.abs(delta)} picks late / reach`})\n`;
+      context += `Value note: Ranked #${expectedSlot} overall; picked at slot ${pick.pick_no} (${delta > 0 ? `${delta} picks late / good value` : `${Math.abs(delta)} picks early / reach`})\n`;
     }
   }
   return context;
@@ -176,7 +177,7 @@ Keep it snarky, quick, and dynasty-focused.`;
     throw new Error('No tool use block in Claude response for pick analysis');
   }
 
-  const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'draft_id' | 'pick_no'>;
+  const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'pick_id' | 'draft_id' | 'pick_no'>;
   return {
     ...analysis,
     pick_id: `${draftId}:${pick.pick_no}`,

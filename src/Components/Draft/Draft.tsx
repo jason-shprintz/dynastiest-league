@@ -77,6 +77,8 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
   }, [leagueId, usersStore, rostersStore, draftStore]);
 
   const draft = draftStore.mostRecentDraft;
+  // Derived from MobX observable — access here so the observer tracks it and re-renders fire
+  const picksCount = draftPicksState.picks.length;
 
   // Load picks + analyses when draft is known
   useEffect(() => {
@@ -85,9 +87,6 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     const loadDraftData = () => {
       draftPicksState.load(draft.draft_id);
       draftPickAnalysisStore.loadAnalyses(draft.draft_id);
-      if (draft.status === 'complete') {
-        teamDraftGradeStore.loadGrades(draft.draft_id);
-      }
     };
 
     loadDraftData();
@@ -103,7 +102,19 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
         refreshTimerRef.current = null;
       }
     };
-  }, [draft, draftPickAnalysisStore, teamDraftGradeStore]);
+  }, [draft, draftPickAnalysisStore]);
+
+  // Reactively load team grades once picks reach the expected total
+  // (mirrors worker completion condition: status=complete OR picks.length >= rounds*teams)
+  useEffect(() => {
+    if (!draft) return;
+    const totalExpectedPicks = draft.settings.rounds * draft.settings.teams;
+    const isDraftComplete =
+      draft.status === 'complete' || picksCount >= totalExpectedPicks;
+    if (isDraftComplete) {
+      teamDraftGradeStore.loadGrades(draft.draft_id);
+    }
+  }, [draft, picksCount, teamDraftGradeStore]);
 
   const getRosterName = useCallback(
     (rosterId: number): string => {
