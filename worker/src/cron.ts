@@ -8,16 +8,38 @@ import type {
   SleeperTransaction,
   SleeperRoster,
   SleeperUser,
+  SleeperNflState,
+  PlayerInfo,
 } from './types';
 import {
   fetchTransactions,
   fetchRosters,
   fetchUsers,
-  fetchPlayerNames,
+  fetchLeague,
   fetchNflState,
+  fetchPlayerNames,
+  getPlayerMap,
 } from './sleeper';
 import { generateTradeAnalysis } from './anthropic';
 import { analysisExists, saveAnalysis } from './db';
+
+/**
+ * Compute position counts for a single roster's player list.
+ * Returns e.g. { QB: 2, RB: 5, WR: 6, TE: 2, K: 1 }
+ */
+function computeRosterShape(
+  playerIds: string[],
+  playerMap: Record<string, PlayerInfo>,
+): Record<string, number> {
+  const shape: Record<string, number> = {};
+  for (const id of playerIds) {
+    const p = playerMap[id];
+    if (!p) continue;
+    const pos = p.position ?? '?';
+    shape[pos] = (shape[pos] ?? 0) + 1;
+  }
+  return shape;
+}
 
 /**
  * Check if a transaction is a processed trade
@@ -55,6 +77,9 @@ async function processWeekTrades(
   week: number,
   rosters: SleeperRoster[],
   users: SleeperUser[],
+  nflState: SleeperNflState,
+  allPlayers: Record<string, PlayerInfo>,
+  priorSeasonRecords: Record<string, { wins: number; losses: number; fpts: number; fpts_against?: number }>,
   seenTransactionIds: Set<string>,
 ): Promise<number> {
   console.log(`Processing trades for week ${week}...`);
@@ -102,9 +127,21 @@ async function processWeekTrades(
 
         console.log(`Generating analysis for trade ${trade.transaction_id}...`);
 
-        // Resolve player names for this trade via KV-cached player data
+        // Resolve enriched player names for this trade
         const playerIds = Object.keys(trade.adds ?? {});
         const playerNames = await fetchPlayerNames(playerIds, env.PLAYERS_KV);
+
+        // Compute roster shape (position counts) for each team involved
+        const rosterShapes: Record<number, Record<string, number>> = {};
+        for (const rosterId of trade.roster_ids ?? []) {
+          const roster = rosters.find((r) => r.roster_id === rosterId);
+          if (roster) {
+            rosterShapes[rosterId] = computeRosterShape(
+              roster.players ?? [],
+              allPlayers,
+            );
+          }
+        }
 
         const analysis = await generateTradeAnalysis(
           trade,
@@ -112,6 +149,9 @@ async function processWeekTrades(
           users,
           playerNames,
           env.ANTHROPIC_API_KEY,
+          nflState,
+          rosterShapes,
+          priorSeasonRecords,
         );
 
         // Use fallback for created timestamp
@@ -166,10 +206,43 @@ export async function handleScheduled(env: Env): Promise<void> {
   );
 
   // Fetch league data once — shared across all week scans
-  const [rosters, users] = await Promise.all([
+  const [rosters, users, allPlayers] = await Promise.all([
     fetchRosters(leagueId),
     fetchUsers(leagueId),
+    getPlayerMap(env.PLAYERS_KV),
   ]);
+
+  // Fetch prior-season records when in-season so the model has performance
+  // context beyond the current (potentially early-season) W-L record.
+  const priorSeasonRecords: Record<
+    string,
+    { wins: number; losses: number; fpts: number; fpts_against?: number }
+  > = {};
+
+  if (!isOffseason) {
+    try {
+      const league = await fetchLeague(leagueId);
+      if (league.previous_league_id) {
+        const prevRosters = await fetchRosters(league.previous_league_id);
+        for (const r of prevRosters) {
+          if (r.owner_id) {
+            priorSeasonRecords[r.owner_id] = {
+              wins: r.settings.wins,
+              losses: r.settings.losses,
+              fpts: r.settings.fpts,
+              fpts_against: r.settings.fpts_against,
+            };
+          }
+        }
+        console.log(
+          `Loaded prior-season records for ${Object.keys(priorSeasonRecords).length} teams`,
+        );
+      }
+    } catch (err) {
+      console.error('Failed to fetch prior-season records:', err);
+      // Non-fatal — analysis will proceed without prior-season data
+    }
+  }
 
   // Track seen transaction IDs to avoid processing duplicates across weeks
   const seenTransactionIds = new Set<string>();
@@ -182,6 +255,9 @@ export async function handleScheduled(env: Env): Promise<void> {
       week,
       rosters,
       users,
+      nflState,
+      allPlayers,
+      priorSeasonRecords,
       seenTransactionIds,
     );
     totalProcessed += processed;

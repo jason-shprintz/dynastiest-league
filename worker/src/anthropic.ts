@@ -8,6 +8,8 @@ import type {
   SleeperTransaction,
   SleeperRoster,
   SleeperUser,
+  SleeperNflState,
+  PlayerInfo,
   TradeAnalysis,
 } from './types';
 
@@ -83,14 +85,30 @@ const ANALYSIS_SCHEMA = {
 };
 
 /**
+ * Prior-season record for a single team (keyed by owner_id)
+ */
+interface PriorSeasonRecord {
+  wins: number;
+  losses: number;
+  fpts: number;
+  fpts_against?: number;
+}
+
+/**
  * Build context about the trade for Claude
  */
 function buildTradeContext(
   trade: SleeperTransaction,
   rosters: SleeperRoster[],
   users: SleeperUser[],
-  playerNames: Record<string, { name: string; position: string }>,
+  playerNames: Record<string, PlayerInfo>,
+  nflState: SleeperNflState,
+  rosterShapes: Record<number, Record<string, number>>,
+  priorSeasonRecords: Record<string, PriorSeasonRecord>,
 ): string {
+  const isOffseason =
+    nflState.season_type === 'off' || nflState.week === 0;
+
   const getTeamName = (rosterId: number): string => {
     const roster = rosters.find((r) => r.roster_id === rosterId);
     if (!roster) return `Team ${rosterId}`;
@@ -99,18 +117,33 @@ function buildTradeContext(
     return user.metadata?.team_name || user.display_name || user.username;
   };
 
-  const resolvePlayerName = (playerId: string): string => {
-    if (playerNames[playerId]) {
-      const { name, position } = playerNames[playerId];
-      return `${name} (${position})`;
-    }
-    return `Player ID: ${playerId}`;
+  const resolvePlayerInfo = (playerId: string): string => {
+    const p = playerNames[playerId];
+    if (!p) return `Player ID: ${playerId}`;
+    const parts: string[] = [`${p.name} (${p.position}`];
+    if (p.team) parts[0] += `, ${p.team}`;
+    parts[0] += ')';
+    const meta: string[] = [];
+    if (p.age !== undefined) meta.push(`age ${p.age}`);
+    if (p.years_exp !== undefined) meta.push(`${p.years_exp} yr exp`);
+    if (p.search_rank !== undefined) meta.push(`rank #${p.search_rank}`);
+    if (meta.length > 0) parts.push(`[${meta.join(', ')}]`);
+    return parts.join(' ');
   };
 
   const createdAt = trade.created ?? Date.now();
   let context = `Transaction ID: ${trade.transaction_id}\n`;
-  context += `Date: ${new Date(createdAt).toLocaleDateString()}\n\n`;
-  context += `Teams involved:\n`;
+  context += `Date: ${new Date(createdAt).toLocaleDateString()}\n`;
+
+  // Season state context
+  if (isOffseason) {
+    context += `Season state: OFFSEASON (${nflState.season} offseason)\n`;
+    context += `NOTE: All team records show 0-0 because the season has not started. Do not interpret 0-0 records as weakness or rebuilding.\n`;
+  } else {
+    context += `Season state: IN-SEASON (${nflState.season}, Week ${nflState.week})\n`;
+  }
+
+  context += `\nTeams involved:\n`;
 
   const rosterIds = trade.roster_ids ?? [];
   const adds = trade.adds ?? {};
@@ -126,6 +159,27 @@ function buildTradeContext(
     context += `\nRoster ID: ${rosterId}\n`;
     context += `${teamName} (${record}):\n`;
 
+    // Prior-season record (in-season only)
+    if (!isOffseason && roster && priorSeasonRecords[roster.owner_id]) {
+      const prior = priorSeasonRecords[roster.owner_id];
+      const priorPf = prior.fpts.toFixed(1);
+      const priorPa =
+        prior.fpts_against !== undefined ? prior.fpts_against.toFixed(1) : '?';
+      context += `  Prior season: ${prior.wins}-${prior.losses} (PF: ${priorPf}, PA: ${priorPa})\n`;
+    }
+
+    // Current roster shape
+    const shape = rosterShapes[rosterId];
+    if (shape && Object.keys(shape).length > 0) {
+      const shapeParts = Object.entries(shape)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([pos, cnt]) => `${pos}: ${cnt}`)
+        .join(', ');
+      const taxiCount = roster?.taxi?.length ?? 0;
+      const taxiStr = taxiCount > 0 ? ` + ${taxiCount} taxi` : '';
+      context += `  Current roster: ${shapeParts}${taxiStr}\n`;
+    }
+
     // What this team received
     context += `  Received:\n`;
     const gotPlayers = Object.entries(adds).filter(([, to]) => to === rosterId);
@@ -134,7 +188,7 @@ function buildTradeContext(
       context += `    - Nothing\n`;
     }
     gotPlayers.forEach(([playerId]) => {
-      context += `    - ${resolvePlayerName(playerId)}\n`;
+      context += `    - ${resolvePlayerInfo(playerId)}\n`;
     });
     gotPicks.forEach((pick) => {
       const originalTeam = getTeamName(pick.roster_id);
@@ -153,7 +207,7 @@ function buildTradeContext(
       context += `    - Nothing\n`;
     }
     sentPlayers.forEach(([playerId]) => {
-      context += `    - ${resolvePlayerName(playerId)}\n`;
+      context += `    - ${resolvePlayerInfo(playerId)}\n`;
     });
     sentPicks.forEach((pick) => {
       context += `    - ${pick.season} Round ${pick.round} Pick\n`;
@@ -170,15 +224,32 @@ export async function generateTradeAnalysis(
   trade: SleeperTransaction,
   rosters: SleeperRoster[],
   users: SleeperUser[],
-  playerNames: Record<string, { name: string; position: string }>,
+  playerNames: Record<string, PlayerInfo>,
   apiKey: string,
+  nflState: SleeperNflState,
+  rosterShapes: Record<number, Record<string, number>>,
+  priorSeasonRecords: Record<string, PriorSeasonRecord>,
 ): Promise<TradeAnalysis> {
   const anthropic = new Anthropic({ apiKey });
 
-  const context = buildTradeContext(trade, rosters, users, playerNames);
+  const isOffseason =
+    nflState.season_type === 'off' || nflState.week === 0;
 
-  const prompt = `You are analyzing a fantasy football trade for a dynasty league. Your job is to create an in-depth, snarky analysis written as a conversation between two sports analysts named Mike and Jim.
+  const context = buildTradeContext(
+    trade,
+    rosters,
+    users,
+    playerNames,
+    nflState,
+    rosterShapes,
+    priorSeasonRecords,
+  );
 
+  const offseasonGuidance = isOffseason
+    ? `This trade occurred during the dynasty offseason. Records are 0-0 because the season has not started — do not interpret this as teams struggling or rebuilding. Weight your analysis toward player age, dynasty trade value, multi-year roster construction, and how the trade affects each team's competitive window.`
+    : ``;
+
+  const prompt = `You are analyzing a fantasy football trade for a dynasty league. Your job is to create an in-depth, snarky analysis written as a conversation between two sports analysts named Mike and Jim.${offseasonGuidance ? `\n\n${offseasonGuidance}` : ''}
 Trade Details:
 ${context}
 
@@ -192,11 +263,11 @@ Instructions:
 7. End with an "overall_take" that summarizes the trade in one sentence
 
 Keep the tone fun and engaging, but provide genuine fantasy football insights. Consider factors like:
-- Player age and career trajectory
-- Team records and whether they're contending or rebuilding
-- Positional needs
+- Player age and career trajectory (use the age/years_exp/rank data provided)
+- Positional needs (use the roster shape data to identify surplus or need)
+- Dynasty league context (future value matters!)${isOffseason ? '' : `
+- Team records and whether they're contending or rebuilding`}
 - Draft pick value
-- Dynasty league context (future value matters!)
 
 IMPORTANT: Key the "teams" object by roster ID (as a string), not team name. For example:
 {

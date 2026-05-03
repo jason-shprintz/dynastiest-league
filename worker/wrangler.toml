@@ -20,4 +20,4 @@ crons = ["*/5 * * * *"]
 # Environment variables (secrets should be set via wrangler secret put)
 [vars]
 SLEEPER_LEAGUE_ID = "1326434695138787328"
-ANALYSIS_VERSION = "v1"
+ANALYSIS_VERSION = "v2"
