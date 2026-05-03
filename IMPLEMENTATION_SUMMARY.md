@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully implemented a complete AI-powered trade analysis feature that automatically generates snarky, in-depth analysis for Sleeper fantasy football trades using Cloudflare Workers, D1 database, and OpenAI API.
+Successfully implemented a complete AI-powered trade analysis feature that automatically generates snarky, in-depth analysis for Sleeper fantasy football trades using Cloudflare Workers, D1 database, and Anthropic Claude API.
 
 ## Problem Solved
 
@@ -13,7 +13,7 @@ Before this implementation, the Breaking News page displayed raw trade data with
 ### Backend (Cloudflare Worker)
 
 - **Cron Job**: Automatically polls Sleeper API every 5 minutes for new trades
-- **OpenAI Integration**: Generates analysis as a conversation between two sports analyst characters (Mike & Jim)
+- **Anthropic Claude Integration**: Generates analysis as a conversation between two sports analyst characters (Mike & Jim)
 - **D1 Database**: Caches analyses to ensure one generation per trade (idempotent)
 - **HTTP API**: Provides endpoints for fetching single or batch analyses
 - **Security**: API keys stored as Cloudflare secrets, never exposed to clients
@@ -48,7 +48,7 @@ Each analysis includes:
 
 - One analysis per trade (stored in database)
 - All users see the same analysis
-- No OpenAI API calls from browser
+- No Anthropic API calls from browser
 - Cached results for instant loading
 
 ### 4. Efficient Loading
@@ -78,12 +78,12 @@ worker/
 │   ├── cron.ts        - Scheduled job logic
 │   ├── db.ts          - D1 database operations
 │   ├── sleeper.ts     - Sleeper API client
-│   ├── openai.ts      - OpenAI integration with structured output
+│   ├── anthropic.ts   - Anthropic Claude integration with structured output
 │   └── types.ts       - TypeScript type definitions
 ├── migrations/
 │   └── 0001_create_trade_analysis.sql
 ├── wrangler.toml      - Worker configuration
-├── package.json       - Dependencies (OpenAI SDK, Wrangler)
+├── package.json       - Dependencies (Anthropic SDK, Wrangler)
 ├── tsconfig.json      - TypeScript config
 ├── .gitignore         - Ignore build artifacts
 └── README.md          - Worker documentation
@@ -136,11 +136,11 @@ Configuration:
 - D1: 5M reads/day, 5GB storage (plenty of headroom)
 - Cron: ~8,640 invocations/month (covered by free tier)
 
-### OpenAI (Paid)
+### Anthropic (Paid)
 
-- Model: GPT-4o-mini (cost-effective)
-- ~$0.01-0.05 per analysis
-- Typical monthly cost: $0.10-1.00 (assuming 5-20 trades/month)
+- Model: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`, cost-effective)
+- ~$0.007 per analysis (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
+- Typical monthly cost: $0.05-0.20 (assuming 5-20 trades/month)
 
 ## **Total Monthly Cost: < $1.00**
 
@@ -166,8 +166,8 @@ npm run d1:create
 # 3. Run migrations
 npm run d1:migrations:apply:remote
 
-# 4. Set OpenAI API key
-wrangler secret put OPENAI_API_KEY
+# 4. Set Anthropic API key
+wrangler secret put ANTHROPIC_API_KEY
 
 # 5. Deploy worker
 npm run deploy
@@ -219,7 +219,7 @@ npm run build
 ### Scaling Considerations
 
 - Cloudflare Cache API for high-traffic scenarios
-- Analysis quotas to control OpenAI costs
+- Analysis quotas to control Anthropic costs
 - Durable Objects for real-time features
 - Multi-region D1 replication
 
@@ -256,7 +256,7 @@ npm run build
 - Batch API significantly reduces HTTP overhead
 - MobX integration was seamless
 - Cloudflare Workers are fast and reliable
-- OpenAI structured output ensures consistent format
+- Anthropic Claude structured output (tool use) ensures consistent format
 
 ### Challenges Overcome
 

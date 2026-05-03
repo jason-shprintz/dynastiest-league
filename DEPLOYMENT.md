@@ -1,12 +1,12 @@
 # AI Trade Analyzer - Deployment Guide
 
-This guide covers deploying the AI Trade Analyzer to Cloudflare Workers with D1 database and OpenAI integration.
+This guide covers deploying the AI Trade Analyzer to Cloudflare Workers with D1 database and Anthropic Claude integration.
 
 ## Prerequisites
 
 1. **Cloudflare Account** - Free tier is sufficient
 2. **Node.js 18+** - For running Wrangler CLI
-3. **OpenAI API Key** - Get from <https://platform.openai.com/api-keys>
+3. **Anthropic API Key** - Get from <https://console.anthropic.com/>
 4. **Sleeper League ID** - Your league's ID from Sleeper
 
 ## Step 1: Install Wrangler CLI
@@ -88,15 +88,15 @@ You should see:
 ✅ Successfully applied 1 migration.
 ```
 
-## Step 5: Set OpenAI API Key Secret
+## Step 5: Set Anthropic API Key Secret
 
-Store your OpenAI API key as a Cloudflare secret:
+Store your Anthropic API key as a Cloudflare secret:
 
 ```bash
-wrangler secret put OPENAI_API_KEY
+wrangler secret put ANTHROPIC_API_KEY
 ```
 
-When prompted, paste your OpenAI API key and press Enter.
+When prompted, paste your Anthropic API key and press Enter.
 
 ## Step 6: Deploy Worker
 
@@ -244,11 +244,11 @@ Based on default configuration:
 
 All within free tier for typical usage.
 
-### OpenAI
+### Anthropic
 
-- **Model**: gpt-4o-mini (~$0.00015 per 1K input tokens, ~$0.0006 per 1K output tokens)
-- **Estimated**: ~$0.01-0.05 per trade analysis
-- **Monthly**: Depends on trade volume (typically 5-20 trades/month = $0.10-1.00)
+- **Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+- **Cost per analysis**: ~$0.007 (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
+- **Monthly**: Depends on trade volume (typically 5-20 trades/month = $0.05-0.20)
 
 ## Troubleshooting
 
@@ -259,10 +259,10 @@ All within free tier for typical usage.
 3. Check SLEEPER_LEAGUE_ID is correct
 4. Ensure D1 migrations were applied
 
-### OpenAI errors
+### Anthropic errors
 
 1. Verify API key is set: `wrangler secret list`
-2. Check OpenAI account has credits
+2. Check Anthropic account has credits
 3. Review logs for specific error messages
 
 ### Front-end not showing analysis
@@ -294,31 +294,31 @@ Edit `worker/wrangler.toml`:
 crons = ["*/15 * * * *"]  # Every 15 minutes instead of 5
 ```
 
-### Change OpenAI Model
+### Change Anthropic Model
 
-Edit `worker/src/openai.ts`:
+Edit `worker/src/anthropic.ts`:
 
 ```typescript
-const response = await openai.chat.completions.create({
-  model: 'gpt-4', // Use GPT-4 for better quality (higher cost)
+const response = await anthropic.messages.create({
+  model: 'claude-opus-4-5', // Use Claude Opus for better quality (higher cost)
   // ...
 });
 ```
 
 ### Adjust Analysis Style
 
-Edit the prompt in `worker/src/openai.ts` to change tone, length, or focus.
+Edit the prompt in `worker/src/anthropic.ts` to change tone, length, or focus.
 
 ## Production Checklist
 
 - [ ] D1 database created and migrations applied
-- [ ] OpenAI API key set as secret
+- [ ] Anthropic API key set as secret
 - [ ] Worker deployed and health check passes
 - [ ] CORS headers configured for your domain
 - [ ] Front-end environment variable set
 - [ ] Cron job running (check logs after 5-10 minutes)
 - [ ] Test analysis generation works
-- [ ] Monitor costs in OpenAI dashboard
+- [ ] Monitor costs in [Anthropic Console](https://console.anthropic.com/)
 - [ ] Set up alerts for Worker errors (Cloudflare dashboard)
 
 ## Support
@@ -326,7 +326,7 @@ Edit the prompt in `worker/src/openai.ts` to change tone, length, or focus.
 For issues with:
 
 - **Cloudflare Workers/D1**: Check [Cloudflare Docs](https://developers.cloudflare.com/)
-- **OpenAI API**: Check [OpenAI Docs](https://platform.openai.com/docs)
+- **Anthropic API**: Check [Anthropic Docs](https://docs.claude.com/)
 - **Sleeper API**: Check [Sleeper API Docs](https://docs.sleeper.com/)
 
 ## Next Steps
