@@ -305,6 +305,7 @@ export interface DraftPick {
   player_id: string;
   picked_by: string;
   pick_no: number;
+  draft_slot: number;
   metadata: {
     first_name?: string;
     last_name?: string;

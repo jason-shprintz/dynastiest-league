@@ -9,6 +9,8 @@ import type {
   SleeperUser,
   SleeperNflState,
   SleeperLeague,
+  SleeperDraft,
+  SleeperDraftPick,
   PlayerInfo,
 } from './types';
 
@@ -173,4 +175,26 @@ export async function getCurrentWeek(): Promise<number> {
     );
     return 1;
   }
+}
+
+/**
+ * Fetch a single draft object from Sleeper
+ */
+export async function fetchDraft(draftId: string): Promise<SleeperDraft> {
+  const response = await fetch(`${SLEEPER_API_BASE}/draft/${draftId}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch draft: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch all picks for a specific draft from Sleeper
+ */
+export async function fetchDraftPicks(draftId: string): Promise<SleeperDraftPick[]> {
+  const response = await fetch(`${SLEEPER_API_BASE}/draft/${draftId}/picks`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch draft picks: ${response.statusText}`);
+  }
+  return response.json();
 }

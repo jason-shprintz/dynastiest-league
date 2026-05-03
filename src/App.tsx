@@ -5,6 +5,7 @@ import AllTeams from './Components/AllTeams/AllTeams';
 import Blog from './Components/Blog/Blog';
 import Champion from './Components/Champion/Champion';
 import Constitution from './Components/Constitution/Constitution';
+import Draft from './Components/Draft/Draft';
 import Footer from './Components/Footer/Footer';
 import HallOfRecords from './Components/HallOfRecords/HallOfRecords';
 import Header from './Components/Header/Header';
@@ -114,6 +115,7 @@ function App() {
           {activeSection === 'blog' && <Blog onNavigate={handleNavigate} />}
           {activeSection === 'teams' && <AllTeams />}
           {activeSection === 'trades' && <Trades />}
+          {activeSection === 'draft' && <Draft />}
           {activeSection === 'previous-seasons' && <PreviousSeasons />}
         </MainContent>
 

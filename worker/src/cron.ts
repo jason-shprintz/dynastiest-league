@@ -19,9 +19,12 @@ import {
   fetchNflState,
   filterPlayerMap,
   getPlayerMap,
+  fetchDraft,
+  fetchDraftPicks,
 } from './sleeper';
 import { generateTradeAnalysis } from './anthropic';
-import { analysisExists, saveAnalysis } from './db';
+import { generatePickAnalysis, generateTeamDraftGrade } from './draftAnalysis';
+import { analysisExists, saveAnalysis, pickAnalysisExists, savePickAnalysis, teamDraftGradeExists, saveTeamDraftGrade } from './db';
 
 /**
  * Compute position counts for a single roster's player list.
@@ -264,4 +267,125 @@ export async function handleScheduled(env: Env): Promise<void> {
   }
 
   console.log(`Cron job completed. Processed ${totalProcessed} new trade(s)`);
+
+  // Draft analysis — only runs when LEAGUE_DRAFT_ID is configured
+  const draftId = env.LEAGUE_DRAFT_ID;
+  if (draftId) {
+    try {
+      await processDraftAnalysis(env, draftId, leagueId, rosters, users, allPlayers);
+    } catch (err) {
+      console.error('Error processing draft analysis:', err);
+    }
+  }
+}
+
+/**
+ * Process draft picks — generates per-pick analyses and, when complete, per-team grades.
+ */
+async function processDraftAnalysis(
+  env: Env,
+  draftId: string,
+  leagueId: string,
+  rosters: SleeperRoster[],
+  users: SleeperUser[],
+  playerMap: Record<string, PlayerInfo>,
+): Promise<void> {
+  console.log(`Processing draft analysis for draft ${draftId}...`);
+
+  const [draft, picks] = await Promise.all([
+    fetchDraft(draftId),
+    fetchDraftPicks(draftId),
+  ]);
+
+  if (picks.length === 0) {
+    console.log('No picks yet in this draft, skipping');
+    return;
+  }
+
+  const version = env.DRAFT_ANALYSIS_VERSION || env.ANALYSIS_VERSION || 'v1';
+
+  // Process each pick that doesn't have an analysis yet
+  let picksAnalyzed = 0;
+  for (let i = 0; i < picks.length; i++) {
+    const pick = picks[i];
+    try {
+      const exists = await pickAnalysisExists(env.DB, draftId, pick.pick_no);
+      if (exists) continue;
+
+      console.log(`Generating analysis for pick #${pick.pick_no}...`);
+
+      // Prior picks for context (all picks before this one)
+      const priorPicks = picks.slice(0, i);
+
+      const analysis = await generatePickAnalysis(
+        pick,
+        draftId,
+        rosters,
+        users,
+        playerMap,
+        priorPicks,
+        env.ANTHROPIC_API_KEY,
+      );
+
+      await savePickAnalysis(env.DB, draftId, pick.pick_no, leagueId, analysis, version);
+      console.log(`Saved analysis for pick #${pick.pick_no}`);
+      picksAnalyzed++;
+    } catch (err) {
+      console.error(`Error analyzing pick #${pick.pick_no}:`, err);
+      // Continue with other picks
+    }
+  }
+
+  console.log(`Draft pick analysis: ${picksAnalyzed} new pick(s) analyzed`);
+
+  // Check for draft completion — generate team grades when done
+  const totalExpectedPicks = draft.settings.rounds * draft.settings.teams;
+  const isDraftComplete =
+    draft.status === 'complete' ||
+    picks.length >= totalExpectedPicks;
+
+  if (!isDraftComplete) {
+    console.log(`Draft not yet complete (${picks.length}/${totalExpectedPicks} picks)`);
+    return;
+  }
+
+  console.log('Draft is complete — generating team grades...');
+
+  // Group picks by roster_id
+  const picksByRoster: Record<number, typeof picks> = {};
+  for (const pick of picks) {
+    if (!picksByRoster[pick.roster_id]) {
+      picksByRoster[pick.roster_id] = [];
+    }
+    picksByRoster[pick.roster_id].push(pick);
+  }
+
+  let teamsGraded = 0;
+  for (const [rosterIdStr, teamPicks] of Object.entries(picksByRoster)) {
+    const rosterId = Number(rosterIdStr);
+    try {
+      const exists = await teamDraftGradeExists(env.DB, draftId, rosterId);
+      if (exists) continue;
+
+      console.log(`Generating team grade for roster ${rosterId}...`);
+
+      const grade = await generateTeamDraftGrade(
+        rosterId,
+        draftId,
+        teamPicks,
+        rosters,
+        users,
+        playerMap,
+        env.ANTHROPIC_API_KEY,
+      );
+
+      await saveTeamDraftGrade(env.DB, draftId, rosterId, leagueId, grade, version);
+      console.log(`Saved team grade for roster ${rosterId}`);
+      teamsGraded++;
+    } catch (err) {
+      console.error(`Error grading roster ${rosterId}:`, err);
+    }
+  }
+
+  console.log(`Team draft grades: ${teamsGraded} new grade(s) generated`);
 }

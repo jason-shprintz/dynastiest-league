@@ -12,6 +12,7 @@ export const VALID_SECTIONS: readonly Section[] = [
   'blog',
   'teams',
   'trades',
+  'draft',
   'scouting',
   'records',
   'champion',

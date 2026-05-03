@@ -4,7 +4,7 @@
  */
 
 import type { Env } from './types';
-import { getAnalysis, getBatchAnalyses } from './db';
+import { getAnalysis, getBatchAnalyses, getDraftPickAnalyses, getTeamDraftGrades } from './db';
 
 const ALLOWED_ORIGINS = [
   'https://dynastiestleague.com',
@@ -123,6 +123,74 @@ export async function handleGetBatchAnalyses(
     });
   } catch (error) {
     console.error('Error fetching batch analyses:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: cors,
+    });
+  }
+}
+
+/**
+ * Handle GET /api/draft-pick-analyses?draft_id=...
+ * Returns all pick analyses for a draft as a map keyed by pick_no
+ */
+export async function handleGetDraftPickAnalyses(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const cors = getCorsHeaders(request);
+  const url = new URL(request.url);
+  const draftId = url.searchParams.get('draft_id');
+
+  if (!draftId) {
+    return new Response(
+      JSON.stringify({ error: 'draft_id parameter is required' }),
+      { status: 400, headers: cors },
+    );
+  }
+
+  try {
+    const analyses = await getDraftPickAnalyses(env.DB, draftId);
+    return new Response(JSON.stringify(analyses), {
+      status: 200,
+      headers: cors,
+    });
+  } catch (error) {
+    console.error('Error fetching draft pick analyses:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: cors,
+    });
+  }
+}
+
+/**
+ * Handle GET /api/team-draft-grades?draft_id=...
+ * Returns all team draft grades for a draft as a map keyed by roster_id
+ */
+export async function handleGetTeamDraftGrades(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const cors = getCorsHeaders(request);
+  const url = new URL(request.url);
+  const draftId = url.searchParams.get('draft_id');
+
+  if (!draftId) {
+    return new Response(
+      JSON.stringify({ error: 'draft_id parameter is required' }),
+      { status: 400, headers: cors },
+    );
+  }
+
+  try {
+    const grades = await getTeamDraftGrades(env.DB, draftId);
+    return new Response(JSON.stringify(grades), {
+      status: 200,
+      headers: cors,
+    });
+  } catch (error) {
+    console.error('Error fetching team draft grades:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: cors,

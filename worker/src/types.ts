@@ -8,6 +8,9 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
   SLEEPER_LEAGUE_ID: string;
   ANALYSIS_VERSION: string;
+  TRADE_ANALYSIS_VERSION: string;
+  DRAFT_ANALYSIS_VERSION: string;
+  LEAGUE_DRAFT_ID: string;
 }
 
 /**
@@ -134,6 +137,98 @@ export interface TradeAnalysisRecord {
   league_id: string;
   created_at: number;
   analysis_json: string;
+  analysis_version: string;
+  updated_at: number;
+}
+
+/**
+ * Sleeper Draft object (worker-side)
+ */
+export interface SleeperDraft {
+  draft_id: string;
+  league_id: string;
+  status: 'pre_draft' | 'drafting' | 'complete' | string;
+  settings: {
+    rounds: number;
+    teams: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Sleeper draft pick (worker-side)
+ */
+export interface SleeperDraftPick {
+  pick_no: number;
+  round: number;
+  draft_slot: number;
+  roster_id: number;
+  player_id: string;
+  picked_by: string;
+  metadata: {
+    first_name?: string;
+    last_name?: string;
+    position?: string;
+    team?: string;
+    [key: string]: unknown;
+  } | null;
+}
+
+/**
+ * Draft pick analysis structure
+ */
+export interface DraftPickAnalysis {
+  pick_id: string; // "draft_id:pick_no"
+  draft_id: string;
+  pick_no: number;
+  grade: string;
+  value_vs_adp: string;
+  conversation: Array<{
+    speaker: 'Mike' | 'Jim';
+    text: string;
+  }>;
+  hot_take: string;
+}
+
+/**
+ * Team draft grade structure
+ */
+export interface TeamDraftGrade {
+  draft_id: string;
+  roster_id: number;
+  overall_grade: string;
+  best_pick: { pick_no: number; reason: string } | null;
+  worst_pick: { pick_no: number; reason: string } | null;
+  summary: string;
+  conversation: Array<{
+    speaker: 'Mike' | 'Jim';
+    text: string;
+  }>;
+}
+
+/**
+ * Database record for draft pick analysis
+ */
+export interface DraftPickAnalysisRecord {
+  draft_id: string;
+  pick_no: number;
+  league_id: string;
+  created_at: number;
+  analysis_json: string;
+  analysis_version: string;
+  updated_at: number;
+}
+
+/**
+ * Database record for team draft grade
+ */
+export interface TeamDraftGradeRecord {
+  draft_id: string;
+  roster_id: number;
+  league_id: string;
+  created_at: number;
+  grade_json: string;
   analysis_version: string;
   updated_at: number;
 }

@@ -7,6 +7,7 @@ type Section =
   | 'blog'
   | 'teams'
   | 'trades'
+  | 'draft'
   | 'previous-seasons';
 
 // Navigation target that can include an optional subsection for deep linking

@@ -13,11 +13,15 @@ database_id = "d93d3be4-7f27-48f6-b8e6-5037abacac42"
 binding = "PLAYERS_KV"
 id = "7a76420693ce4dcfb81667ea1727fd25"
 
-# Cron trigger - runs every 5 minutes
+# Cron trigger - runs every 1 minute for draft-week responsiveness
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/1 * * * *"]
 
 # Environment variables (secrets should be set via wrangler secret put)
 [vars]
 SLEEPER_LEAGUE_ID = "1326434695138787328"
 ANALYSIS_VERSION = "v2"
+TRADE_ANALYSIS_VERSION = "v2"
+DRAFT_ANALYSIS_VERSION = "v1"
+# Set LEAGUE_DRAFT_ID to the active draft's ID to enable draft analysis
+# LEAGUE_DRAFT_ID = ""

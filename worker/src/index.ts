@@ -9,6 +9,8 @@ import {
   handleOptions,
   handleGetAnalysis,
   handleGetBatchAnalyses,
+  handleGetDraftPickAnalyses,
+  handleGetTeamDraftGrades,
 } from './api';
 
 /**
@@ -41,6 +43,14 @@ export default {
 
     if (url.pathname === '/api/trade-analyses') {
       return handleGetBatchAnalyses(request, env);
+    }
+
+    if (url.pathname === '/api/draft-pick-analyses') {
+      return handleGetDraftPickAnalyses(request, env);
+    }
+
+    if (url.pathname === '/api/team-draft-grades') {
+      return handleGetTeamDraftGrades(request, env);
     }
 
     // Health check endpoint

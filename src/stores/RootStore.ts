@@ -14,6 +14,8 @@ import { TradedPicksStore } from './TradedPicksStore';
 import { PlayersStore } from './PlayersStore';
 import { TradeAnalysisStore } from './TradeAnalysisStore';
 import { PreviousSeasonsStore } from './PreviousSeasonsStore';
+import { DraftPickAnalysisStore } from './DraftPickAnalysisStore';
+import { TeamDraftGradeStore } from './TeamDraftGradeStore';
 
 export class RootStore {
   leagueStore: LeagueStore;
@@ -27,6 +29,8 @@ export class RootStore {
   playersStore: PlayersStore;
   tradeAnalysisStore: TradeAnalysisStore;
   previousSeasonsStore: PreviousSeasonsStore;
+  draftPickAnalysisStore: DraftPickAnalysisStore;
+  teamDraftGradeStore: TeamDraftGradeStore;
 
   constructor() {
     this.leagueStore = new LeagueStore();
@@ -40,6 +44,8 @@ export class RootStore {
     this.playersStore = new PlayersStore();
     this.tradeAnalysisStore = new TradeAnalysisStore();
     this.previousSeasonsStore = new PreviousSeasonsStore();
+    this.draftPickAnalysisStore = new DraftPickAnalysisStore();
+    this.teamDraftGradeStore = new TeamDraftGradeStore();
   }
 
   /**
@@ -93,5 +99,7 @@ export class RootStore {
     this.playersStore.reset();
     this.tradeAnalysisStore.reset();
     this.previousSeasonsStore.reset();
+    this.draftPickAnalysisStore.reset();
+    this.teamDraftGradeStore.reset();
   }
 }
