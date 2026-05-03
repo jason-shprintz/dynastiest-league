@@ -11,6 +11,18 @@ export interface Env {
 }
 
 /**
+ * Enriched player info stored in KV and used for prompt context
+ */
+export interface PlayerInfo {
+  name: string;
+  position: string;
+  team?: string;
+  age?: number;
+  years_exp?: number;
+  search_rank?: number;
+}
+
+/**
  * Sleeper Transaction types
  */
 export interface SleeperTransaction {
@@ -45,11 +57,22 @@ export interface SleeperRoster {
   roster_id: number;
   owner_id: string;
   players: string[];
+  taxi?: string[];
   settings: {
     wins: number;
     losses: number;
     fpts: number;
+    fpts_against?: number;
   };
+}
+
+/**
+ * Sleeper League object (partial — only the fields we use)
+ */
+export interface SleeperLeague {
+  league_id: string;
+  previous_league_id?: string;
+  [key: string]: unknown;
 }
 
 export interface SleeperUser {
