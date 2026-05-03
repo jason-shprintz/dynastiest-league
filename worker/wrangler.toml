@@ -20,7 +20,6 @@ crons = ["*/1 * * * *"]
 # Environment variables (secrets should be set via wrangler secret put)
 [vars]
 SLEEPER_LEAGUE_ID = "1326434695138787328"
-ANALYSIS_VERSION = "v2"
 TRADE_ANALYSIS_VERSION = "v2"
 DRAFT_ANALYSIS_VERSION = "v1"
 # Set LEAGUE_DRAFT_ID to the active draft's ID to enable draft analysis

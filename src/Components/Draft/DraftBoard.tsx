@@ -31,8 +31,9 @@ export const DraftBoard = ({ draft, picks, analyses, getTeamName }: DraftBoardPr
   // Sleeper pick objects have draft_slot field, so we derive the slot→team from picks
   const slotToRosterId = new Map<number, number>();
   for (const pick of picks) {
-    if (!slotToRosterId.has(pick.draft_slot ?? 0)) {
-      slotToRosterId.set(pick.draft_slot ?? pick.pick_no, pick.roster_id);
+    const slot = pick.draft_slot > 0 ? pick.draft_slot : ((pick.pick_no - 1) % numTeams) + 1;
+    if (!slotToRosterId.has(slot)) {
+      slotToRosterId.set(slot, pick.roster_id);
     }
   }
 
@@ -42,7 +43,7 @@ export const DraftBoard = ({ draft, picks, analyses, getTeamName }: DraftBoardPr
   // Build lookup: (round, slot) → pick
   const pickLookup = new Map<string, DraftPick>();
   for (const pick of picks) {
-    const slot = pick.draft_slot ?? ((pick.pick_no - 1) % numTeams) + 1;
+    const slot = pick.draft_slot > 0 ? pick.draft_slot : ((pick.pick_no - 1) % numTeams) + 1;
     pickLookup.set(`${pick.round}:${slot}`, pick);
   }
 

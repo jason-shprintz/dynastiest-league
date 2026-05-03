@@ -59,7 +59,8 @@ export default {
         JSON.stringify({
           status: 'ok',
           service: 'dynastiest-league-worker',
-          version: env.ANALYSIS_VERSION,
+          trade_analysis_version: env.TRADE_ANALYSIS_VERSION || env.ANALYSIS_VERSION,
+          draft_analysis_version: env.DRAFT_ANALYSIS_VERSION,
         }),
         {
           status: 200,

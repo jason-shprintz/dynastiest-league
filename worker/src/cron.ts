@@ -167,7 +167,7 @@ async function processWeekTrades(
           leagueId,
           createdAt,
           analysis,
-          env.ANALYSIS_VERSION,
+          env.TRADE_ANALYSIS_VERSION || env.ANALYSIS_VERSION,
         );
 
         console.log(`Successfully saved analysis for ${trade.transaction_id}`);
@@ -302,7 +302,7 @@ async function processDraftAnalysis(
     return;
   }
 
-  const version = env.DRAFT_ANALYSIS_VERSION || env.ANALYSIS_VERSION || 'v1';
+  const version = env.DRAFT_ANALYSIS_VERSION || 'v1';
 
   // Process each pick that doesn't have an analysis yet
   let picksAnalyzed = 0;
