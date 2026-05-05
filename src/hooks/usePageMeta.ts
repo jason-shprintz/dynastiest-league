@@ -42,6 +42,11 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
     description:
       'Recent trade history and analysis for the Dynastiest League.',
   },
+  draft: {
+    title: 'Draft | The Dynastiest League',
+    description:
+      'Live rookie draft board with per-pick AI commentary and overall team grades from Mike & Jim.',
+  },
   'previous-seasons': {
     title: 'Previous Seasons | The Dynastiest League',
     description:

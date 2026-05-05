@@ -9,6 +9,8 @@ import {
   handleOptions,
   handleGetAnalysis,
   handleGetBatchAnalyses,
+  handleGetDraftPickAnalyses,
+  handleGetTeamDraftGrades,
 } from './api';
 
 /**
@@ -43,13 +45,22 @@ export default {
       return handleGetBatchAnalyses(request, env);
     }
 
+    if (url.pathname === '/api/draft-pick-analyses') {
+      return handleGetDraftPickAnalyses(request, env);
+    }
+
+    if (url.pathname === '/api/team-draft-grades') {
+      return handleGetTeamDraftGrades(request, env);
+    }
+
     // Health check endpoint
     if (url.pathname === '/health' || url.pathname === '/') {
       return new Response(
         JSON.stringify({
           status: 'ok',
           service: 'dynastiest-league-worker',
-          version: env.ANALYSIS_VERSION,
+          trade_analysis_version: env.TRADE_ANALYSIS_VERSION,
+          draft_analysis_version: env.DRAFT_ANALYSIS_VERSION,
         }),
         {
           status: 200,

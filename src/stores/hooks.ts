@@ -62,3 +62,11 @@ export function usePlayersStore() {
 export function usePreviousSeasonsStore() {
   return useStore().previousSeasonsStore;
 }
+
+export function useDraftPickAnalysisStore() {
+  return useStore().draftPickAnalysisStore;
+}
+
+export function useTeamDraftGradeStore() {
+  return useStore().teamDraftGradeStore;
+}

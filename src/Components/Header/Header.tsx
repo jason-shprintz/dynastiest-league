@@ -29,6 +29,7 @@ const navItems: NavItem[] = [
   { section: 'blog', label: 'Blog' },
   { section: 'teams', label: 'Teams' },
   { section: 'trades', label: 'Trades' },
+  { section: 'draft', label: 'Draft' },
   { section: 'scouting', label: 'Scouting' },
   { section: 'records', label: 'Hall of Records' },
   { section: 'champion', label: 'Current Champion' },

@@ -3,7 +3,7 @@
  * Functions to interact with D1 database
  */
 
-import type { Env, TradeAnalysis, TradeAnalysisRecord } from './types';
+import type { Env, TradeAnalysis, TradeAnalysisRecord, DraftPickAnalysis, DraftPickAnalysisRecord, TeamDraftGrade, TeamDraftGradeRecord } from './types';
 
 /**
  * Get trade analysis by transaction ID
@@ -127,4 +127,128 @@ export async function getLeagueAnalyses(
   return result.results.map(
     (r) => JSON.parse(r.analysis_json) as TradeAnalysis,
   );
+}
+
+// ─── Draft Pick Analysis ─────────────────────────────────────────────────────
+
+/**
+ * Check if a draft pick analysis already exists
+ */
+export async function pickAnalysisExists(
+  db: D1Database,
+  draftId: string,
+  pickNo: number,
+): Promise<boolean> {
+  const result = await db
+    .prepare('SELECT 1 FROM draft_pick_analysis WHERE draft_id = ? AND pick_no = ? LIMIT 1')
+    .bind(draftId, pickNo)
+    .first();
+  return result !== null;
+}
+
+/**
+ * Save a draft pick analysis to the database
+ */
+export async function savePickAnalysis(
+  db: D1Database,
+  draftId: string,
+  pickNo: number,
+  leagueId: string,
+  analysis: DraftPickAnalysis,
+  version: string,
+): Promise<void> {
+  const now = Date.now();
+  await db
+    .prepare(
+      `INSERT INTO draft_pick_analysis
+       (draft_id, pick_no, league_id, created_at, analysis_json, analysis_version, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(draft_id, pick_no) DO UPDATE SET
+       analysis_json = excluded.analysis_json,
+       analysis_version = excluded.analysis_version,
+       updated_at = excluded.updated_at`,
+    )
+    .bind(draftId, pickNo, leagueId, now, JSON.stringify(analysis), version, now)
+    .run();
+}
+
+/**
+ * Get all draft pick analyses for a draft, returned as a map keyed by pick_no
+ */
+export async function getDraftPickAnalyses(
+  db: D1Database,
+  draftId: string,
+): Promise<Record<number, DraftPickAnalysis>> {
+  const result = await db
+    .prepare('SELECT pick_no, analysis_json FROM draft_pick_analysis WHERE draft_id = ? ORDER BY pick_no ASC')
+    .bind(draftId)
+    .all<DraftPickAnalysisRecord>();
+
+  const map: Record<number, DraftPickAnalysis> = {};
+  result.results.forEach((row) => {
+    map[row.pick_no] = JSON.parse(row.analysis_json) as DraftPickAnalysis;
+  });
+  return map;
+}
+
+// ─── Team Draft Grade ────────────────────────────────────────────────────────
+
+/**
+ * Check if a team draft grade already exists
+ */
+export async function teamDraftGradeExists(
+  db: D1Database,
+  draftId: string,
+  rosterId: number,
+): Promise<boolean> {
+  const result = await db
+    .prepare('SELECT 1 FROM team_draft_grade WHERE draft_id = ? AND roster_id = ? LIMIT 1')
+    .bind(draftId, rosterId)
+    .first();
+  return result !== null;
+}
+
+/**
+ * Save a team draft grade to the database
+ */
+export async function saveTeamDraftGrade(
+  db: D1Database,
+  draftId: string,
+  rosterId: number,
+  leagueId: string,
+  grade: TeamDraftGrade,
+  version: string,
+): Promise<void> {
+  const now = Date.now();
+  await db
+    .prepare(
+      `INSERT INTO team_draft_grade
+       (draft_id, roster_id, league_id, created_at, grade_json, analysis_version, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(draft_id, roster_id) DO UPDATE SET
+       grade_json = excluded.grade_json,
+       analysis_version = excluded.analysis_version,
+       updated_at = excluded.updated_at`,
+    )
+    .bind(draftId, rosterId, leagueId, now, JSON.stringify(grade), version, now)
+    .run();
+}
+
+/**
+ * Get all team draft grades for a draft, returned as a map keyed by roster_id
+ */
+export async function getTeamDraftGrades(
+  db: D1Database,
+  draftId: string,
+): Promise<Record<number, TeamDraftGrade>> {
+  const result = await db
+    .prepare('SELECT roster_id, grade_json FROM team_draft_grade WHERE draft_id = ? ORDER BY roster_id ASC')
+    .bind(draftId)
+    .all<TeamDraftGradeRecord>();
+
+  const map: Record<number, TeamDraftGrade> = {};
+  result.results.forEach((row) => {
+    map[row.roster_id] = JSON.parse(row.grade_json) as TeamDraftGrade;
+  });
+  return map;
 }
