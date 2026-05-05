@@ -5,6 +5,7 @@
  */
 
 import type { SpeakerConfig } from '../speakers';
+import { COLORS } from '../../../theme/colors';
 import {
   ConversationWrapper,
   MessageGroupWrapper,
@@ -71,7 +72,7 @@ export const Conversation = ({
               {group.messages.map((msg, msgIdx) => (
                 <Bubble
                   key={`${groupIdx}-${msgIdx}`}
-                  $color="#555555"
+                  $color={COLORS.secondary}
                   $isLeft
                   $isFirst={msgIdx === 0}
                   $compact={compact}
