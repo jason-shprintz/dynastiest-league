@@ -64,7 +64,24 @@ export const Conversation = ({
     <ConversationWrapper>
       {groups.map((group, groupIdx) => {
         const config = speakers[group.speaker];
-        if (!config) return null;
+        if (!config) {
+          // Unknown speaker — render messages as plain text so content isn't silently dropped
+          return (
+            <MessageGroupWrapper key={`unknown-${groupIdx}`} $isLeft>
+              {group.messages.map((msg, msgIdx) => (
+                <Bubble
+                  key={`${groupIdx}-${msgIdx}`}
+                  $color="#555555"
+                  $isLeft
+                  $isFirst={msgIdx === 0}
+                  $compact={compact}
+                >
+                  <strong>{group.speaker}:</strong> {msg.text}
+                </Bubble>
+              ))}
+            </MessageGroupWrapper>
+          );
+        }
 
         const isLeft = config.side === 'left';
 
@@ -86,7 +103,7 @@ export const Conversation = ({
                     (isFirst ? (
                       <AvatarImg
                         src={config.avatar}
-                        alt={group.speaker}
+                        alt=""
                         $compact={compact}
                       />
                     ) : (
@@ -106,7 +123,7 @@ export const Conversation = ({
                     (isFirst ? (
                       <AvatarImg
                         src={config.avatar}
-                        alt={group.speaker}
+                        alt=""
                         $compact={compact}
                       />
                     ) : (

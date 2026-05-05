@@ -3,6 +3,8 @@
  * Consumed by all conversation surfaces: trade cards, draft pick cards, team grade cards.
  */
 
+import { COLORS } from '../../theme/colors';
+
 export interface SpeakerConfig {
   /** Path to the speaker's avatar image */
   avatar: string;
@@ -22,13 +24,13 @@ export const MIKE_AND_JIM_SPEAKERS: Record<string, SpeakerConfig> = {
   Mike: {
     avatar: '/MikeFantasy.webp',
     side: 'left',
-    color: '#1a4a80',   // deep steel blue — ~11:1 contrast with white
-    nameColor: '#ccd6f6', // textSecondary from theme
+    color: '#1a4a80',            // deep steel blue — ~11:1 contrast with white
+    nameColor: COLORS.textSecondary,
   },
   Jim: {
     avatar: '/JimFantasy.webp',
     side: 'right',
-    color: '#8b2500',   // dark burnt orange — ~8:1 contrast with white
-    nameColor: '#ffd700', // accent/gold from theme
+    color: '#8b2500',            // dark burnt orange — ~8:1 contrast with white
+    nameColor: COLORS.accent,
   },
 };

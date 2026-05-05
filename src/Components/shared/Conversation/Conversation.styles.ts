@@ -1,7 +1,8 @@
 import styled from 'styled-components';
+import { COLORS } from '../../../theme/colors';
 
-const AVATAR_SIZE_DEFAULT = 54;
-const AVATAR_SIZE_COMPACT = 36;
+const AVATAR_SIZE_DEFAULT = 36;
+const AVATAR_SIZE_COMPACT = 24;
 const GAP_DEFAULT = 10;
 const GAP_COMPACT = 8;
 
@@ -68,7 +69,7 @@ export const Bubble = styled.div<{
   $compact: boolean;
 }>`
   background: ${({ $color }) => $color};
-  color: #ffffff;
+  color: ${COLORS.white};
   border-radius: ${({ $isFirst, $isLeft }) =>
     $isFirst
       ? $isLeft
