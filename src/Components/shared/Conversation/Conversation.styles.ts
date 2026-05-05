@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
-const AVATAR_SIZE_DEFAULT = 36;
-const AVATAR_SIZE_COMPACT = 24;
+const AVATAR_SIZE_DEFAULT = 54;
+const AVATAR_SIZE_COMPACT = 36;
 const GAP_DEFAULT = 10;
 const GAP_COMPACT = 8;
 
@@ -51,6 +51,8 @@ export const AvatarImg = styled.img<{ $compact: boolean }>`
   height: ${({ $compact }) => ($compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`)};
   border-radius: 50%;
   object-fit: cover;
+  /* stylelint-disable-next-line property-no-unknown */
+  object-view-box: inset(0 0 20% 0);
   flex-shrink: 0;
 `;
 
