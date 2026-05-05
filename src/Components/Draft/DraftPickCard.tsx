@@ -15,10 +15,9 @@ import {
   HotTake,
   PlaceholderText,
   MiniConversation,
-  MiniMessage,
-  MiniSpeaker,
-  MiniAvatar,
 } from './Draft.styles';
+import { Conversation } from '../shared/Conversation';
+import { MIKE_AND_JIM_SPEAKERS } from '../shared/speakers';
 
 interface DraftPickCardProps {
   pick: DraftPick;
@@ -66,18 +65,11 @@ export const DraftPickCard = ({ pick, analysis }: DraftPickCardProps) => {
           <HotTake>"{analysis.hot_take}"</HotTake>
           {analysis.conversation.length > 0 && (
             <MiniConversation>
-              {analysis.conversation.slice(0, 3).map((msg, i) => (
-                <MiniMessage key={i}>
-                  <MiniAvatar
-                    src={msg.speaker === 'Mike' ? '/MikeFantasy.webp' : '/JimFantasy.webp'}
-                    alt={msg.speaker}
-                  />
-                  <div>
-                    <MiniSpeaker $isMike={msg.speaker === 'Mike'}>{msg.speaker}: </MiniSpeaker>
-                    {msg.text}
-                  </div>
-                </MiniMessage>
-              ))}
+              <Conversation
+                messages={analysis.conversation.slice(0, 3)}
+                speakers={MIKE_AND_JIM_SPEAKERS}
+                variant="compact"
+              />
             </MiniConversation>
           )}
         </>

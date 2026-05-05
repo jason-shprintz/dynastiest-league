@@ -182,29 +182,6 @@ export const AnalysisTitle = styled.h3`
   color: ${COLORS.textPrimary};
 `;
 
-export const ConversationContainer = styled.div`
-  margin-bottom: 0.75rem;
-`;
-
-export const MessageRow = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 0.75rem;
-`;
-
-export const SpeakerAvatar = styled.img`
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-`;
-
-export const SpeakerName = styled.strong<{ $isMike: boolean }>`
-  color: ${({ $isMike }) => ($isMike ? COLORS.textSecondary : COLORS.accent)};
-`;
-
 export const BottomLine = styled.div`
   margin-top: 0.75rem;
   padding-top: 0.75rem;
