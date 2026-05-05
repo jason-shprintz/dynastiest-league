@@ -52,6 +52,7 @@ export const AvatarImg = styled.img<{ $compact: boolean }>`
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  align-self: flex-end;
 `;
 
 export const AvatarSpacer = styled.div<{ $compact: boolean }>`
@@ -87,7 +88,7 @@ export const Bubble = styled.div<{
     &::before {
       content: '';
       position: absolute;
-      top: 8px;
+      bottom: 8px;
       left: -8px;
       width: 0;
       height: 0;
@@ -101,7 +102,7 @@ export const Bubble = styled.div<{
     &::before {
       content: '';
       position: absolute;
-      top: 8px;
+      bottom: 8px;
       right: -8px;
       width: 0;
       height: 0;
