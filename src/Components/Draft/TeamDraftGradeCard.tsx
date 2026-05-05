@@ -13,10 +13,9 @@ import {
   BestWorstRow,
   BestWorstItem,
   GradeConversation,
-  GradeMessageRow,
-  GradeAvatar,
-  GradeSpeaker,
 } from './Draft.styles';
+import { Conversation } from '../shared/Conversation';
+import { MIKE_AND_JIM_SPEAKERS } from '../shared/speakers';
 
 interface TeamDraftGradeCardProps {
   grade: TeamDraftGrade;
@@ -50,18 +49,10 @@ export const TeamDraftGradeCard = ({ grade, teamName }: TeamDraftGradeCardProps)
 
       {grade.conversation.length > 0 && (
         <GradeConversation>
-          {grade.conversation.map((msg, i) => (
-            <GradeMessageRow key={i}>
-              <GradeAvatar
-                src={msg.speaker === 'Mike' ? '/MikeFantasy.webp' : '/JimFantasy.webp'}
-                alt={msg.speaker}
-              />
-              <div>
-                <GradeSpeaker $isMike={msg.speaker === 'Mike'}>{msg.speaker}: </GradeSpeaker>
-                {msg.text}
-              </div>
-            </GradeMessageRow>
-          ))}
+          <Conversation
+            messages={grade.conversation}
+            speakers={MIKE_AND_JIM_SPEAKERS}
+          />
         </GradeConversation>
       )}
     </TeamGradeCardContainer>

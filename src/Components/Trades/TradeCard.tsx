@@ -24,12 +24,10 @@ import {
   LoadingAnalysis,
   AnalysisContainer,
   AnalysisTitle,
-  ConversationContainer,
-  MessageRow,
-  SpeakerAvatar,
-  SpeakerName,
   BottomLine,
 } from './TradeCard.styles';
+import { Conversation } from '../shared/Conversation';
+import { MIKE_AND_JIM_SPEAKERS } from '../shared/speakers';
 
 interface TradeCardProps {
   trade: Transaction;
@@ -207,26 +205,10 @@ export const TradeCard = ({
           <AnalysisTitle>
             📺 Mike &amp; Jim's Analysis
           </AnalysisTitle>
-          <ConversationContainer>
-            {analysis.conversation.map((msg, idx) => (
-              <MessageRow key={idx}>
-                <SpeakerAvatar
-                  src={
-                    msg.speaker === 'Mike'
-                      ? '/MikeFantasy.webp'
-                      : '/JimFantasy.webp'
-                  }
-                  alt={msg.speaker}
-                />
-                <div>
-                  <SpeakerName $isMike={msg.speaker === 'Mike'}>
-                    {msg.speaker}:
-                  </SpeakerName>{' '}
-                  {msg.text}
-                </div>
-              </MessageRow>
-            ))}
-          </ConversationContainer>
+          <Conversation
+            messages={analysis.conversation}
+            speakers={MIKE_AND_JIM_SPEAKERS}
+          />
           <BottomLine>
             Bottom Line: {analysis.overall_take}
           </BottomLine>

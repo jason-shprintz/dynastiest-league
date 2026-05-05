@@ -194,29 +194,6 @@ export const MiniConversation = styled.div`
   padding-top: 0.4rem;
 `;
 
-export const MiniMessage = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin-bottom: 0.3rem;
-  font-size: 0.73rem;
-  color: ${COLORS.textSecondary};
-  line-height: 1.4;
-`;
-
-export const MiniSpeaker = styled.strong<{ $isMike: boolean }>`
-  color: ${({ $isMike }) => ($isMike ? COLORS.textSecondary : COLORS.accent)};
-  white-space: nowrap;
-`;
-
-export const MiniAvatar = styled.img`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-`;
-
 // ─── Team grade card ──────────────────────────────────────────────────────────
 
 export const TeamGradeCardContainer = styled.div`
@@ -277,27 +254,6 @@ export const GradeConversation = styled.div`
   border-top: 1px solid rgba(168, 178, 209, 0.15);
   padding-top: 0.5rem;
   margin-top: 0.5rem;
-`;
-
-export const GradeMessageRow = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 0.5rem;
-  font-size: 0.8rem;
-  color: ${COLORS.textSecondary};
-`;
-
-export const GradeAvatar = styled.img`
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-`;
-
-export const GradeSpeaker = styled.strong<{ $isMike: boolean }>`
-  color: ${({ $isMike }) => ($isMike ? COLORS.textSecondary : COLORS.accent)};
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
