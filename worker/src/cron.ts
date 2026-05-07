@@ -214,18 +214,20 @@ async function resolveDraftId(env: Env, leagueId: string): Promise<string | null
       return active.draft_id;
     }
     const completedDrafts = drafts.filter((d) => d.status === 'complete');
+    const getDraftRecency = (draft: (typeof completedDrafts)[number]): number => {
+      const lastPicked =
+        typeof draft.last_picked === 'number' ? draft.last_picked : null;
+      const startTime =
+        typeof draft.start_time === 'number' ? draft.start_time : null;
+      const created = typeof draft.created === 'number' ? draft.created : null;
+      return lastPicked ?? startTime ?? created ?? 0;
+    };
     const recentComplete = completedDrafts.reduce<
       (typeof completedDrafts)[number] | null
     >((latest, current) => {
       if (!latest) return current;
-      const latestRecency =
-        (typeof latest.last_picked === 'number' ? latest.last_picked : 0) ||
-        (typeof latest.start_time === 'number' ? latest.start_time : 0) ||
-        (typeof latest.created === 'number' ? latest.created : 0);
-      const currentRecency =
-        (typeof current.last_picked === 'number' ? current.last_picked : 0) ||
-        (typeof current.start_time === 'number' ? current.start_time : 0) ||
-        (typeof current.created === 'number' ? current.created : 0);
+      const latestRecency = getDraftRecency(latest);
+      const currentRecency = getDraftRecency(current);
       return currentRecency > latestRecency ? current : latest;
     }, null);
     if (recentComplete) {
