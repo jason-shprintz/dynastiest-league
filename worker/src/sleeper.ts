@@ -198,3 +198,16 @@ export async function fetchDraftPicks(draftId: string): Promise<SleeperDraftPick
   }
   return response.json();
 }
+
+/**
+ * Fetch all drafts associated with a league.
+ * Sleeper returns drafts in reverse chronological order (newest first).
+ * Used by the cron to auto-detect the active draft when LEAGUE_DRAFT_ID is unset.
+ */
+export async function fetchLeagueDrafts(leagueId: string): Promise<SleeperDraft[]> {
+  const response = await fetch(`${SLEEPER_API_BASE}/league/${leagueId}/drafts`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch league drafts: ${response.statusText}`);
+  }
+  return response.json();
+}
