@@ -56,12 +56,12 @@ export class DraftPickAnalysisStore {
   /**
    * Fetch all pick analyses for a draft
    */
-  async loadAnalyses(draftId: string): Promise<void> {
+  async loadAnalyses(draftId: string, options?: { force?: boolean }): Promise<void> {
     // Skip if already loading
     if (this.loadingDraftIds.has(draftId)) return;
 
     // Check retry timer for drafts that returned empty
-    if (this.analysesByDraftId.has(draftId) && !this.shouldRetry(draftId)) return;
+    if (!options?.force && this.analysesByDraftId.has(draftId) && !this.shouldRetry(draftId)) return;
 
     runInAction(() => {
       this.loadingDraftIds.add(draftId);

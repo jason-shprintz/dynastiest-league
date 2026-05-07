@@ -85,6 +85,8 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
   }, [leagueId, usersStore, rostersStore, draftStore]);
 
   const draft = draftStore.mostRecentDraft;
+  const draftId = draft?.draft_id;
+  const draftStatus = draft?.status;
   // Derived from MobX observable — access here so the observer tracks it and re-renders fire
   const picksCount = draftPicksState.picks.length;
 
@@ -99,22 +101,22 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
 
   // Load picks + analyses once whenever draft changes
   useEffect(() => {
-    if (!draft) return;
+    if (!draftId) return;
     const loadPicks = async () => {
-      await draftPicksState.load(draft.draft_id);
+      await draftPicksState.load(draftId);
       setLastUpdatedAt(Date.now());
     };
     const loadAnalyses = async () => {
-      await draftPickAnalysisStore.loadAnalyses(draft.draft_id);
+      await draftPickAnalysisStore.loadAnalyses(draftId, { force: draftStatus === 'drafting' });
       setLastUpdatedAt(Date.now());
     };
     loadPicks();
     loadAnalyses();
-  }, [draft, draftPickAnalysisStore]);
+  }, [draftId, draftStatus, draftPickAnalysisStore]);
 
   // Poll while draft is live and tab is visible
   useEffect(() => {
-    if (!draft) return;
+    if (!draftId) return;
 
     const clearPolling = () => {
       if (picksRefreshTimerRef.current) {
@@ -127,13 +129,13 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
       }
     };
 
-    if (draft.status === 'drafting' && isTabVisible) {
+    if (draftStatus === 'drafting' && isTabVisible) {
       const loadPicks = async () => {
-        await draftPicksState.load(draft.draft_id);
+        await draftPicksState.load(draftId);
         setLastUpdatedAt(Date.now());
       };
       const loadAnalyses = async () => {
-        await draftPickAnalysisStore.loadAnalyses(draft.draft_id);
+        await draftPickAnalysisStore.loadAnalyses(draftId, { force: true });
         setLastUpdatedAt(Date.now());
       };
 
@@ -148,7 +150,7 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     }
 
     return clearPolling;
-  }, [draft, isTabVisible, draftPickAnalysisStore]);
+  }, [draftId, draftStatus, isTabVisible, draftPickAnalysisStore]);
 
   // Reactively load team grades once picks reach the expected total
   // (mirrors worker completion condition: status=complete OR picks.length >= rounds*teams)
