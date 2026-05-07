@@ -79,12 +79,21 @@ function buildPickContext(
 
   const playerInfo = playerMap[pick.player_id];
   const age = playerInfo?.age !== undefined ? `Age ${playerInfo.age}` : null;
-  const yearsExp = playerInfo?.years_exp !== undefined
-    ? `${playerInfo.years_exp} yrs exp`
+  // years_exp === 0 in Sleeper indicates a rookie. Surface this affirmatively
+  // rather than as "0 yrs exp" so the model parses it correctly.
+  const rookieFlag = playerInfo?.years_exp === 0
+    ? 'Rookie (no NFL snaps yet)'
+    : playerInfo?.years_exp !== undefined
+    ? `${playerInfo.years_exp} NFL years`
     : null;
-  const rank = playerInfo?.search_rank !== undefined
-    ? `Dynasty rank #${playerInfo.search_rank}`
-    : null;
+
+  // NOTE: We intentionally do NOT include Sleeper's search_rank here. It is a
+  // global redraft-style ranking that places unproven rookies in the 200+ range
+  // because they're not useful in same-season redraft formats. Comparing
+  // search_rank against rookie-draft slot numbers (1–40) produced bogus "reach"
+  // labels for every pick. Until proper dynasty rookie ADP is wired in (see
+  // FantasyCalc integration issue), it's better to omit ADP context entirely
+  // and let the model lean on NFL Draft capital, landing spot, and fit.
 
   const teamName = getTeamName(pick.roster_id, rosters, users);
   const roster = rosters.find((r) => r.roster_id === pick.roster_id);
@@ -106,8 +115,8 @@ function buildPickContext(
   let context = `Draft ID: ${draftId}\n`;
   context += `Pick #${pick.pick_no} (Round ${pick.round})\n`;
   context += `Player: ${playerName} | Position: ${position} | NFL Team: ${nflTeam}\n`;
-  if (age || yearsExp || rank) {
-    context += `Profile: ${[age, yearsExp, rank].filter(Boolean).join(', ')}\n`;
+  if (age || rookieFlag) {
+    context += `Profile: ${[age, rookieFlag].filter(Boolean).join(', ')}\n`;
   }
   context += `Drafted By: ${teamName} (Roster ID: ${pick.roster_id})\n`;
   if (shapeParts) {
@@ -115,15 +124,6 @@ function buildPickContext(
   }
   if (teamPriorPicks.length > 0) {
     context += `${teamName}'s prior picks in this draft: ${teamPriorPositions}\n`;
-  }
-  if (rank) {
-    const expectedSlot = playerInfo!.search_rank!;
-    // Positive delta = player fell further than expected = good value for the drafter
-    // Negative delta = player taken earlier than ranked = reach
-    const delta = pick.pick_no - expectedSlot;
-    if (Math.abs(delta) >= 3) {
-      context += `Value note: Ranked #${expectedSlot} overall; picked at slot ${pick.pick_no} (${delta > 0 ? `${delta} picks late / good value` : `${Math.abs(delta)} picks early / reach`})\n`;
-    }
   }
   return context;
 }
@@ -144,23 +144,34 @@ export async function generatePickAnalysis(
 
   const context = buildPickContext(pick, draftId, rosters, users, playerMap, priorPicks);
 
-  const prompt = `You are analyzing a dynasty fantasy football rookie draft pick. Provide a brief, entertaining hot take as a short conversation between two analysts, Mike and Jim.
+  const prompt = `You are analyzing a pick in a DYNASTY ROOKIE DRAFT. Provide a brief, entertaining hot take as a short conversation between two analysts, Mike and Jim.
+
+CRITICAL CONTEXT — read carefully before judging this pick:
+- Every player taken in this draft is an incoming NFL rookie who has NOT played a single professional snap.
+- Traditional/redraft ADP does NOT apply here. Rookies always rank low in redraft formats because they're unproven; that is irrelevant in a dynasty rookie draft.
+- Evaluate the pick using:
+  • NFL Draft capital (what round/team the player was selected by in the actual NFL Draft)
+  • Landing spot and depth chart opportunity
+  • Age and athletic profile
+  • Positional scarcity in dynasty (elite WRs are scarcer than RBs; QBs gain value in superflex)
+  • Fit with the drafting team's existing roster
+- Do NOT call this pick a "reach" unless the player would clearly go multiple rounds later in any reasonable dynasty rookie ranking. When uncertain, treat it as fair value.
 
 Pick Details:
 ${context}
 
 Instructions:
 1. Give this pick a letter grade (A+, A, A-, B+, B, B-, C+, C, C-, D+, D, F)
-2. Rate value vs ADP/ranking: positive number means good value (picked later than expected), negative means reach, "0" means fair value
-3. Write 2-3 exchanges between Mike and Jim — short and punchy, not long paragraphs
+2. Set value_vs_adp as a small integer string. Default to "0" (fair value). Use a small positive number (1–3) only if you're confident the player is widely viewed as a clearly better pick than this slot, and a small negative (-1 to -3) only if clearly a reach. Do NOT use large magnitudes — this is a 4-round, 40-pick draft.
+3. Write 2-3 short, punchy exchanges between Mike and Jim
 4. Write a one-sentence hot_take
 
-Keep it snarky, quick, and dynasty-focused.`;
+Keep it snarky, quick, and dynasty-rookie-focused.`;
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 800,
-    system: 'You are a fantasy football analyst providing quick, snarky takes on rookie draft picks.',
+    system: 'You are a fantasy football analyst providing quick, snarky takes on dynasty rookie draft picks. You understand that rookies have no NFL track record yet and that traditional redraft ADP is meaningless in a rookie-only dynasty draft.',
     tools: [
       {
         name: 'submit_pick_analysis',
@@ -246,7 +257,7 @@ function buildTeamGradeContext(
   if (shapeParts) {
     context += `Existing roster: ${shapeParts}\n`;
   }
-  context += `\nDraft picks:\n`;
+  context += `\nDraft picks (all rookies):\n`;
 
   for (const pick of teamPicks) {
     const meta = pick.metadata ?? {};
@@ -256,9 +267,9 @@ function buildTeamGradeContext(
     const position = meta.position ?? 'Unknown';
     const nflTeam = meta.team ?? 'FA';
     const playerInfo = playerMap[pick.player_id];
-    const rank = playerInfo?.search_rank !== undefined ? ` (rank #${playerInfo.search_rank})` : '';
     const age = playerInfo?.age !== undefined ? `, age ${playerInfo.age}` : '';
-    context += `  Pick #${pick.pick_no} (Rd ${pick.round}): ${playerName} — ${position}, ${nflTeam}${age}${rank}\n`;
+    // Intentionally omitting Sleeper search_rank — see note in buildPickContext.
+    context += `  Pick #${pick.pick_no} (Rd ${pick.round}): ${playerName} — ${position}, ${nflTeam}${age}\n`;
   }
 
   return context;
@@ -280,22 +291,25 @@ export async function generateTeamDraftGrade(
 
   const context = buildTeamGradeContext(rosterId, teamPicks, rosters, users, playerMap);
 
-  const prompt = `You are grading an entire dynasty rookie draft class for one team. Give an overall draft grade and a short Mike & Jim conversation.
+  const prompt = `You are grading a DYNASTY ROOKIE DRAFT class for one team. Give an overall draft grade and a short Mike & Jim conversation.
+
+CRITICAL CONTEXT:
+- Every pick below is an incoming NFL rookie. None has played a pro snap.
+- Do NOT apply traditional/redraft ADP. Rookies always rank low in redraft; that is irrelevant in a rookie-only dynasty draft.
+- Grade based on: NFL Draft capital, landing spot, age/athletic profile, positional scarcity in dynasty, and how the new picks fit with the team's existing roster shape.
 
 ${context}
 
 Instructions:
-1. Give an overall letter grade for this team's draft class
+1. Give an overall letter grade for this team's rookie draft class
 2. Call out the best pick and worst pick (by pick_no) with a one-sentence reason each. If the team only had great picks, pick the weakest of the strong; if all picks were poor, pick the least bad.
 3. Write a 2-3 sentence summary of the draft class
-4. Write 2-3 exchanges between Mike and Jim about this draft
-
-Dynasty context matters: age, position scarcity, and fit with existing roster.`;
+4. Write 2-3 exchanges between Mike and Jim about this draft`;
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1000,
-    system: 'You are a fantasy football analyst grading dynasty rookie draft classes.',
+    system: 'You are a fantasy football analyst grading dynasty rookie draft classes. You understand that rookies have no NFL track record yet and that redraft ADP does not apply.',
     tools: [
       {
         name: 'submit_team_grade',
