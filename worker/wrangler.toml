@@ -21,7 +21,7 @@ crons = ["*/1 * * * *"]
 [vars]
 SLEEPER_LEAGUE_ID = "1326434695138787328"
 TRADE_ANALYSIS_VERSION = "v2"
-DRAFT_ANALYSIS_VERSION = "v2"
+DRAFT_ANALYSIS_VERSION = "v3"
 # LEAGUE_DRAFT_ID is optional. When unset, the cron auto-detects the active
 # (or most recent completed) draft via Sleeper's /league/{id}/drafts endpoint.
 # Set it explicitly only to override auto-detection for a specific draft.
