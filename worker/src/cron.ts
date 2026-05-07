@@ -213,7 +213,21 @@ async function resolveDraftId(env: Env, leagueId: string): Promise<string | null
       console.log(`Auto-detected active draft: ${active.draft_id}`);
       return active.draft_id;
     }
-    const recentComplete = drafts.find((d) => d.status === 'complete');
+    const completedDrafts = drafts.filter((d) => d.status === 'complete');
+    const recentComplete = completedDrafts.reduce<
+      (typeof completedDrafts)[number] | null
+    >((latest, current) => {
+      if (!latest) return current;
+      const latestRecency =
+        (typeof latest.last_picked === 'number' ? latest.last_picked : 0) ||
+        (typeof latest.start_time === 'number' ? latest.start_time : 0) ||
+        (typeof latest.created === 'number' ? latest.created : 0);
+      const currentRecency =
+        (typeof current.last_picked === 'number' ? current.last_picked : 0) ||
+        (typeof current.start_time === 'number' ? current.start_time : 0) ||
+        (typeof current.created === 'number' ? current.created : 0);
+      return currentRecency > latestRecency ? current : latest;
+    }, null);
     if (recentComplete) {
       console.log(
         `Auto-detected most recent completed draft: ${recentComplete.draft_id}`,
