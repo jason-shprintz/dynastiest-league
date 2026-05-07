@@ -64,9 +64,9 @@ function computeRosterShape(
 }
 
 /**
- * Bucket the slot-vs-rank delta into a qualitative label for the prompt.
- * Positive delta = picked LATER than expected = good value for drafter.
- * Negative delta = picked EARLIER than expected = reach.
+ * Bucket the slot-vs-rookieRank delta into a qualitative label for the prompt.
+ * Positive delta = picked LATER than the rookie's rank in the class = good value.
+ * Negative delta = picked EARLIER than rookie rank = reach.
  */
 function deltaLabel(delta: number): string {
   if (delta >= 8) return 'major value — fell well below consensus';
@@ -80,7 +80,10 @@ function deltaLabel(delta: number): string {
 
 interface PickContextResult {
   context: string;
-  /** Slot - overallRank. null when no FantasyCalc data is available. */
+  /**
+   * Slot - rookieRank. null when no rookieRank is available (player not in
+   * FantasyCalc, or not flagged as a rookie in Sleeper).
+   */
   computedDelta: number | null;
 }
 
@@ -123,25 +126,35 @@ function buildPickContext(
     .map((p) => p.metadata?.position ?? '?')
     .join(', ');
 
-  // FantasyCalc dynasty value (the authoritative ADP signal for rookies).
-  // The dynasty value already implicitly bakes in NFL Draft capital, landing
-  // spot, and athletic profile — exactly the signals the model is missing
-  // due to its training cutoff predating the actual NFL Draft.
+  // FantasyCalc dynasty rank, with rookie-only re-ranking applied.
+  //
+  // CRITICAL: We use rookieRank (rank among rookies in this class) for the
+  // slot-value delta — NOT overallRank (rank across all dynasty assets, vets
+  // included). Example: Travis Hunter might be overallRank #25 but rookieRank
+  // #1. In a rookie-only draft, picking him at slot 1 is exactly right, not
+  // a 24-slot reach. overallRank is shown as supplementary color but is not
+  // used for delta math.
   const fcValue = rookieValues.players[pick.player_id];
   let computedDelta: number | null = null;
   let valueLine = '';
-  if (fcValue) {
-    computedDelta = pick.pick_no - fcValue.overallRank;
+  if (fcValue && fcValue.rookieRank !== undefined) {
+    computedDelta = pick.pick_no - fcValue.rookieRank;
     const deltaSign = computedDelta > 0 ? '+' : '';
-    const posRankStr = fcValue.positionRank !== undefined
-      ? `, #${fcValue.positionRank} at ${position}`
+    const posRankStr = fcValue.rookiePositionRank !== undefined
+      ? ` (rookie ${position}${fcValue.rookiePositionRank} in this class)`
       : '';
     valueLine =
-      `Dynasty rank (FantasyCalc): #${fcValue.overallRank} overall${posRankStr} (value ${fcValue.value})\n` +
-      `Slot vs rank: picked at #${pick.pick_no}, ranked #${fcValue.overallRank} → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n`;
+      `Rookie class rank: #${fcValue.rookieRank}${posRankStr}\n` +
+      `Slot vs rookie rank: picked at #${pick.pick_no}, ranked #${fcValue.rookieRank} among rookies → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n` +
+      `(For dynasty context only — not used for slot evaluation: FantasyCalc overall rank #${fcValue.overallRank}, value ${fcValue.value}.)\n`;
+  } else if (fcValue) {
+    // Player has FantasyCalc data but no rookieRank — likely a non-rookie
+    // accidentally in the draft, or rookie flag is missing in Sleeper.
+    valueLine =
+      `Dynasty rank: FantasyCalc has this player but they aren't flagged as a rookie. Skip slot-value commentary; focus on profile and team fit.\n`;
   } else {
     valueLine =
-      `Dynasty rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
+      `Rookie rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
   }
 
   let context = `Pick #${pick.pick_no} (Round ${pick.round})\n`;
@@ -189,13 +202,13 @@ export async function generatePickAnalysis(
   const prompt = `You are Mike and Jim, two fantasy football analysts giving a quick take on a dynasty rookie draft pick.
 
 Context:
-- This is a ${draftRounds}-round, ${draftRounds * draftTeams}-pick dynasty rookie draft. Every player is an incoming NFL rookie.
-- The pick details below include the player's dynasty rank from FantasyCalc, which represents the consensus dynasty community valuation. Treat this as the authoritative source for whether the pick was made at a fair slot.
-- "Slot vs rank" tells you exactly whether the pick was good value, fair, or a reach. Use that as your starting point — do not invent your own ADP intuitions.
-- If a player has no FantasyCalc rank, do NOT speculate about value. Focus only on player profile and team fit.
+- This is a ${draftRounds}-round, ${draftRounds * draftTeams}-pick dynasty ROOKIE-ONLY draft. Every player taken is an incoming NFL rookie.
+- The pick details below include the player's "Rookie class rank" — their rank among the rookies in this class, derived from FantasyCalc dynasty values. THIS is the authoritative ADP for evaluating whether the pick was made at a fair slot. The slot vs rookie rank delta tells you exactly whether the pick was good value, fair, or a reach.
+- IGNORE the FantasyCalc overall rank for slot evaluation — that ranks across all dynasty assets including veterans, and would make every rookie look like a massive reach. It's shown only as supplementary dynasty context.
+- If a player has no rookie rank (rare deep prospect or data issue), do NOT speculate about value. Focus only on player profile and team fit.
 
 What to discuss:
-- Whether the pick was good value, fair, or a reach (per the delta)
+- Whether the pick was good value, fair, or a reach (per the slot-vs-rookie-rank delta)
 - Player profile and fit with the drafting team's roster shape
 - Positional dynasty appeal (elite WRs scarce, RBs age fast, QBs matter more in superflex)
 - Snark and entertainment
@@ -204,15 +217,15 @@ Pick details:
 ${context}
 
 Instructions:
-1. Letter grade (A+ through F) reflecting both player quality and slot value.
-2. value_vs_adp: short integer-string. Use the slot-vs-rank delta directly when available, "0" when no FantasyCalc data.
+1. Letter grade (A+ through F) reflecting both player quality and slot value (per the rookie rank delta).
+2. value_vs_adp: short integer-string. Use the slot-vs-rookie-rank delta directly when available, "0" when no rookie rank.
 3. 2–3 short, punchy Mike & Jim exchanges.
 4. One-sentence hot_take.`;
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 800,
-    system: 'You are Mike and Jim, dynasty fantasy football analysts. You evaluate rookie draft picks using FantasyCalc dynasty rankings as the authoritative consensus, supplemented by player profile and roster fit.',
+    system: 'You are Mike and Jim, dynasty fantasy football analysts. You evaluate rookie draft picks using rookie-class-only rankings as the authoritative consensus, supplemented by player profile and roster fit. You ignore overall dynasty rank for slot evaluation because rookie-only drafts are not measured against veterans.',
     tools: [
       {
         name: 'submit_pick_analysis',
@@ -232,7 +245,7 @@ Instructions:
   const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'pick_id' | 'draft_id' | 'pick_no'>;
 
   // Always overwrite value_vs_adp with the computed delta (or "0" when we
-  // have no FantasyCalc data). The model's emitted value is unreliable; the
+  // have no rookie rank). The model's emitted value is unreliable; the
   // delta is deterministic and matches the prompt context exactly.
   const sanitizedValue = computedDelta !== null ? String(computedDelta) : '0';
 
@@ -304,7 +317,7 @@ function buildTeamGradeContext(
 
   let totalValue = 0;
   let totalSlotDelta = 0;
-  let picksWithValue = 0;
+  let picksWithDelta = 0;
 
   let context = `Team: ${teamName}\n`;
   if (shapeParts) {
@@ -324,24 +337,24 @@ function buildTeamGradeContext(
 
     const fcValue = rookieValues.players[pick.player_id];
     let valueSegment = '';
-    if (fcValue) {
-      const delta = pick.pick_no - fcValue.overallRank;
+    if (fcValue && fcValue.rookieRank !== undefined) {
+      const delta = pick.pick_no - fcValue.rookieRank;
       const deltaSign = delta > 0 ? '+' : '';
-      valueSegment = ` | Dynasty #${fcValue.overallRank} overall (delta ${deltaSign}${delta}: ${deltaLabel(delta)})`;
+      valueSegment = ` | Rookie #${fcValue.rookieRank} in class (delta ${deltaSign}${delta}: ${deltaLabel(delta)})`;
       totalValue += fcValue.value;
       totalSlotDelta += delta;
-      picksWithValue++;
+      picksWithDelta++;
     } else {
-      valueSegment = ' | Dynasty rank: unavailable';
+      valueSegment = ' | Rookie rank: unavailable';
     }
 
     context += `  Pick #${pick.pick_no} (Rd ${pick.round}): ${playerName} — ${position}, ${nflTeam}${age}${valueSegment}\n`;
   }
 
-  if (picksWithValue > 0) {
-    const avgDelta = totalSlotDelta / picksWithValue;
+  if (picksWithDelta > 0) {
+    const avgDelta = totalSlotDelta / picksWithDelta;
     const avgSign = avgDelta > 0 ? '+' : '';
-    context += `\nClass totals (FantasyCalc-rated picks only): total value ${totalValue}, average slot-vs-rank delta ${avgSign}${avgDelta.toFixed(1)}\n`;
+    context += `\nClass totals (rookie-ranked picks only): total FantasyCalc value ${totalValue}, average slot-vs-rookie-rank delta ${avgSign}${avgDelta.toFixed(1)}\n`;
   }
 
   return context;
@@ -374,28 +387,28 @@ export async function generateTeamDraftGrade(
   const prompt = `You are Mike and Jim grading one team's dynasty rookie draft class.
 
 Context:
-- This is a dynasty rookie draft. All picks below are incoming NFL rookies.
-- Each pick includes the player's FantasyCalc dynasty rank — the consensus dynasty community valuation. Use this as the authoritative source for whether picks were made at fair slots.
-- "Class totals" tells you the team's average slot-vs-rank delta. Positive average = team consistently got value. Negative average = team consistently reached.
+- This is a dynasty ROOKIE-ONLY draft. All picks below are incoming NFL rookies.
+- Each pick includes the player's rookie class rank — their rank among rookies in this class. Use this as the authoritative consensus for whether picks were made at fair slots.
+- "Class totals" tells you the team's average slot-vs-rookie-rank delta. Positive average = team consistently got value. Negative average = team consistently reached.
 
 Grade based on:
 - Total dynasty value accumulated (sum of FantasyCalc values)
 - How well the rookies fill positional needs in the existing roster
-- Whether the team got value at each slot or reached
+- Whether the team got value at each slot or reached (per the rookie-rank delta)
 - Positional dynasty appeal of the class (WRs and TEs age slowly; RBs are volatile)
 
 ${context}
 
 Instructions:
 1. Letter grade for the rookie class.
-2. Best pick + worst pick (by pick_no) with one-sentence reason each (cite the dynasty rank when relevant).
+2. Best pick + worst pick (by pick_no) with one-sentence reason each (cite the rookie rank when relevant).
 3. 2–3 sentence summary of the class.
 4. 2–3 exchanges between Mike and Jim about the team's strategy and execution.`;
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1000,
-    system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using FantasyCalc dynasty rankings as the authoritative consensus, total class value, slot-vs-rank deltas, and roster fit.',
+    system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using rookie-class-only rankings as the authoritative consensus, total class value, slot-vs-rookie-rank deltas, and roster fit.',
     tools: [
       {
         name: 'submit_team_grade',
