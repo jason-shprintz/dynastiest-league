@@ -97,25 +97,20 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, []);
 
-  const loadPicks = useCallback(async (draftId: string) => {
-    await draftPicksState.load(draftId);
-    setLastUpdatedAt(Date.now());
-  }, []);
-
-  const loadAnalyses = useCallback(
-    async (draftId: string) => {
-      await draftPickAnalysisStore.loadAnalyses(draftId);
-      setLastUpdatedAt(Date.now());
-    },
-    [draftPickAnalysisStore],
-  );
-
   // Load picks + analyses once whenever draft changes
   useEffect(() => {
     if (!draft) return;
-    loadPicks(draft.draft_id);
-    loadAnalyses(draft.draft_id);
-  }, [draft, loadPicks, loadAnalyses]);
+    const loadPicks = async () => {
+      await draftPicksState.load(draft.draft_id);
+      setLastUpdatedAt(Date.now());
+    };
+    const loadAnalyses = async () => {
+      await draftPickAnalysisStore.loadAnalyses(draft.draft_id);
+      setLastUpdatedAt(Date.now());
+    };
+    loadPicks();
+    loadAnalyses();
+  }, [draft, draftPickAnalysisStore]);
 
   // Poll while draft is live and tab is visible
   useEffect(() => {
@@ -133,18 +128,27 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     };
 
     if (draft.status === 'drafting' && isTabVisible) {
+      const loadPicks = async () => {
+        await draftPicksState.load(draft.draft_id);
+        setLastUpdatedAt(Date.now());
+      };
+      const loadAnalyses = async () => {
+        await draftPickAnalysisStore.loadAnalyses(draft.draft_id);
+        setLastUpdatedAt(Date.now());
+      };
+
       picksRefreshTimerRef.current = setInterval(
-        () => loadPicks(draft.draft_id),
+        () => void loadPicks(),
         PICKS_REFRESH_INTERVAL_MS,
       );
       analysesRefreshTimerRef.current = setInterval(
-        () => loadAnalyses(draft.draft_id),
+        () => void loadAnalyses(),
         ANALYSES_REFRESH_INTERVAL_MS,
       );
     }
 
     return clearPolling;
-  }, [draft, isTabVisible, loadPicks, loadAnalyses]);
+  }, [draft, isTabVisible, draftPickAnalysisStore]);
 
   // Reactively load team grades once picks reach the expected total
   // (mirrors worker completion condition: status=complete OR picks.length >= rounds*teams)
