@@ -12,6 +12,7 @@ import type {
   DraftPickAnalysis,
   TeamDraftGrade,
 } from './types';
+import type { RookieValueMap } from './rookieValues';
 
 // ─── Per-pick analysis ────────────────────────────────────────────────────────
 
@@ -62,14 +63,35 @@ function computeRosterShape(
   return shape;
 }
 
+/**
+ * Bucket the slot-vs-rank delta into a qualitative label for the prompt.
+ * Positive delta = picked LATER than expected = good value for drafter.
+ * Negative delta = picked EARLIER than expected = reach.
+ */
+function deltaLabel(delta: number): string {
+  if (delta >= 8) return 'major value — fell well below consensus';
+  if (delta >= 4) return 'good value — fell below consensus';
+  if (delta >= 2) return 'slight value';
+  if (delta >= -1) return 'roughly at consensus';
+  if (delta >= -3) return 'slight reach';
+  if (delta >= -7) return 'reach — taken meaningfully early';
+  return 'major reach — taken well above consensus';
+}
+
+interface PickContextResult {
+  context: string;
+  /** Slot - overallRank. null when no FantasyCalc data is available. */
+  computedDelta: number | null;
+}
+
 function buildPickContext(
   pick: SleeperDraftPick,
-  draftId: string,
   rosters: SleeperRoster[],
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
   priorPicks: SleeperDraftPick[],
-): string {
+  rookieValues: RookieValueMap,
+): PickContextResult {
   const meta = pick.metadata ?? {};
   const playerName = meta.first_name && meta.last_name
     ? `${meta.first_name} ${meta.last_name}`
@@ -79,21 +101,11 @@ function buildPickContext(
 
   const playerInfo = playerMap[pick.player_id];
   const age = playerInfo?.age !== undefined ? `Age ${playerInfo.age}` : null;
-  // years_exp === 0 in Sleeper indicates a rookie. Surface this affirmatively
-  // rather than as "0 yrs exp" so the model parses it correctly.
   const rookieFlag = playerInfo?.years_exp === 0
     ? 'Rookie (no NFL snaps yet)'
     : playerInfo?.years_exp !== undefined
     ? `${playerInfo.years_exp} NFL years`
     : null;
-
-  // NOTE: We intentionally do NOT include Sleeper's search_rank here. It is a
-  // global redraft-style ranking that places unproven rookies in the 200+ range
-  // because they're not useful in same-season redraft formats. Comparing
-  // search_rank against rookie-draft slot numbers (1–40) produced bogus "reach"
-  // labels for every pick. Until proper dynasty rookie ADP is wired in (see
-  // FantasyCalc integration issue), it's better to omit ADP context entirely
-  // and let the model lean on NFL Draft capital, landing spot, and fit.
 
   const teamName = getTeamName(pick.roster_id, rosters, users);
   const roster = rosters.find((r) => r.roster_id === pick.roster_id);
@@ -106,26 +118,46 @@ function buildPickContext(
     .map(([pos, cnt]) => `${pos}: ${cnt}`)
     .join(', ');
 
-  // Prior picks in this draft for context (has this team been heavy at a position?)
   const teamPriorPicks = priorPicks.filter((p) => p.roster_id === pick.roster_id);
   const teamPriorPositions = teamPriorPicks
     .map((p) => p.metadata?.position ?? '?')
     .join(', ');
 
-  let context = `Draft ID: ${draftId}\n`;
-  context += `Pick #${pick.pick_no} (Round ${pick.round})\n`;
+  // FantasyCalc dynasty value (the authoritative ADP signal for rookies).
+  // The dynasty value already implicitly bakes in NFL Draft capital, landing
+  // spot, and athletic profile — exactly the signals the model is missing
+  // due to its training cutoff predating the actual NFL Draft.
+  const fcValue = rookieValues.players[pick.player_id];
+  let computedDelta: number | null = null;
+  let valueLine = '';
+  if (fcValue) {
+    computedDelta = pick.pick_no - fcValue.overallRank;
+    const deltaSign = computedDelta > 0 ? '+' : '';
+    const posRankStr = fcValue.positionRank !== undefined
+      ? `, #${fcValue.positionRank} at ${position}`
+      : '';
+    valueLine =
+      `Dynasty rank (FantasyCalc): #${fcValue.overallRank} overall${posRankStr} (value ${fcValue.value})\n` +
+      `Slot vs rank: picked at #${pick.pick_no}, ranked #${fcValue.overallRank} → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n`;
+  } else {
+    valueLine =
+      `Dynasty rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
+  }
+
+  let context = `Pick #${pick.pick_no} (Round ${pick.round})\n`;
   context += `Player: ${playerName} | Position: ${position} | NFL Team: ${nflTeam}\n`;
   if (age || rookieFlag) {
     context += `Profile: ${[age, rookieFlag].filter(Boolean).join(', ')}\n`;
   }
-  context += `Drafted By: ${teamName} (Roster ID: ${pick.roster_id})\n`;
+  context += valueLine;
+  context += `Drafted By: ${teamName}\n`;
   if (shapeParts) {
-    context += `${teamName}'s current roster: ${shapeParts}\n`;
+    context += `${teamName}'s current roster shape: ${shapeParts}\n`;
   }
   if (teamPriorPicks.length > 0) {
     context += `${teamName}'s prior picks in this draft: ${teamPriorPositions}\n`;
   }
-  return context;
+  return { context, computedDelta };
 }
 
 /**
@@ -138,40 +170,49 @@ export async function generatePickAnalysis(
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
   priorPicks: SleeperDraftPick[],
+  rookieValues: RookieValueMap,
+  draftRounds: number,
+  draftTeams: number,
   apiKey: string,
 ): Promise<DraftPickAnalysis> {
   const anthropic = new Anthropic({ apiKey });
 
-  const context = buildPickContext(pick, draftId, rosters, users, playerMap, priorPicks);
+  const { context, computedDelta } = buildPickContext(
+    pick,
+    rosters,
+    users,
+    playerMap,
+    priorPicks,
+    rookieValues,
+  );
 
-  const prompt = `You are analyzing a pick in a DYNASTY ROOKIE DRAFT. Provide a brief, entertaining hot take as a short conversation between two analysts, Mike and Jim.
+  const prompt = `You are Mike and Jim, two fantasy football analysts giving a quick take on a dynasty rookie draft pick.
 
-CRITICAL CONTEXT — read carefully before judging this pick:
-- Every player taken in this draft is an incoming NFL rookie who has NOT played a single professional snap.
-- Traditional/redraft ADP does NOT apply here. Rookies always rank low in redraft formats because they're unproven; that is irrelevant in a dynasty rookie draft.
-- Evaluate the pick using:
-  • NFL Draft capital (what round/team the player was selected by in the actual NFL Draft)
-  • Landing spot and depth chart opportunity
-  • Age and athletic profile
-  • Positional scarcity in dynasty (elite WRs are scarcer than RBs; QBs gain value in superflex)
-  • Fit with the drafting team's existing roster
-- Do NOT call this pick a "reach" unless the player would clearly go multiple rounds later in any reasonable dynasty rookie ranking. When uncertain, treat it as fair value.
+Context:
+- This is a ${draftRounds}-round, ${draftRounds * draftTeams}-pick dynasty rookie draft. Every player is an incoming NFL rookie.
+- The pick details below include the player's dynasty rank from FantasyCalc, which represents the consensus dynasty community valuation. Treat this as the authoritative source for whether the pick was made at a fair slot.
+- "Slot vs rank" tells you exactly whether the pick was good value, fair, or a reach. Use that as your starting point — do not invent your own ADP intuitions.
+- If a player has no FantasyCalc rank, do NOT speculate about value. Focus only on player profile and team fit.
 
-Pick Details:
+What to discuss:
+- Whether the pick was good value, fair, or a reach (per the delta)
+- Player profile and fit with the drafting team's roster shape
+- Positional dynasty appeal (elite WRs scarce, RBs age fast, QBs matter more in superflex)
+- Snark and entertainment
+
+Pick details:
 ${context}
 
 Instructions:
-1. Give this pick a letter grade (A+, A, A-, B+, B, B-, C+, C, C-, D+, D, F)
-2. Set value_vs_adp as a small integer string. Default to "0" (fair value). Use a small positive number (1–3) only if you're confident the player is widely viewed as a clearly better pick than this slot, and a small negative (-1 to -3) only if clearly a reach. Do NOT use large magnitudes — this is a 4-round, 40-pick draft.
-3. Write 2-3 short, punchy exchanges between Mike and Jim
-4. Write a one-sentence hot_take
-
-Keep it snarky, quick, and dynasty-rookie-focused.`;
+1. Letter grade (A+ through F) reflecting both player quality and slot value.
+2. value_vs_adp: short integer-string. Use the slot-vs-rank delta directly when available, "0" when no FantasyCalc data.
+3. 2–3 short, punchy Mike & Jim exchanges.
+4. One-sentence hot_take.`;
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 800,
-    system: 'You are a fantasy football analyst providing quick, snarky takes on dynasty rookie draft picks. You understand that rookies have no NFL track record yet and that traditional redraft ADP is meaningless in a rookie-only dynasty draft.',
+    system: 'You are Mike and Jim, dynasty fantasy football analysts. You evaluate rookie draft picks using FantasyCalc dynasty rankings as the authoritative consensus, supplemented by player profile and roster fit.',
     tools: [
       {
         name: 'submit_pick_analysis',
@@ -189,8 +230,15 @@ Keep it snarky, quick, and dynasty-rookie-focused.`;
   }
 
   const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'pick_id' | 'draft_id' | 'pick_no'>;
+
+  // Always overwrite value_vs_adp with the computed delta (or "0" when we
+  // have no FantasyCalc data). The model's emitted value is unreliable; the
+  // delta is deterministic and matches the prompt context exactly.
+  const sanitizedValue = computedDelta !== null ? String(computedDelta) : '0';
+
   return {
     ...analysis,
+    value_vs_adp: sanitizedValue,
     pick_id: `${draftId}:${pick.pick_no}`,
     draft_id: draftId,
     pick_no: pick.pick_no,
@@ -241,6 +289,7 @@ function buildTeamGradeContext(
   rosters: SleeperRoster[],
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
+  rookieValues: RookieValueMap,
 ): string {
   const teamName = getTeamName(rosterId, rosters, users);
   const roster = rosters.find((r) => r.roster_id === rosterId);
@@ -253,11 +302,15 @@ function buildTeamGradeContext(
     .map(([pos, cnt]) => `${pos}: ${cnt}`)
     .join(', ');
 
-  let context = `Team: ${teamName} (Roster ID: ${rosterId})\n`;
+  let totalValue = 0;
+  let totalSlotDelta = 0;
+  let picksWithValue = 0;
+
+  let context = `Team: ${teamName}\n`;
   if (shapeParts) {
-    context += `Existing roster: ${shapeParts}\n`;
+    context += `Existing roster shape: ${shapeParts}\n`;
   }
-  context += `\nDraft picks (all rookies):\n`;
+  context += `\nDraft picks (all incoming NFL rookies):\n`;
 
   for (const pick of teamPicks) {
     const meta = pick.metadata ?? {};
@@ -268,8 +321,27 @@ function buildTeamGradeContext(
     const nflTeam = meta.team ?? 'FA';
     const playerInfo = playerMap[pick.player_id];
     const age = playerInfo?.age !== undefined ? `, age ${playerInfo.age}` : '';
-    // Intentionally omitting Sleeper search_rank — see note in buildPickContext.
-    context += `  Pick #${pick.pick_no} (Rd ${pick.round}): ${playerName} — ${position}, ${nflTeam}${age}\n`;
+
+    const fcValue = rookieValues.players[pick.player_id];
+    let valueSegment = '';
+    if (fcValue) {
+      const delta = pick.pick_no - fcValue.overallRank;
+      const deltaSign = delta > 0 ? '+' : '';
+      valueSegment = ` | Dynasty #${fcValue.overallRank} overall (delta ${deltaSign}${delta}: ${deltaLabel(delta)})`;
+      totalValue += fcValue.value;
+      totalSlotDelta += delta;
+      picksWithValue++;
+    } else {
+      valueSegment = ' | Dynasty rank: unavailable';
+    }
+
+    context += `  Pick #${pick.pick_no} (Rd ${pick.round}): ${playerName} — ${position}, ${nflTeam}${age}${valueSegment}\n`;
+  }
+
+  if (picksWithValue > 0) {
+    const avgDelta = totalSlotDelta / picksWithValue;
+    const avgSign = avgDelta > 0 ? '+' : '';
+    context += `\nClass totals (FantasyCalc-rated picks only): total value ${totalValue}, average slot-vs-rank delta ${avgSign}${avgDelta.toFixed(1)}\n`;
   }
 
   return context;
@@ -285,31 +357,45 @@ export async function generateTeamDraftGrade(
   rosters: SleeperRoster[],
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
+  rookieValues: RookieValueMap,
   apiKey: string,
 ): Promise<TeamDraftGrade> {
   const anthropic = new Anthropic({ apiKey });
 
-  const context = buildTeamGradeContext(rosterId, teamPicks, rosters, users, playerMap);
+  const context = buildTeamGradeContext(
+    rosterId,
+    teamPicks,
+    rosters,
+    users,
+    playerMap,
+    rookieValues,
+  );
 
-  const prompt = `You are grading a DYNASTY ROOKIE DRAFT class for one team. Give an overall draft grade and a short Mike & Jim conversation.
+  const prompt = `You are Mike and Jim grading one team's dynasty rookie draft class.
 
-CRITICAL CONTEXT:
-- Every pick below is an incoming NFL rookie. None has played a pro snap.
-- Do NOT apply traditional/redraft ADP. Rookies always rank low in redraft; that is irrelevant in a rookie-only dynasty draft.
-- Grade based on: NFL Draft capital, landing spot, age/athletic profile, positional scarcity in dynasty, and how the new picks fit with the team's existing roster shape.
+Context:
+- This is a dynasty rookie draft. All picks below are incoming NFL rookies.
+- Each pick includes the player's FantasyCalc dynasty rank — the consensus dynasty community valuation. Use this as the authoritative source for whether picks were made at fair slots.
+- "Class totals" tells you the team's average slot-vs-rank delta. Positive average = team consistently got value. Negative average = team consistently reached.
+
+Grade based on:
+- Total dynasty value accumulated (sum of FantasyCalc values)
+- How well the rookies fill positional needs in the existing roster
+- Whether the team got value at each slot or reached
+- Positional dynasty appeal of the class (WRs and TEs age slowly; RBs are volatile)
 
 ${context}
 
 Instructions:
-1. Give an overall letter grade for this team's rookie draft class
-2. Call out the best pick and worst pick (by pick_no) with a one-sentence reason each. If the team only had great picks, pick the weakest of the strong; if all picks were poor, pick the least bad.
-3. Write a 2-3 sentence summary of the draft class
-4. Write 2-3 exchanges between Mike and Jim about this draft`;
+1. Letter grade for the rookie class.
+2. Best pick + worst pick (by pick_no) with one-sentence reason each (cite the dynasty rank when relevant).
+3. 2–3 sentence summary of the class.
+4. 2–3 exchanges between Mike and Jim about the team's strategy and execution.`;
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1000,
-    system: 'You are a fantasy football analyst grading dynasty rookie draft classes. You understand that rookies have no NFL track record yet and that redraft ADP does not apply.',
+    system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using FantasyCalc dynasty rankings as the authoritative consensus, total class value, slot-vs-rank deltas, and roster fit.',
     tools: [
       {
         name: 'submit_team_grade',

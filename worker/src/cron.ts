@@ -25,6 +25,7 @@ import {
 } from './sleeper';
 import { generateTradeAnalysis } from './anthropic';
 import { generatePickAnalysis, generateTeamDraftGrade } from './draftAnalysis';
+import { getRookieValueMap } from './rookieValues';
 import { analysisExists, saveAnalysis, pickAnalysisExists, savePickAnalysis, teamDraftGradeExists, saveTeamDraftGrade } from './db';
 
 /**
@@ -356,9 +357,13 @@ async function processDraftAnalysis(
 ): Promise<void> {
   console.log(`Processing draft analysis for draft ${draftId}...`);
 
-  const [draft, picks] = await Promise.all([
+  const [draft, picks, rookieValues] = await Promise.all([
     fetchDraft(draftId),
     fetchDraftPicks(draftId),
+    // FantasyCalc dynasty values, cached in KV with 24h TTL. Returns an empty
+    // map on failure — the analysis functions will still run, they just won't
+    // have ADP context for that tick.
+    getRookieValueMap(env.PLAYERS_KV),
   ]);
 
   if (picks.length === 0) {
@@ -393,6 +398,9 @@ async function processDraftAnalysis(
         users,
         playerMap,
         priorPicks,
+        rookieValues,
+        draft.settings.rounds,
+        draft.settings.teams,
         env.ANTHROPIC_API_KEY,
       );
 
@@ -450,6 +458,7 @@ async function processDraftAnalysis(
         rosters,
         users,
         playerMap,
+        rookieValues,
         env.ANTHROPIC_API_KEY,
       );
 
