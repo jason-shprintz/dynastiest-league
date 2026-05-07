@@ -33,8 +33,8 @@ class DraftPicksState {
     makeAutoObservable(this);
   }
 
-  async load(draftId: string) {
-    if (this.isLoading) return;
+  async load(draftId: string): Promise<boolean> {
+    if (this.isLoading) return false;
     this.isLoading = true;
     this.error = null;
     try {
@@ -43,11 +43,13 @@ class DraftPicksState {
         this.picks = data;
         this.isLoading = false;
       });
+      return true;
     } catch (err) {
       runInAction(() => {
         this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
+      return false;
     }
   }
 }
@@ -103,12 +105,18 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
   useEffect(() => {
     if (!draftId) return;
     const loadPicks = async () => {
-      await draftPicksState.load(draftId);
-      setLastUpdatedAt(Date.now());
+      const didRefresh = await draftPicksState.load(draftId);
+      if (didRefresh) {
+        setLastUpdatedAt(Date.now());
+      }
     };
     const loadAnalyses = async () => {
-      await draftPickAnalysisStore.loadAnalyses(draftId, { force: draftStatus === 'drafting' });
-      setLastUpdatedAt(Date.now());
+      const didRefresh = await draftPickAnalysisStore.loadAnalyses(draftId, {
+        force: draftStatus === 'drafting',
+      });
+      if (didRefresh) {
+        setLastUpdatedAt(Date.now());
+      }
     };
     loadPicks();
     loadAnalyses();
@@ -131,12 +139,16 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
 
     if (draftStatus === 'drafting' && isTabVisible) {
       const loadPicks = async () => {
-        await draftPicksState.load(draftId);
-        setLastUpdatedAt(Date.now());
+        const didRefresh = await draftPicksState.load(draftId);
+        if (didRefresh) {
+          setLastUpdatedAt(Date.now());
+        }
       };
       const loadAnalyses = async () => {
-        await draftPickAnalysisStore.loadAnalyses(draftId, { force: true });
-        setLastUpdatedAt(Date.now());
+        const didRefresh = await draftPickAnalysisStore.loadAnalyses(draftId, { force: true });
+        if (didRefresh) {
+          setLastUpdatedAt(Date.now());
+        }
       };
 
       picksRefreshTimerRef.current = setInterval(
