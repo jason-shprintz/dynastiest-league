@@ -10,6 +10,7 @@ import {
   PickNumber,
   PlayerName,
   PlayerMeta,
+  PickTeamName,
   GradePill,
   ValueBadge,
   HotTake,
@@ -22,6 +23,7 @@ import { MIKE_AND_JIM_SPEAKERS } from '../shared/speakers';
 interface DraftPickCardProps {
   pick: DraftPick;
   analysis: DraftPickAnalysis | null | undefined;
+  teamName: string;
 }
 
 function parseValueDelta(valueVsAdp: string): number {
@@ -36,7 +38,7 @@ function formatValueLabel(valueVsAdp: string): string {
   return 'fair value';
 }
 
-export const DraftPickCard = ({ pick, analysis }: DraftPickCardProps) => {
+export const DraftPickCard = ({ pick, analysis, teamName }: DraftPickCardProps) => {
   const meta = pick.metadata ?? {};
   const firstName = meta.first_name ?? '';
   const lastName = meta.last_name ?? '';
@@ -49,6 +51,7 @@ export const DraftPickCard = ({ pick, analysis }: DraftPickCardProps) => {
       <PickNumber>
         #{pick.pick_no} · Rd {pick.round}
       </PickNumber>
+      <PickTeamName>{teamName}</PickTeamName>
       <PlayerName>{playerName}</PlayerName>
       <PlayerMeta>
         {position} · {nflTeam}

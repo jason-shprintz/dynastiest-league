@@ -29,6 +29,28 @@ export const SectionDescription = styled.p`
   }
 `;
 
+export const LiveStatusPill = styled.span<{ $isLive: boolean }>`
+  display: inline-block;
+  color: ${({ $isLive }) => ($isLive ? COLORS.accent : COLORS.textMuted)};
+  font-weight: 700;
+  ${({ $isLive }) =>
+    $isLive
+      ? `
+    animation: draftPulse 1.5s ease-in-out infinite;
+  `
+      : ''}
+
+  @keyframes draftPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+`;
+
 export const LoadingMessage = styled.div`
   text-align: center;
   color: ${COLORS.textMuted};
@@ -90,9 +112,8 @@ export const BoardTh = styled.th`
   padding: 0.6rem 0.5rem;
   background: ${COLORS.secondary};
   color: ${COLORS.accent};
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  font-weight: 700;
   text-align: center;
   white-space: nowrap;
   border: 1px solid rgba(255, 215, 0, 0.15);
@@ -152,6 +173,14 @@ export const PlayerMeta = styled.div`
   font-size: 0.75rem;
   color: ${COLORS.textMuted};
   margin-bottom: 0.4rem;
+`;
+
+export const PickTeamName = styled.div`
+  font-size: 0.78rem;
+  color: ${COLORS.accent};
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
 `;
 
 export const GradePill = styled.span<{ $grade: string }>`
