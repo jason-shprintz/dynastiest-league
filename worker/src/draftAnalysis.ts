@@ -133,12 +133,15 @@ function buildPickContext(
   if (fcValue) {
     computedDelta = pick.pick_no - fcValue.overallRank;
     const deltaSign = computedDelta > 0 ? '+' : '';
+    const posRankStr = fcValue.positionRank !== undefined
+      ? `, #${fcValue.positionRank} at ${position}`
+      : '';
     valueLine =
-      `Dynasty rank (FantasyCalc): #${fcValue.overallRank} overall, #${fcValue.positionRank} at ${position} (value ${fcValue.value})\n` +
+      `Dynasty rank (FantasyCalc): #${fcValue.overallRank} overall${posRankStr} (value ${fcValue.value})\n` +
       `Slot vs rank: picked at #${pick.pick_no}, ranked #${fcValue.overallRank} → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n`;
   } else {
     valueLine =
-      `Dynasty rank: not in FantasyCalc database (likely a deeper prospect or late riser). Do not speculate about value; comment on player profile and team fit instead.\n`;
+      `Dynasty rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
   }
 
   let context = `Pick #${pick.pick_no} (Round ${pick.round})\n`;
@@ -168,6 +171,8 @@ export async function generatePickAnalysis(
   playerMap: Record<string, PlayerInfo>,
   priorPicks: SleeperDraftPick[],
   rookieValues: RookieValueMap,
+  draftRounds: number,
+  draftTeams: number,
   apiKey: string,
 ): Promise<DraftPickAnalysis> {
   const anthropic = new Anthropic({ apiKey });
@@ -184,7 +189,7 @@ export async function generatePickAnalysis(
   const prompt = `You are Mike and Jim, two fantasy football analysts giving a quick take on a dynasty rookie draft pick.
 
 Context:
-- This is a 4-round, 40-pick dynasty rookie draft. Every player is an incoming NFL rookie.
+- This is a ${draftRounds}-round, ${draftRounds * draftTeams}-pick dynasty rookie draft. Every player is an incoming NFL rookie.
 - The pick details below include the player's dynasty rank from FantasyCalc, which represents the consensus dynasty community valuation. Treat this as the authoritative source for whether the pick was made at a fair slot.
 - "Slot vs rank" tells you exactly whether the pick was good value, fair, or a reach. Use that as your starting point — do not invent your own ADP intuitions.
 - If a player has no FantasyCalc rank, do NOT speculate about value. Focus only on player profile and team fit.
@@ -327,7 +332,7 @@ function buildTeamGradeContext(
       totalSlotDelta += delta;
       picksWithValue++;
     } else {
-      valueSegment = ' | Dynasty rank: not in FantasyCalc';
+      valueSegment = ' | Dynasty rank: unavailable';
     }
 
     context += `  Pick #${pick.pick_no} (Rd ${pick.round}): ${playerName} — ${position}, ${nflTeam}${age}${valueSegment}\n`;

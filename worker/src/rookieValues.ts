@@ -21,8 +21,8 @@ export interface RookieValue {
   value: number;
   /** Overall rank across all dynasty assets (lower = more valuable) */
   overallRank: number;
-  /** Rank within the player's position */
-  positionRank: number;
+  /** Rank within the player's position — omitted when not present in API response */
+  positionRank?: number;
 }
 
 export interface RookieValueMap {
@@ -91,7 +91,7 @@ export async function getRookieValueMap(kv: KVNamespace): Promise<RookieValueMap
       const v: RookieValue = {
         value: entry.value,
         overallRank: entry.overallRank,
-        positionRank: entry.positionRank ?? 0,
+        ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
       };
 
       if (player.position === 'PICK') {

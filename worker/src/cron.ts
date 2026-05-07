@@ -399,6 +399,8 @@ async function processDraftAnalysis(
         playerMap,
         priorPicks,
         rookieValues,
+        draft.settings.rounds,
+        draft.settings.teams,
         env.ANTHROPIC_API_KEY,
       );
 
