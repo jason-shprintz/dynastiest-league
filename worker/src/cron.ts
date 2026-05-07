@@ -21,6 +21,7 @@ import {
   getPlayerMap,
   fetchDraft,
   fetchDraftPicks,
+  fetchLeagueDrafts,
 } from './sleeper';
 import { generateTradeAnalysis } from './anthropic';
 import { generatePickAnalysis, generateTeamDraftGrade } from './draftAnalysis';
@@ -186,6 +187,64 @@ async function processWeekTrades(
 }
 
 /**
+ * Resolve which draft the cron should analyze.
+ *
+ * Priority:
+ *   1. env.LEAGUE_DRAFT_ID — explicit override, useful for targeting a specific
+ *      draft (e.g. a startup draft from a prior season).
+ *   2. The active draft for this league (status === 'drafting').
+ *   3. The most recent completed draft (so post-draft team grades can still be
+ *      generated even if the cron didn't catch the completion live).
+ *
+ * Returns null when nothing analyzable exists (e.g. only pre_draft entries, or
+ * the league has no drafts yet).
+ */
+async function resolveDraftId(env: Env, leagueId: string): Promise<string | null> {
+  if (env.LEAGUE_DRAFT_ID) {
+    return env.LEAGUE_DRAFT_ID;
+  }
+
+  try {
+    const drafts = await fetchLeagueDrafts(leagueId);
+    // Sleeper returns drafts in reverse chronological order. Skip pre_draft —
+    // there are no picks to analyze yet.
+    const active = drafts.find((d) => d.status === 'drafting');
+    if (active) {
+      console.log(`Auto-detected active draft: ${active.draft_id}`);
+      return active.draft_id;
+    }
+    const completedDrafts = drafts.filter((d) => d.status === 'complete');
+    const getDraftRecency = (draft: (typeof completedDrafts)[number]): number => {
+      const lastPicked =
+        typeof draft.last_picked === 'number' ? draft.last_picked : null;
+      const startTime =
+        typeof draft.start_time === 'number' ? draft.start_time : null;
+      const created = typeof draft.created === 'number' ? draft.created : null;
+      return lastPicked ?? startTime ?? created ?? 0;
+    };
+    const recentComplete = completedDrafts.reduce<
+      (typeof completedDrafts)[number] | null
+    >((latest, current) => {
+      if (!latest) return current;
+      const latestRecency = getDraftRecency(latest);
+      const currentRecency = getDraftRecency(current);
+      return currentRecency > latestRecency ? current : latest;
+    }, null);
+    if (recentComplete) {
+      console.log(
+        `Auto-detected most recent completed draft: ${recentComplete.draft_id}`,
+      );
+      return recentComplete.draft_id;
+    }
+    console.log('No active or completed draft found for this league');
+    return null;
+  } catch (err) {
+    console.error('Error auto-detecting league draft:', err);
+    return null;
+  }
+}
+
+/**
  * Handle scheduled cron trigger
  */
 export async function handleScheduled(env: Env): Promise<void> {
@@ -268,8 +327,9 @@ export async function handleScheduled(env: Env): Promise<void> {
 
   console.log(`Cron job completed. Processed ${totalProcessed} new trade(s)`);
 
-  // Draft analysis — only runs when LEAGUE_DRAFT_ID is configured
-  const draftId = env.LEAGUE_DRAFT_ID;
+  // Draft analysis — auto-detects the active draft from the league when
+  // LEAGUE_DRAFT_ID is unset. Manual override via env var still wins.
+  const draftId = await resolveDraftId(env, leagueId);
   if (draftId) {
     try {
       await processDraftAnalysis(env, draftId, leagueId, rosters, users, allPlayers);
