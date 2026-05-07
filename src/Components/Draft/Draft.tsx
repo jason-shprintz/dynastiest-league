@@ -218,7 +218,8 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
         ) : (
           <LiveStatusPill $isLive={isTabVisible}>🔴 Live</LiveStatusPill>
         )}
-        {draft.status === 'drafting' && ' · auto-refresh 15s picks / 30s analysis'}
+        {draft.status === 'drafting' &&
+          ' · auto-refresh: picks every 15s, analyses every 30s'}
         {draft.status === 'drafting' && lastUpdatedAt && (
           <> · last updated {new Date(lastUpdatedAt).toLocaleTimeString()}</>
         )}
