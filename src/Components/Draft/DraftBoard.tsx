@@ -26,33 +26,16 @@ export const DraftBoard = ({ draft, picks, analyses, getTeamName }: DraftBoardPr
   const numRounds = draft.settings.rounds;
   const numTeams = draft.settings.teams;
 
-  // Build a lookup: draft_slot → team name using draft_order if available
-  // draft_order maps user_id → draft_slot; we need slot → roster_id
-  // Sleeper pick objects have draft_slot field, so we derive the slot→team from picks
-  const slotToRosterId = new Map<number, number>();
-  for (const pick of picks) {
-    const slot = pick.draft_slot > 0 ? pick.draft_slot : ((pick.pick_no - 1) % numTeams) + 1;
-    if (!slotToRosterId.has(slot)) {
-      slotToRosterId.set(slot, pick.roster_id);
-    }
-  }
-
   // Build column headers (draft slots 1..N)
   const slots = Array.from({ length: numTeams }, (_, i) => i + 1);
 
   // Build lookup: (round, slot) → pick
   const pickLookup = new Map<string, DraftPick>();
   for (const pick of picks) {
-    const slot = pick.draft_slot > 0 ? pick.draft_slot : ((pick.pick_no - 1) % numTeams) + 1;
+    const slot = pick.draft_slot;
+    if (slot <= 0) continue;
     pickLookup.set(`${pick.round}:${slot}`, pick);
   }
-
-  // Get column team name by slot — use first pick we know for this slot
-  const getSlotTeamName = (slot: number): string => {
-    const rosterId = slotToRosterId.get(slot);
-    if (rosterId !== undefined) return getTeamName(rosterId);
-    return `Slot ${slot}`;
-  };
 
   return (
     <BoardWrapper>
@@ -61,7 +44,7 @@ export const DraftBoard = ({ draft, picks, analyses, getTeamName }: DraftBoardPr
           <tr>
             <BoardTh>Round</BoardTh>
             {slots.map((slot) => (
-              <BoardTh key={slot}>{getSlotTeamName(slot)}</BoardTh>
+              <BoardTh key={slot}>Slot {slot}</BoardTh>
             ))}
           </tr>
         </BoardThead>
@@ -79,6 +62,7 @@ export const DraftBoard = ({ draft, picks, analyses, getTeamName }: DraftBoardPr
                         <DraftPickCard
                           pick={pick}
                           analysis={analyses.get(pick.pick_no)}
+                          teamName={getTeamName(pick.roster_id)}
                         />
                       ) : null}
                     </BoardTd>

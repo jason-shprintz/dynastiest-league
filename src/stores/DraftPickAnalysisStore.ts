@@ -49,19 +49,21 @@ export class DraftPickAnalysisStore {
 
   private shouldRetry(draftId: string): boolean {
     const nextRetry = this.nextRetryAtByDraftId.get(draftId);
-    if (!nextRetry) return true;
+    if (!nextRetry) return false;
     return Date.now() >= nextRetry;
   }
 
   /**
    * Fetch all pick analyses for a draft
    */
-  async loadAnalyses(draftId: string): Promise<void> {
+  async loadAnalyses(draftId: string, options?: { force?: boolean }): Promise<boolean> {
     // Skip if already loading
-    if (this.loadingDraftIds.has(draftId)) return;
+    if (this.loadingDraftIds.has(draftId)) return false;
 
     // Check retry timer for drafts that returned empty
-    if (this.analysesByDraftId.has(draftId) && !this.shouldRetry(draftId)) return;
+    if (!options?.force && this.analysesByDraftId.has(draftId) && !this.shouldRetry(draftId)) {
+      return false;
+    }
 
     runInAction(() => {
       this.loadingDraftIds.add(draftId);
@@ -94,11 +96,13 @@ export class DraftPickAnalysisStore {
         }
         this.loadingDraftIds.delete(draftId);
       });
+      return true;
     } catch (err) {
       runInAction(() => {
         this.error = err instanceof Error ? err.message : 'Unknown error';
         this.loadingDraftIds.delete(draftId);
       });
+      return false;
     }
   }
 

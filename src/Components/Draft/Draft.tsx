@@ -3,7 +3,7 @@
  * Container — loads draft data, pick analyses, and team grades; renders the board.
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../../stores';
 import { DEFAULT_LEAGUE_ID } from '../../constants';
@@ -20,6 +20,7 @@ import {
   FinalGradesPanel,
   FinalGradesTitle,
   GradesGrid,
+  LiveStatusPill,
 } from './Draft.styles';
 
 // Local observable state for draft picks (not stored in RootStore since it's draft-specific)
@@ -32,7 +33,8 @@ class DraftPicksState {
     makeAutoObservable(this);
   }
 
-  async load(draftId: string) {
+  async load(draftId: string): Promise<boolean> {
+    if (this.isLoading) return false;
     this.isLoading = true;
     this.error = null;
     try {
@@ -41,11 +43,13 @@ class DraftPicksState {
         this.picks = data;
         this.isLoading = false;
       });
+      return true;
     } catch (err) {
       runInAction(() => {
         this.error = err instanceof Error ? err.message : 'Unknown error';
         this.isLoading = false;
       });
+      return false;
     }
   }
 }
@@ -57,7 +61,8 @@ interface DraftProps {
   leagueId?: string;
 }
 
-const REFRESH_INTERVAL_MS = 60000; // re-poll picks every 60s during active draft
+const PICKS_REFRESH_INTERVAL_MS = 15000;
+const ANALYSES_REFRESH_INTERVAL_MS = 30000;
 
 const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
   const {
@@ -68,7 +73,12 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     teamDraftGradeStore,
   } = useStore();
 
-  const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const picksRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const analysesRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isTabVisible, setIsTabVisible] = useState(
+    () => typeof document === 'undefined' || !document.hidden,
+  );
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
 
   useEffect(() => {
     usersStore.loadUsers(leagueId);
@@ -77,32 +87,82 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
   }, [leagueId, usersStore, rostersStore, draftStore]);
 
   const draft = draftStore.mostRecentDraft;
+  const draftId = draft?.draft_id;
+  const draftStatus = draft?.status;
   // Derived from MobX observable — access here so the observer tracks it and re-renders fire
   const picksCount = draftPicksState.picks.length;
 
-  // Load picks + analyses when draft is known
   useEffect(() => {
-    if (!draft) return;
-
-    const loadDraftData = () => {
-      draftPicksState.load(draft.draft_id);
-      draftPickAnalysisStore.loadAnalyses(draft.draft_id);
+    if (typeof document === 'undefined') return;
+    const onVisibilityChange = () => {
+      setIsTabVisible(!document.hidden);
     };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
 
-    loadDraftData();
-
-    // Poll for new picks while the draft is live
-    if (draft.status === 'drafting') {
-      refreshTimerRef.current = setInterval(loadDraftData, REFRESH_INTERVAL_MS);
-    }
-
-    return () => {
-      if (refreshTimerRef.current) {
-        clearInterval(refreshTimerRef.current);
-        refreshTimerRef.current = null;
+  // Load picks + analyses once whenever draft changes
+  useEffect(() => {
+    if (!draftId) return;
+    const loadPicks = async () => {
+      const didRefresh = await draftPicksState.load(draftId);
+      if (didRefresh) {
+        setLastUpdatedAt(Date.now());
       }
     };
-  }, [draft, draftPickAnalysisStore]);
+    const loadAnalyses = async () => {
+      const didRefresh = await draftPickAnalysisStore.loadAnalyses(draftId, {
+        force: draftStatus === 'drafting',
+      });
+      if (didRefresh) {
+        setLastUpdatedAt(Date.now());
+      }
+    };
+    loadPicks();
+    loadAnalyses();
+  }, [draftId, draftStatus, draftPickAnalysisStore]);
+
+  // Poll while draft is live and tab is visible
+  useEffect(() => {
+    if (!draftId) return;
+
+    const clearPolling = () => {
+      if (picksRefreshTimerRef.current) {
+        clearInterval(picksRefreshTimerRef.current);
+        picksRefreshTimerRef.current = null;
+      }
+      if (analysesRefreshTimerRef.current) {
+        clearInterval(analysesRefreshTimerRef.current);
+        analysesRefreshTimerRef.current = null;
+      }
+    };
+
+    if (draftStatus === 'drafting' && isTabVisible) {
+      const loadPicks = async () => {
+        const didRefresh = await draftPicksState.load(draftId);
+        if (didRefresh) {
+          setLastUpdatedAt(Date.now());
+        }
+      };
+      const loadAnalyses = async () => {
+        const didRefresh = await draftPickAnalysisStore.loadAnalyses(draftId, { force: true });
+        if (didRefresh) {
+          setLastUpdatedAt(Date.now());
+        }
+      };
+
+      picksRefreshTimerRef.current = setInterval(
+        () => void loadPicks(),
+        PICKS_REFRESH_INTERVAL_MS,
+      );
+      analysesRefreshTimerRef.current = setInterval(
+        () => void loadAnalyses(),
+        ANALYSES_REFRESH_INTERVAL_MS,
+      );
+    }
+
+    return clearPolling;
+  }, [draftId, draftStatus, isTabVisible, draftPickAnalysisStore]);
 
   // Reactively load team grades once picks reach the expected total
   // (mirrors worker completion condition: status=complete OR picks.length >= rounds*teams)
@@ -171,7 +231,16 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
       <h2>Draft</h2>
       <SectionDescription>
         {draft.settings.teams}-team · {draft.settings.rounds}-round rookie draft ·{' '}
-        {draft.status === 'complete' ? '✅ Complete' : '🔴 Live'}
+        {draft.status === 'complete' ? (
+          '✅ Complete'
+        ) : (
+          <LiveStatusPill $isLive={isTabVisible}>🔴 Live</LiveStatusPill>
+        )}
+        {draft.status === 'drafting' &&
+          ' · auto-refresh: picks every 15s, analyses every 30s'}
+        {draft.status === 'drafting' && lastUpdatedAt && (
+          <> · last updated {new Date(lastUpdatedAt).toLocaleTimeString()}</>
+        )}
         {draftPicksState.picks.length > 0 && ` · ${draftPicksState.picks.length} picks made`}
       </SectionDescription>
 
