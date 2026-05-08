@@ -134,17 +134,15 @@ export async function generatePickAnalysis(
 
   const context = buildPickContext(pick, draftId, rosters, users, playerMap, priorPicks);
 
-  // The prompt deliberately avoids the words "reach," "ADP," and "value" in
-  // negative framings. Earlier iterations used "do not call this a reach" —
-  // negation prompts anchor the model on the very concept they try to forbid.
-  // Instead, we redirect the model entirely toward player profile and team fit.
+  // Keep the model focused on player profile and team fit instead of draft-slot
+  // timing or market/ranking labels.
   const prompt = `You are Mike and Jim, two fantasy football analysts giving a quick take on a dynasty rookie draft pick.
 
 Important constraints:
 
-(1) Every player taken in this draft is an incoming NFL rookie with zero professional snaps. You do not have reliable information about where each rookie was selected in the actual NFL Draft, nor do you have current dynasty rookie ADP rankings. Do NOT speculate about whether the pick was made too early or too late — you simply do not have that information.
+(1) Every player taken in this draft is an incoming NFL rookie with zero professional snaps. This analysis is a player-profile + roster-fit evaluation only.
 
-(2) Banned topics: do not discuss draft slot timing, do not compare the pick number to a ranking, do not opine on whether the player was selected at the right slot. The words "reach," "ADP," "overdrafted," and "underdrafted" must not appear in your output.
+(2) Stay inside that scope: discuss profile, traits, fit, and dynasty role. Skip market/ranking labels and pick-number timing debates.
 
 (3) What you SHOULD discuss: the player's college profile and skill set, their athletic traits, the position they play and how it slots into the drafting team's roster construction, the general dynasty appeal of the position (e.g. elite WRs are scarce, RBs age fast), and any banter about the player as a prospect. Be entertaining, snarky, and fun.
 
@@ -179,10 +177,8 @@ Instructions:
 
   const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'pick_id' | 'draft_id' | 'pick_no'>;
 
-  // Defensive: if the model ignored the instruction and put a non-"0" value,
-  // overwrite it. The frontend renders this as a badge — we do not want it
-  // displaying "1 reach" because the model couldn't help itself.
-  const sanitizedValue = analysis.value_vs_adp === '0' ? '0' : '0';
+  // Defensive: hard-force this signal to neutral until real rookie ADP is wired.
+  const sanitizedValue = '0';
 
   return {
     ...analysis,
@@ -290,9 +286,9 @@ export async function generateTeamDraftGrade(
 
 Important constraints:
 
-(1) Every pick below is an incoming NFL rookie with zero professional snaps. You do not have reliable rookie ADP rankings or NFL Draft slot information. Do NOT speculate about whether picks were made too early or too late.
+(1) Every pick below is an incoming NFL rookie with zero professional snaps. Grade this class from player-profile quality and roster-construction fit only.
 
-(2) Banned topics: do not discuss draft slot timing or compare picks to rankings. The words "reach," "ADP," "overdrafted," and "underdrafted" must not appear in your output.
+(2) Keep commentary centered on player traits, positional strategy, and team-building outcomes. Market/ranking labels and pick-timing debates are out of scope.
 
 (3) What you SHOULD evaluate: how the rookie class fills positional needs in the drafting team's roster, the dynasty appeal of the positions targeted (WR-heavy classes age better than RB-heavy ones), the player profiles, and overall roster construction strategy.
 
