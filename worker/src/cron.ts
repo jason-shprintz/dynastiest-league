@@ -82,7 +82,14 @@ const MAX_PICKS_PER_TICK = 3;
 const MAX_GRADES_PER_TICK = 2;
 
 /**
- * Process trades for a specific week
+ * Process trades for a specific week.
+ *
+ * `currentVersion` and `budget` are passed in from `handleScheduled` so that
+ * the version guard fires once per tick (not once per week) and the Anthropic
+ * call budget is enforced globally across all week scans.
+ *
+ * Returns `{ processed, attempted }` so the caller can decrement the global
+ * budget by `attempted` (errors still consume budget, preventing runaway spend).
  */
 async function processWeekTrades(
   env: Env,
@@ -94,14 +101,10 @@ async function processWeekTrades(
   allPlayers: Record<string, PlayerInfo>,
   priorSeasonRecords: Record<string, { wins: number; losses: number; fpts: number; fpts_against?: number }>,
   seenTransactionIds: Set<string>,
-): Promise<number> {
+  currentVersion: string,
+  budget: number,
+): Promise<{ processed: number; attempted: number }> {
   console.log(`Processing trades for week ${week}...`);
-
-  const currentVersion = env.TRADE_ANALYSIS_VERSION;
-  if (!currentVersion) {
-    console.error('TRADE_ANALYSIS_VERSION is unset — skipping trade processing this tick');
-    return 0;
-  }
 
   try {
     const transactions = await fetchTransactions(leagueId, week);
@@ -114,19 +117,20 @@ async function processWeekTrades(
 
     if (completedTrades.length === 0) {
       console.log(`No completed trades found for week ${week}`);
-      return 0;
+      return { processed: 0, attempted: 0 };
     }
 
     console.log(
       `Found ${completedTrades.length} completed trades for week ${week}`,
     );
 
+    let attempted = 0;
     let processed = 0;
 
-    // Process each trade (capped per tick to pace version-bump rollout)
+    // Process each trade up to the remaining global budget for this tick
     for (const trade of completedTrades) {
-      if (processed >= MAX_TRADES_PER_TICK) {
-        console.log(`Reached per-tick trade cap (${MAX_TRADES_PER_TICK}); remaining trades will be processed next tick`);
+      if (attempted >= budget) {
+        console.log(`Reached per-tick trade cap (${MAX_TRADES_PER_TICK} total); remaining trades will be processed next tick`);
         break;
       }
 
@@ -150,6 +154,10 @@ async function processWeekTrades(
           ? `Generating new analysis for ${trade.transaction_id}`
           : `Regenerating analysis for ${trade.transaction_id} (${existingVersion} → ${currentVersion})`;
         console.log(action);
+
+        // Count the attempt before calling Anthropic — errors still consume budget
+        // to prevent runaway spend when a prompt consistently fails.
+        attempted++;
 
         // Filter the already-loaded player map — no extra KV round-trip needed
         const playerIds = Object.keys(trade.adds ?? {});
@@ -199,10 +207,10 @@ async function processWeekTrades(
       }
     }
 
-    return processed;
+    return { processed, attempted };
   } catch (error) {
     console.error(`Error processing week ${week}:`, error);
-    return 0;
+    return { processed: 0, attempted: 0 };
   }
 }
 
@@ -278,7 +286,7 @@ export async function handleScheduled(env: Env): Promise<void> {
   // During the offseason dynasty leagues still trade, and Sleeper files those
   // transactions across whatever week number is current (often 1–18). Scan all
   // 18 weeks so no trade is missed. In-season, only current + previous week
-  // need checking since the cron runs every 5 minutes.
+  // need checking since the cron runs every 1 minute.
   const weeksToCheck: number[] = isOffseason
     ? Array.from({ length: 18 }, (_, i) => i + 1)
     : [currentWeek, Math.max(1, currentWeek - 1)];
@@ -330,19 +338,34 @@ export async function handleScheduled(env: Env): Promise<void> {
   const seenTransactionIds = new Set<string>();
   let totalProcessed = 0;
 
-  for (const week of weeksToCheck) {
-    const processed = await processWeekTrades(
-      env,
-      leagueId,
-      week,
-      rosters,
-      users,
-      nflState,
-      allPlayers,
-      priorSeasonRecords,
-      seenTransactionIds,
-    );
-    totalProcessed += processed;
+  // Guard the version once per tick — if unset, skip all trade processing.
+  // This prevents the error from appearing up to 18 times in offseason.
+  const currentTradeVersion = env.TRADE_ANALYSIS_VERSION;
+  if (!currentTradeVersion) {
+    console.error('TRADE_ANALYSIS_VERSION is unset — skipping trade processing this tick');
+  } else {
+    // Global budget shared across all week scans — ensures we never exceed
+    // MAX_TRADES_PER_TICK Anthropic calls total in one cron tick, regardless
+    // of how many weeks are scanned (up to 18 in offseason).
+    let tradesBudget = MAX_TRADES_PER_TICK;
+    for (const week of weeksToCheck) {
+      if (tradesBudget <= 0) break;
+      const { processed, attempted } = await processWeekTrades(
+        env,
+        leagueId,
+        week,
+        rosters,
+        users,
+        nflState,
+        allPlayers,
+        priorSeasonRecords,
+        seenTransactionIds,
+        currentTradeVersion,
+        tradesBudget,
+      );
+      totalProcessed += processed;
+      tradesBudget -= attempted;
+    }
   }
 
   console.log(`Cron job completed. Processed ${totalProcessed} new trade(s)`);

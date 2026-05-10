@@ -184,7 +184,7 @@ Health check endpoint.
 
 ## Cron Schedule
 
-The worker runs every 5 minutes (`*/5 * * * *`) and:
+The worker runs every 1 minute (`*/1 * * * *`) and:
 
 1. Checks the current week and previous week for new trades
 2. Filters for completed trades only
@@ -206,9 +206,10 @@ DRAFT_ANALYSIS_VERSION = "v2"   # was "v1"
 
 Once deployed, the cron will compare every existing record's stored version against the new
 value. Any mismatch triggers a regeneration. Per-tick caps (`MAX_TRADES_PER_TICK = 5`,
-`MAX_PICKS_PER_TICK = 3`, `MAX_GRADES_PER_TICK = 2`) pace the rollout across successive
-cron ticks (~30 min total for a full refresh at current volumes) so you don't blow your
-Anthropic budget in a single burst.
+`MAX_PICKS_PER_TICK = 3`, `MAX_GRADES_PER_TICK = 2`) are enforced **globally per cron tick**:
+the trade cap spans all week scans combined (not per-week), so a single tick never exceeds 5
+Anthropic trade calls regardless of offseason/in-season mode. Rollout paces naturally across
+successive 1-minute ticks.
 
 **No manual `DELETE FROM ...` needed.** If you leave the version unchanged, existing records
 are silently skipped and only brand-new trades/picks receive analysis.
@@ -221,9 +222,19 @@ are silently skipped and only brand-new trades/picks receive analysis.
 
 ### Manual DELETE (escape hatch)
 
-`DELETE FROM ... WHERE id = '...'` still works if you want to force regeneration of a
-single record without bumping the version (e.g. debugging one weird trade). The next cron
-tick will see the row as missing and regenerate it fresh.
+You can force regeneration of a single record without bumping the version (e.g. debugging
+one weird trade). The next cron tick will see the row as missing and regenerate it fresh.
+
+```sql
+-- Force-regen a specific trade
+DELETE FROM trade_analysis WHERE transaction_id = 'your-transaction-id';
+
+-- Force-regen a specific draft pick
+DELETE FROM draft_pick_analysis WHERE draft_id = 'your-draft-id' AND pick_no = 42;
+
+-- Force-regen a specific team's draft grade
+DELETE FROM team_draft_grade WHERE draft_id = 'your-draft-id' AND roster_id = 3;
+```
 
 ## Architecture
 
