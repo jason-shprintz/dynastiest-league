@@ -184,12 +184,57 @@ Health check endpoint.
 
 ## Cron Schedule
 
-The worker runs every 5 minutes (`*/5 * * * *`) and:
+The worker runs every 1 minute (`*/1 * * * *`) and:
 
 1. Checks the current week and previous week for new trades
 2. Filters for completed trades only
-3. Generates analysis for trades that don't have one yet
-4. Stores the analysis in D1
+3. Compares each trade/pick/grade's stored version against the current `*_ANALYSIS_VERSION`
+4. Generates or regenerates analysis for records that are missing or version-stale
+5. Stores the analysis in D1 via UPSERT
+
+## Iterating on Prompts
+
+When you want to re-run analysis with an updated prompt, **bump the version string** in
+`wrangler.toml` and merge to `main`. That's the only step required.
+
+```toml
+# wrangler.toml
+[vars]
+TRADE_ANALYSIS_VERSION = "v2"   # was "v1"
+DRAFT_ANALYSIS_VERSION = "v2"   # was "v1"
+```
+
+Once deployed, the cron will compare every existing record's stored version against the new
+value. Any mismatch triggers a regeneration. Per-tick caps (`MAX_TRADES_PER_TICK = 5`,
+`MAX_PICKS_PER_TICK = 3`, `MAX_GRADES_PER_TICK = 2`) are enforced **globally per cron tick**:
+the trade cap spans all week scans combined (not per-week), so a single tick never exceeds 5
+Anthropic trade calls regardless of offseason/in-season mode. Rollout paces naturally across
+successive 1-minute ticks.
+
+**No manual `DELETE FROM ...` needed.** If you leave the version unchanged, existing records
+are silently skipped and only brand-new trades/picks receive analysis.
+
+> **Warning:** An empty-string or unset `TRADE_ANALYSIS_VERSION` / `DRAFT_ANALYSIS_VERSION`
+> causes the cron to log an error and **skip** that processing path for that tick. Trade
+> and draft processing are handled independently — a misconfigured trade version doesn't
+> prevent draft analysis from running, and vice versa. Always ensure both vars are set to
+> a non-empty string in `wrangler.toml` before deploying.
+
+### Manual DELETE (escape hatch)
+
+You can force regeneration of a single record without bumping the version (e.g. debugging
+one weird trade). The next cron tick will see the row as missing and regenerate it fresh.
+
+```sql
+-- Force-regen a specific trade
+DELETE FROM trade_analysis WHERE transaction_id = 'your-transaction-id';
+
+-- Force-regen a specific draft pick
+DELETE FROM draft_pick_analysis WHERE draft_id = 'your-draft-id' AND pick_no = 42;
+
+-- Force-regen a specific team's draft grade
+DELETE FROM team_draft_grade WHERE draft_id = 'your-draft-id' AND roster_id = 3;
+```
 
 ## Architecture
 
@@ -215,7 +260,9 @@ worker/
 Set in `wrangler.toml`:
 
 - `SLEEPER_LEAGUE_ID`: Your Sleeper league ID
-- `ANALYSIS_VERSION`: Version string for analysis schema (e.g., "v1")
+- `TRADE_ANALYSIS_VERSION`: Version string for trade analysis (e.g. `"v1"`). Bump to regenerate all existing trade analyses.
+- `DRAFT_ANALYSIS_VERSION`: Version string for draft pick/grade analysis (e.g. `"v1"`). Bump to regenerate all existing draft analyses.
+- `LEAGUE_DRAFT_ID` *(optional)*: Pin cron to a specific draft ID instead of auto-detecting
 
 Set as secrets:
 
