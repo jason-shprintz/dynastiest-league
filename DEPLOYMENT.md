@@ -108,6 +108,13 @@ For initial setup or emergency manual deploys, run from the `worker/` directory:
 npm run deploy
 ```
 
+### Finding your Worker URL
+
+Your Worker URL follows the pattern `https://<worker-name>.<your-subdomain>.workers.dev`. You can find it in two places:
+
+- **GitHub Actions logs**: open the deploy workflow run in the **Actions** tab → expand the `wrangler deploy` step → look for a line like `Deployed dynastiest-league-worker … https://…workers.dev`
+- **Cloudflare dashboard**: go to **Workers & Pages** → select `dynastiest-league-worker` → the URL is shown on the overview page
+
 ## Step 7: Configure Front-End
 
 Create a `.env.local` file in the root directory (not in `/worker`):
