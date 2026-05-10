@@ -73,20 +73,25 @@ ANALYSIS_VERSION = "v1"
 
 ## Step 4: Run Database Migrations
 
-Apply migrations to create the `trade_analysis` table:
+> **On subsequent deploys, migrations are applied automatically by the GitHub Actions workflow** — you only need this manual step during initial setup before CI is configured.
+
+Apply migrations to create the database tables:
 
 ```bash
 npm run d1:migrations:apply:remote
 ```
 
-You should see:
+You should see output similar to:
 
 ```bash
 🌀 Executing on remote database dynastiest-league-db (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx):
 🌀 To execute on your local development database, pass the --local flag to 'wrangler d1 migrations apply'
 🌀 Applying migration 0001_create_trade_analysis.sql
-✅ Successfully applied 1 migration.
+🌀 Applying migration 0002_create_draft_tables.sql
+✅ Successfully applied 2 migrations.
 ```
+
+Once the deploy workflow (`.github/workflows/deploy-worker.yml`) is set up with the required repo secrets, it will run `wrangler d1 migrations apply DB --remote` automatically before every deploy. See `worker/README.md` for details on the migration workflow and the idempotency convention all migration files must follow.
 
 ## Step 5: Set Anthropic API Key Secret
 
