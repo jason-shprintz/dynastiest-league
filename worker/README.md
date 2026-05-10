@@ -65,13 +65,33 @@ wrangler secret put ANTHROPIC_API_KEY
 
 Update `SLEEPER_LEAGUE_ID` in `wrangler.toml` with your Sleeper league ID.
 
+## Deployment
+
+Merging to `main` automatically deploys the worker via GitHub Actions (`.github/workflows/deploy-worker.yml`). No manual step is required after a successful merge.
+
+The workflow:
+1. Triggers on any push to `main` that touches `worker/**` (or the workflow file itself)
+2. Authenticates with Cloudflare using the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repo secrets
+3. Runs `wrangler deploy` from the `worker/` directory
+
+**Local `wrangler deploy` is now a fallback for emergencies only.** If you run it locally, it will overwrite whatever the workflow deployed, so only do this when absolutely necessary and coordinate with the team.
+
+### Required Repo Secrets (one-time setup)
+
+| Secret | Description |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | API token with Workers Scripts, Workers KV, and D1 Edit permissions |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (found in the dashboard URL or Workers sidebar) |
+
+The workflow can also be triggered manually from the Actions tab (via `workflow_dispatch`) without needing an empty commit.
+
 ## Development
 
 ```bash
 # Run worker locally
 npm run dev
 
-# Deploy to Cloudflare
+# Deploy to Cloudflare (emergency fallback only — prefer merging to main)
 npm run deploy
 
 # View logs

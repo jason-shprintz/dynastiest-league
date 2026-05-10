@@ -100,23 +100,13 @@ When prompted, paste your Anthropic API key and press Enter.
 
 ## Step 6: Deploy Worker
 
-Deploy the worker to Cloudflare:
+> **Auto-deploy is active on `main`.** Once the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are configured, every merge to `main` that touches `worker/**` automatically deploys via the `.github/workflows/deploy-worker.yml` GitHub Actions workflow. You can monitor the deploy in the **Actions** tab. Local `wrangler deploy` is now a fallback for emergencies only.
+
+For initial setup or emergency manual deploys, run from the `worker/` directory:
 
 ```bash
 npm run deploy
 ```
-
-You should see output like:
-
-```bash
-Total Upload: xx.xx KiB / gzip: xx.xx KiB
-Uploaded dynastiest-league-worker (x.xx sec)
-Published dynastiest-league-worker (x.xx sec)
-  https://dynastiest-league-worker.your-subdomain.workers.dev
-Current Deployment ID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-```
-
-**Copy your Worker URL** from the output.
 
 ## Step 7: Configure Front-End
 
