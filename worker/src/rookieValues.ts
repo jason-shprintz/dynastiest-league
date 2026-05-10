@@ -16,7 +16,7 @@ import type { SleeperNflState } from './types';
 const FANTASYCALC_URL =
   'https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=1&numTeams=10&ppr=1';
 
-// Bumped from v2 → v3: rookie identity now uses nflState.season + player.metadata.draft_year.
+// Bumped from v2 → v3: rookie identity now uses nflState.season + Sleeper player-map draft_year.
 const KV_KEY = 'fantasycalc_dynasty_v3';
 const TTL_SECONDS = 86400; // 24 hours — values shift slowly
 

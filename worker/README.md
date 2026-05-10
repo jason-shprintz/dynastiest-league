@@ -195,7 +195,8 @@ The worker runs every 1 minute (`*/1 * * * *`) and:
 ### Rookie identification source for draft analysis
 
 Rookie ranking data comes from FantasyCalc dynasty values, but rookie identity is
-computed from Sleeper metadata using `nflState.season - player.metadata.draft_year === 0`.
+computed from the cached Sleeper player map using
+`parseInt(playerInfo.draft_year, 10) === parseInt(nflState.season, 10)`.
 `years_exp` is intentionally not used for rookie detection to avoid offseason rollover
 issues.
 

@@ -87,6 +87,17 @@ interface PickContextResult {
   computedDelta: number | null;
 }
 
+function isCurrentSeasonRookie(
+  playerInfo: PlayerInfo | undefined,
+  nflSeason: string,
+): boolean {
+  if (!playerInfo?.draft_year) return false;
+  if (!/^\d{4}$/.test(playerInfo.draft_year) || !/^\d{4}$/.test(nflSeason)) {
+    return false;
+  }
+  return parseInt(playerInfo.draft_year, 10) === parseInt(nflSeason, 10);
+}
+
 function buildPickContext(
   pick: SleeperDraftPick,
   rosters: SleeperRoster[],
@@ -94,6 +105,7 @@ function buildPickContext(
   playerMap: Record<string, PlayerInfo>,
   priorPicks: SleeperDraftPick[],
   rookieValues: RookieValueMap,
+  nflSeason: string,
 ): PickContextResult {
   const meta = pick.metadata ?? {};
   const playerName = meta.first_name && meta.last_name
@@ -104,7 +116,7 @@ function buildPickContext(
 
   const playerInfo = playerMap[pick.player_id];
   const age = playerInfo?.age !== undefined ? `Age ${playerInfo.age}` : null;
-  const rookieFlag = rookieValues.players[pick.player_id]
+  const rookieFlag = isCurrentSeasonRookie(playerInfo, nflSeason)
     ? 'Rookie (current season draft class)'
     : null;
 
@@ -141,10 +153,6 @@ function buildPickContext(
       `Rookie class rank: #${fcValue.rookieRank}${posRankStr}\n` +
       `Slot vs rookie rank: picked at #${pick.pick_no}, ranked #${fcValue.rookieRank} among rookies → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n` +
       `FantasyCalc value: ${fcValue.value}\n`;
-  } else if (fcValue) {
-    // Player has FantasyCalc data but no rookieRank.
-    valueLine =
-      `Rookie rank: FantasyCalc has this player but no rookie class rank was available. Skip slot-value commentary; focus on profile and team fit.\n`;
   } else {
     valueLine =
       `Rookie rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
@@ -179,6 +187,7 @@ export async function generatePickAnalysis(
   rookieValues: RookieValueMap,
   draftRounds: number,
   draftTeams: number,
+  nflSeason: string,
   apiKey: string,
 ): Promise<DraftPickAnalysis> {
   const anthropic = new Anthropic({ apiKey });
@@ -190,6 +199,7 @@ export async function generatePickAnalysis(
     playerMap,
     priorPicks,
     rookieValues,
+    nflSeason,
   );
 
   const prompt = `You are Mike and Jim, two fantasy football analysts giving a quick take on a dynasty rookie draft pick.

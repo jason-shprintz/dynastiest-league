@@ -460,6 +460,7 @@ async function processDraftAnalysis(
         rookieValues,
         draft.settings.rounds,
         draft.settings.teams,
+        nflState.season,
         env.ANTHROPIC_API_KEY,
       );
 
