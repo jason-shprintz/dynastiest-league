@@ -45,13 +45,23 @@ database_id = "your-actual-database-id"
 
 ### Run Migrations
 
-```bash
-# For local development
-npm run d1:migrations:apply
+**Production migrations are applied automatically by the deploy workflow.**
+You do not need to run any migration command manually for production.
 
-# For production
-npm run d1:migrations:apply:remote
+```bash
+# Local development only — applies migrations against the local D1 database
+npm run d1:migrations:apply
 ```
+
+To run migrations against production outside of a deploy (emergency path), use
+the **Apply Migrations (Manual)** GitHub Actions workflow (`migrate-worker.yml`)
+via the Actions tab. Direct use of `wrangler d1 execute --file=...` for
+production is deprecated.
+
+**Idempotency convention:** every migration file in `worker/migrations/` must be
+idempotent. Use `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, and
+(where SQLite supports it) `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` so that
+re-applying a migration is always a safe no-op.
 
 ### Set Secrets
 
@@ -72,9 +82,26 @@ Merging to `main` automatically deploys the worker via GitHub Actions (`.github/
 The workflow:
 1. Triggers on any push to `main` that touches `worker/**` (or the workflow file itself)
 2. Authenticates with Cloudflare using the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repo secrets
-3. Runs `wrangler deploy` from the `worker/` directory
+3. Runs `wrangler d1 migrations apply --remote` to apply any unapplied migrations
+4. Runs `wrangler deploy` from the `worker/` directory — **only if migrations succeed**
+
+**Migrations always run before the deploy.** If a migration fails, the deploy is aborted so old code keeps serving traffic against the old schema.
 
 **Local `wrangler deploy` is now a fallback for emergencies only.** If you run it locally, it will overwrite whatever the workflow deployed, so only do this when absolutely necessary and coordinate with the team.
+
+### Adding a New Migration
+
+1. Create a new `.sql` file under `worker/migrations/` following the naming convention `NNNN_description.sql` (e.g. `0003_add_player_cache.sql`).
+2. Write the SQL using idempotent statements (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, etc.).
+3. Merge your changes to `main` — the deploy workflow will apply the migration automatically before deploying your code.
+
+Do **not** run `wrangler d1 execute --file=...` directly against production. That command bypasses wrangler's migration-tracking table and makes the deploy workflow think the migration is unapplied.
+
+### Manual Migration Workflow (Emergency Path)
+
+If you need to apply migrations without redeploying code — for example, to recover after a partial CI failure or to apply a hotfix schema change before new code is ready — use the **Apply Migrations (Manual)** workflow (`migrate-worker.yml`) from the Actions tab.
+
+This is an emergency path only. The standard path is automatic migration on deploy.
 
 ### Required Repo Secrets (one-time setup)
 

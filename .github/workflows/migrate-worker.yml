@@ -1,0 +1,38 @@
+name: Apply Migrations (Manual)
+# Emergency path: apply D1 migrations without redeploying the worker.
+# Use this when you need to run migrations independently of a code deploy
+# (e.g., hotfix a schema issue, recover after a partial CI failure, or test
+# a migration sequence in a controlled way).
+#
+# The standard path is automatic: every push to main that triggers
+# deploy-worker.yml runs migrations first. Only reach for this workflow when
+# you need to apply migrations without touching running code.
+#
+# NOTE: This step is intentionally duplicated from deploy-worker.yml.
+# If a third workflow ever needs the same step, extract it into a composite
+# action under .github/actions/apply-migrations/.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: worker/package-lock.json
+      - run: npm ci
+      - name: Apply D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: d1 migrations apply dynastiest-league-db --remote
