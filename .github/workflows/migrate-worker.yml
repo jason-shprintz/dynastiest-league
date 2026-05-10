@@ -15,6 +15,10 @@ name: Apply Migrations (Manual)
 on:
   workflow_dispatch:
 
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: false
+
 jobs:
   migrate:
     runs-on: ubuntu-latest
@@ -35,4 +39,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
-          command: d1 migrations apply dynastiest-league-db --remote
+          command: d1 migrations apply DB --remote

@@ -45,8 +45,8 @@ database_id = "your-actual-database-id"
 
 ### Run Migrations
 
-**Production migrations are applied automatically by the deploy workflow.**
-You do not need to run any migration command manually for production.
+**Production migrations are applied automatically by the deploy workflow once CI is configured.**
+After initial setup, you do not need to run any migration command manually for production.
 
 ```bash
 # Local development only — applies migrations against the local D1 database
@@ -82,7 +82,7 @@ Merging to `main` automatically deploys the worker via GitHub Actions (`.github/
 The workflow:
 1. Triggers on any push to `main` that touches `worker/**` (or the workflow file itself)
 2. Authenticates with Cloudflare using the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repo secrets
-3. Runs `wrangler d1 migrations apply --remote` to apply any unapplied migrations
+3. Runs `wrangler d1 migrations apply DB --remote` to apply any unapplied migrations
 4. Runs `wrangler deploy` from the `worker/` directory — **only if migrations succeed**
 
 **Migrations always run before the deploy.** If a migration fails, the deploy is aborted so old code keeps serving traffic against the old schema.

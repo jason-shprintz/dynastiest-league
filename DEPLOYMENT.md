@@ -91,7 +91,7 @@ You should see output similar to:
 ✅ Successfully applied 2 migrations.
 ```
 
-Once the deploy workflow (`.github/workflows/deploy-worker.yml`) is set up with the required repo secrets, it will run `wrangler d1 migrations apply --remote` automatically before every deploy. See `worker/README.md` for details on the migration workflow and the idempotency convention all migration files must follow.
+Once the deploy workflow (`.github/workflows/deploy-worker.yml`) is set up with the required repo secrets, it will run `wrangler d1 migrations apply DB --remote` automatically before every deploy. See `worker/README.md` for details on the migration workflow and the idempotency convention all migration files must follow.
 
 ## Step 5: Set Anthropic API Key Secret
 
