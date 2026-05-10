@@ -153,7 +153,7 @@ export async function getRookieValueMap(
           overallRank: entry.overallRank,
           ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
         });
-      } else if (player.sleeperId && !playerInfo?.draft_year) {
+      } else if (player.sleeperId && playerInfo && !playerInfo.draft_year) {
         missingDraftYearCount++;
       }
     }
