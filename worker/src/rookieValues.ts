@@ -76,6 +76,9 @@ function isCurrentSeasonRookie(
   season: string,
 ): boolean {
   if (!playerInfo?.draft_year) return false;
+  if (!/^\d{4}$/.test(playerInfo.draft_year) || !/^\d{4}$/.test(season)) {
+    return false;
+  }
   const draftYear = parseInt(playerInfo.draft_year, 10);
   const currentSeason = parseInt(season, 10);
   if (!Number.isFinite(draftYear) || !Number.isFinite(currentSeason)) return false;
@@ -141,15 +144,16 @@ export async function getRookieValueMap(
         continue;
       }
 
-      if (player.sleeperId && isCurrentSeasonRookie(playerMap[player.sleeperId], nflState.season)) {
+      const playerInfo = player.sleeperId ? playerMap[player.sleeperId] : undefined;
+      if (player.sleeperId && isCurrentSeasonRookie(playerInfo, nflState.season)) {
         rookieEntries.push({
           sleeperId: player.sleeperId,
-          position: playerMap[player.sleeperId]?.position ?? player.position ?? 'UNK',
+          position: playerInfo?.position ?? player.position ?? 'UNK',
           value: entry.value,
           overallRank: entry.overallRank,
           ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
         });
-      } else if (player.sleeperId && !playerMap[player.sleeperId]?.draft_year) {
+      } else if (player.sleeperId && !playerInfo?.draft_year) {
         missingDraftYearCount++;
       }
     }

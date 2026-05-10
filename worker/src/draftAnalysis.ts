@@ -105,7 +105,7 @@ function buildPickContext(
   const playerInfo = playerMap[pick.player_id];
   const age = playerInfo?.age !== undefined ? `Age ${playerInfo.age}` : null;
   const rookieFlag = rookieValues.players[pick.player_id]
-    ? 'Rookie (in FantasyCalc rookie class)'
+    ? 'Rookie (current season draft class)'
     : null;
 
   const teamName = getTeamName(pick.roster_id, rosters, users);
