@@ -82,7 +82,7 @@ function isCurrentSeasonRookie(
   const draftYear = parseInt(playerInfo.draft_year, 10);
   const currentSeason = parseInt(season, 10);
   if (!Number.isFinite(draftYear) || !Number.isFinite(currentSeason)) return false;
-  return currentSeason - draftYear === 0;
+  return currentSeason === draftYear;
 }
 
 /**
