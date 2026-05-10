@@ -85,6 +85,11 @@ function isCurrentSeasonRookie(
 /**
  * Fetch (or return cached) the dynasty value map from FantasyCalc.
  * Returns an empty map on any error so callers can degrade gracefully.
+ *
+ * `playerMap` supplies Sleeper metadata (`draft_year`, position) used to
+ * identify current-season rookies and compute position-based rookie ranks.
+ * `nflState.season` is the authoritative current season used for the
+ * draft_year comparison.
  */
 export async function getRookieValueMap(
   kv: KVNamespace,
@@ -110,6 +115,7 @@ export async function getRookieValueMap(
     }
     const entries = (await response.json()) as FantasyCalcEntry[];
     const map: RookieValueMap = { players: {}, picks: {} };
+    let missingDraftYearCount = 0;
     const rookieEntries: Array<{
       sleeperId: string;
       position: string;
@@ -143,6 +149,8 @@ export async function getRookieValueMap(
           overallRank: entry.overallRank,
           ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
         });
+      } else if (player.sleeperId && !playerMap[player.sleeperId]?.draft_year) {
+        missingDraftYearCount++;
       }
     }
 
@@ -160,7 +168,12 @@ export async function getRookieValueMap(
 
     if (Object.keys(map.players).length === 0) {
       console.warn(
-        `Rookies identified by draft_year: 0 (season=${nflState.season}). Check Sleeper draft_year metadata and FantasyCalc payload.`,
+        `No rookies identified by draft_year (season=${nflState.season}). Check Sleeper draft_year metadata and FantasyCalc payload.`,
+      );
+    }
+    if (missingDraftYearCount > 0) {
+      console.warn(
+        `FantasyCalc entries skipped due to missing Sleeper draft_year metadata: ${missingDraftYearCount}`,
       );
     }
 
