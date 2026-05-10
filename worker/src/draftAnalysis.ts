@@ -63,25 +63,8 @@ function computeRosterShape(
   return shape;
 }
 
-/**
- * Bucket the slot-vs-rank delta into a qualitative label for the prompt.
- * Positive delta = picked LATER than expected = good value for drafter.
- * Negative delta = picked EARLIER than expected = reach.
- */
-function deltaLabel(delta: number): string {
-  if (delta >= 8) return 'major value — fell well below consensus';
-  if (delta >= 4) return 'good value — fell below consensus';
-  if (delta >= 2) return 'slight value';
-  if (delta >= -1) return 'roughly at consensus';
-  if (delta >= -3) return 'slight reach';
-  if (delta >= -7) return 'reach — taken meaningfully early';
-  return 'major reach — taken well above consensus';
-}
-
 interface PickContextResult {
   context: string;
-  /** Slot - overallRank. null when no FantasyCalc data is available. */
-  computedDelta: number | null;
 }
 
 function buildPickContext(
@@ -90,7 +73,6 @@ function buildPickContext(
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
   priorPicks: SleeperDraftPick[],
-  _rookieValues: RookieValueMap,
 ): PickContextResult {
   const meta = pick.metadata ?? {};
   const playerName = meta.first_name && meta.last_name
@@ -124,7 +106,6 @@ function buildPickContext(
     .map((p) => p.metadata?.position ?? '?')
     .join(', ');
 
-  const computedDelta: number | null = null;
   let context = `Pick #${pick.pick_no} (Round ${pick.round})\n`;
   context += `Player: ${playerName} | Position: ${position} | NFL Team: ${nflTeam}\n`;
   if (age || rookieFlag) {
@@ -137,7 +118,7 @@ function buildPickContext(
   if (teamPriorPicks.length > 0) {
     context += `${teamName}'s prior picks in this draft: ${teamPriorPositions}\n`;
   }
-  return { context, computedDelta };
+  return { context };
 }
 
 /**
@@ -150,20 +131,19 @@ export async function generatePickAnalysis(
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
   priorPicks: SleeperDraftPick[],
-  rookieValues: RookieValueMap,
+  _rookieValues: RookieValueMap,
   draftRounds: number,
   draftTeams: number,
   apiKey: string,
 ): Promise<DraftPickAnalysis> {
   const anthropic = new Anthropic({ apiKey });
 
-  const { context, computedDelta } = buildPickContext(
+  const { context } = buildPickContext(
     pick,
     rosters,
     users,
     playerMap,
     priorPicks,
-    rookieValues,
   );
 
   // Keep the model focused on player profile and team fit instead of draft-slot
@@ -265,7 +245,6 @@ function buildTeamGradeContext(
   rosters: SleeperRoster[],
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
-  _rookieValues: RookieValueMap,
 ): string {
   const teamName = getTeamName(rosterId, rosters, users);
   const roster = rosters.find((r) => r.roster_id === rosterId);
@@ -309,7 +288,7 @@ export async function generateTeamDraftGrade(
   rosters: SleeperRoster[],
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
-  rookieValues: RookieValueMap,
+  _rookieValues: RookieValueMap,
   apiKey: string,
 ): Promise<TeamDraftGrade> {
   const anthropic = new Anthropic({ apiKey });
@@ -320,7 +299,6 @@ export async function generateTeamDraftGrade(
     rosters,
     users,
     playerMap,
-    rookieValues,
   );
 
   const prompt = `You are Mike and Jim grading one team's dynasty rookie draft class.
