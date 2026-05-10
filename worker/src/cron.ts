@@ -26,7 +26,7 @@ import {
 import { generateTradeAnalysis } from './anthropic';
 import { generatePickAnalysis, generateTeamDraftGrade } from './draftAnalysis';
 import { getRookieValueMap } from './rookieValues';
-import { analysisExists, saveAnalysis, pickAnalysisExists, savePickAnalysis, teamDraftGradeExists, saveTeamDraftGrade } from './db';
+import { getAnalysisVersion, saveAnalysis, getPickAnalysisVersion, savePickAnalysis, getTeamDraftGradeVersion, saveTeamDraftGrade } from './db';
 
 /**
  * Compute position counts for a single roster's player list.
@@ -74,6 +74,14 @@ function isProcessedTrade(tx: SleeperTransaction): boolean {
 }
 
 /**
+ * Per-tick processing caps to prevent Worker timeout and runaway Anthropic spend.
+ * Version-bump rollout is paced across successive cron ticks rather than all-at-once.
+ */
+const MAX_TRADES_PER_TICK = 5;
+const MAX_PICKS_PER_TICK = 3;
+const MAX_GRADES_PER_TICK = 2;
+
+/**
  * Process trades for a specific week
  */
 async function processWeekTrades(
@@ -88,6 +96,12 @@ async function processWeekTrades(
   seenTransactionIds: Set<string>,
 ): Promise<number> {
   console.log(`Processing trades for week ${week}...`);
+
+  const currentVersion = env.TRADE_ANALYSIS_VERSION;
+  if (!currentVersion) {
+    console.error('TRADE_ANALYSIS_VERSION is unset — skipping trade processing this tick');
+    return 0;
+  }
 
   try {
     const transactions = await fetchTransactions(leagueId, week);
@@ -109,28 +123,33 @@ async function processWeekTrades(
 
     let processed = 0;
 
-    // Process each trade
+    // Process each trade (capped per tick to pace version-bump rollout)
     for (const trade of completedTrades) {
+      if (processed >= MAX_TRADES_PER_TICK) {
+        console.log(`Reached per-tick trade cap (${MAX_TRADES_PER_TICK}); remaining trades will be processed next tick`);
+        break;
+      }
+
       try {
         // Skip if we've already seen this transaction (dedupe across weeks)
         if (seenTransactionIds.has(trade.transaction_id)) {
-          console.log(
-            `Already processed ${trade.transaction_id} in another week, skipping`,
-          );
+          console.log(`Already processed ${trade.transaction_id} in another week, skipping`);
           continue;
         }
         seenTransactionIds.add(trade.transaction_id);
 
-        // Check if analysis already exists
-        const exists = await analysisExists(env.DB, trade.transaction_id);
-        if (exists) {
-          console.log(
-            `Analysis already exists for ${trade.transaction_id}, skipping`,
-          );
+        // Check the stored version — skip if current, regenerate if stale or missing
+        const existingVersion = await getAnalysisVersion(env.DB, trade.transaction_id);
+
+        if (existingVersion === currentVersion) {
+          // Already at current version — skip silently
           continue;
         }
 
-        console.log(`Generating analysis for trade ${trade.transaction_id}...`);
+        const action = existingVersion === null
+          ? `Generating new analysis for ${trade.transaction_id}`
+          : `Regenerating analysis for ${trade.transaction_id} (${existingVersion} → ${currentVersion})`;
+        console.log(action);
 
         // Filter the already-loaded player map — no extra KV round-trip needed
         const playerIds = Object.keys(trade.adds ?? {});
@@ -162,14 +181,14 @@ async function processWeekTrades(
         // Use fallback for created timestamp
         const createdAt = trade.created ?? Date.now();
 
-        // Save to database
+        // Save to database (UPSERT — handles both first-time and version-bump regeneration)
         await saveAnalysis(
           env.DB,
           trade.transaction_id,
           leagueId,
           createdAt,
           analysis,
-          env.TRADE_ANALYSIS_VERSION,
+          currentVersion,
         );
 
         console.log(`Successfully saved analysis for ${trade.transaction_id}`);
@@ -344,9 +363,6 @@ export async function handleScheduled(env: Env): Promise<void> {
  * Process draft picks — generates per-pick analyses and, when complete, per-team grades.
  * Per-tick caps prevent Worker timeout and runaway Anthropic spend.
  */
-const MAX_PICKS_PER_TICK = 3;
-const MAX_GRADES_PER_TICK = 2;
-
 async function processDraftAnalysis(
   env: Env,
   draftId: string,
@@ -356,6 +372,12 @@ async function processDraftAnalysis(
   playerMap: Record<string, PlayerInfo>,
 ): Promise<void> {
   console.log(`Processing draft analysis for draft ${draftId}...`);
+
+  const version = env.DRAFT_ANALYSIS_VERSION;
+  if (!version) {
+    console.error('DRAFT_ANALYSIS_VERSION is unset — skipping draft processing this tick');
+    return;
+  }
 
   const [draft, picks, rookieValues] = await Promise.all([
     fetchDraft(draftId),
@@ -371,9 +393,7 @@ async function processDraftAnalysis(
     return;
   }
 
-  const version = env.DRAFT_ANALYSIS_VERSION || 'v1';
-
-  // Process each pick that doesn't have an analysis yet (capped per tick)
+  // Process each pick — regenerate if missing or version-stale (capped per tick)
   let picksAnalyzed = 0;
   for (let i = 0; i < picks.length; i++) {
     if (picksAnalyzed >= MAX_PICKS_PER_TICK) {
@@ -383,10 +403,17 @@ async function processDraftAnalysis(
 
     const pick = picks[i];
     try {
-      const exists = await pickAnalysisExists(env.DB, draftId, pick.pick_no);
-      if (exists) continue;
+      const existingVersion = await getPickAnalysisVersion(env.DB, draftId, pick.pick_no);
 
-      console.log(`Generating analysis for pick #${pick.pick_no}...`);
+      if (existingVersion === version) {
+        // Already at current version — skip silently
+        continue;
+      }
+
+      const action = existingVersion === null
+        ? `Generating new analysis for pick #${pick.pick_no}`
+        : `Regenerating analysis for pick #${pick.pick_no} (${existingVersion} → ${version})`;
+      console.log(action);
 
       // Prior picks for context (all picks before this one)
       const priorPicks = picks.slice(0, i);
@@ -413,7 +440,7 @@ async function processDraftAnalysis(
     }
   }
 
-  console.log(`Draft pick analysis: ${picksAnalyzed} new pick(s) analyzed`);
+  console.log(`Draft pick analysis: ${picksAnalyzed} new/updated pick(s) analyzed`);
 
   // Check for draft completion — generate team grades when done
   const totalExpectedPicks = draft.settings.rounds * draft.settings.teams;
@@ -446,10 +473,17 @@ async function processDraftAnalysis(
 
     const rosterId = Number(rosterIdStr);
     try {
-      const exists = await teamDraftGradeExists(env.DB, draftId, rosterId);
-      if (exists) continue;
+      const existingVersion = await getTeamDraftGradeVersion(env.DB, draftId, rosterId);
 
-      console.log(`Generating team grade for roster ${rosterId}...`);
+      if (existingVersion === version) {
+        // Already at current version — skip silently
+        continue;
+      }
+
+      const action = existingVersion === null
+        ? `Generating new team grade for roster ${rosterId}`
+        : `Regenerating team grade for roster ${rosterId} (${existingVersion} → ${version})`;
+      console.log(action);
 
       const grade = await generateTeamDraftGrade(
         rosterId,
@@ -470,5 +504,5 @@ async function processDraftAnalysis(
     }
   }
 
-  console.log(`Team draft grades: ${teamsGraded} new grade(s) generated`);
+  console.log(`Team draft grades: ${teamsGraded} new/updated grade(s) generated`);
 }

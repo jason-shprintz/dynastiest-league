@@ -95,18 +95,17 @@ export async function saveAnalysis(
 }
 
 /**
- * Check if analysis exists for a transaction
+ * Get the stored analysis version for a transaction, or null if no record exists
  */
-export async function analysisExists(
+export async function getAnalysisVersion(
   db: D1Database,
   transactionId: string,
-): Promise<boolean> {
-  const result = await db
-    .prepare('SELECT 1 FROM trade_analysis WHERE transaction_id = ? LIMIT 1')
+): Promise<string | null> {
+  const row = await db
+    .prepare('SELECT analysis_version FROM trade_analysis WHERE transaction_id = ? LIMIT 1')
     .bind(transactionId)
-    .first();
-
-  return result !== null;
+    .first<{ analysis_version: string }>();
+  return row?.analysis_version ?? null;
 }
 
 /**
@@ -132,18 +131,18 @@ export async function getLeagueAnalyses(
 // ─── Draft Pick Analysis ─────────────────────────────────────────────────────
 
 /**
- * Check if a draft pick analysis already exists
+ * Get the stored analysis version for a draft pick, or null if no record exists
  */
-export async function pickAnalysisExists(
+export async function getPickAnalysisVersion(
   db: D1Database,
   draftId: string,
   pickNo: number,
-): Promise<boolean> {
-  const result = await db
-    .prepare('SELECT 1 FROM draft_pick_analysis WHERE draft_id = ? AND pick_no = ? LIMIT 1')
+): Promise<string | null> {
+  const row = await db
+    .prepare('SELECT analysis_version FROM draft_pick_analysis WHERE draft_id = ? AND pick_no = ? LIMIT 1')
     .bind(draftId, pickNo)
-    .first();
-  return result !== null;
+    .first<{ analysis_version: string }>();
+  return row?.analysis_version ?? null;
 }
 
 /**
@@ -194,18 +193,18 @@ export async function getDraftPickAnalyses(
 // ─── Team Draft Grade ────────────────────────────────────────────────────────
 
 /**
- * Check if a team draft grade already exists
+ * Get the stored analysis version for a team draft grade, or null if no record exists
  */
-export async function teamDraftGradeExists(
+export async function getTeamDraftGradeVersion(
   db: D1Database,
   draftId: string,
   rosterId: number,
-): Promise<boolean> {
-  const result = await db
-    .prepare('SELECT 1 FROM team_draft_grade WHERE draft_id = ? AND roster_id = ? LIMIT 1')
+): Promise<string | null> {
+  const row = await db
+    .prepare('SELECT analysis_version FROM team_draft_grade WHERE draft_id = ? AND roster_id = ? LIMIT 1')
     .bind(draftId, rosterId)
-    .first();
-  return result !== null;
+    .first<{ analysis_version: string }>();
+  return row?.analysis_version ?? null;
 }
 
 /**

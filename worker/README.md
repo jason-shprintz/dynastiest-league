@@ -188,8 +188,42 @@ The worker runs every 5 minutes (`*/5 * * * *`) and:
 
 1. Checks the current week and previous week for new trades
 2. Filters for completed trades only
-3. Generates analysis for trades that don't have one yet
-4. Stores the analysis in D1
+3. Compares each trade/pick/grade's stored version against the current `*_ANALYSIS_VERSION`
+4. Generates or regenerates analysis for records that are missing or version-stale
+5. Stores the analysis in D1 via UPSERT
+
+## Iterating on Prompts
+
+When you want to re-run analysis with an updated prompt, **bump the version string** in
+`wrangler.toml` and merge to `main`. That's the only step required.
+
+```toml
+# wrangler.toml
+[vars]
+TRADE_ANALYSIS_VERSION = "v2"   # was "v1"
+DRAFT_ANALYSIS_VERSION = "v2"   # was "v1"
+```
+
+Once deployed, the cron will compare every existing record's stored version against the new
+value. Any mismatch triggers a regeneration. Per-tick caps (`MAX_TRADES_PER_TICK = 5`,
+`MAX_PICKS_PER_TICK = 3`, `MAX_GRADES_PER_TICK = 2`) pace the rollout across successive
+cron ticks (~30 min total for a full refresh at current volumes) so you don't blow your
+Anthropic budget in a single burst.
+
+**No manual `DELETE FROM ...` needed.** If you leave the version unchanged, existing records
+are silently skipped and only brand-new trades/picks receive analysis.
+
+> **Warning:** An empty-string or unset `TRADE_ANALYSIS_VERSION` / `DRAFT_ANALYSIS_VERSION`
+> causes the cron to log an error and **skip** that processing path for that tick. Trade
+> and draft processing are handled independently — a misconfigured trade version doesn't
+> prevent draft analysis from running, and vice versa. Always ensure both vars are set to
+> a non-empty string in `wrangler.toml` before deploying.
+
+### Manual DELETE (escape hatch)
+
+`DELETE FROM ... WHERE id = '...'` still works if you want to force regeneration of a
+single record without bumping the version (e.g. debugging one weird trade). The next cron
+tick will see the row as missing and regenerate it fresh.
 
 ## Architecture
 
@@ -215,7 +249,9 @@ worker/
 Set in `wrangler.toml`:
 
 - `SLEEPER_LEAGUE_ID`: Your Sleeper league ID
-- `ANALYSIS_VERSION`: Version string for analysis schema (e.g., "v1")
+- `TRADE_ANALYSIS_VERSION`: Version string for trade analysis (e.g. `"v1"`). Bump to regenerate all existing trade analyses.
+- `DRAFT_ANALYSIS_VERSION`: Version string for draft pick/grade analysis (e.g. `"v1"`). Bump to regenerate all existing draft analyses.
+- `LEAGUE_DRAFT_ID` *(optional)*: Pin cron to a specific draft ID instead of auto-detecting
 
 Set as secrets:
 
