@@ -375,7 +375,15 @@ export async function handleScheduled(env: Env): Promise<void> {
   const draftId = await resolveDraftId(env, leagueId);
   if (draftId) {
     try {
-      await processDraftAnalysis(env, draftId, leagueId, rosters, users, allPlayers);
+      await processDraftAnalysis(
+        env,
+        draftId,
+        leagueId,
+        rosters,
+        users,
+        allPlayers,
+        nflState,
+      );
     } catch (err) {
       console.error('Error processing draft analysis:', err);
     }
@@ -393,6 +401,7 @@ async function processDraftAnalysis(
   rosters: SleeperRoster[],
   users: SleeperUser[],
   playerMap: Record<string, PlayerInfo>,
+  nflState: SleeperNflState,
 ): Promise<void> {
   console.log(`Processing draft analysis for draft ${draftId}...`);
 
@@ -408,7 +417,7 @@ async function processDraftAnalysis(
     // FantasyCalc dynasty values, cached in KV with 24h TTL. Returns an empty
     // map on failure — the analysis functions will still run, they just won't
     // have ADP context for that tick.
-    getRookieValueMap(env.PLAYERS_KV),
+    getRookieValueMap(env.PLAYERS_KV, playerMap, nflState),
   ]);
 
   if (picks.length === 0) {

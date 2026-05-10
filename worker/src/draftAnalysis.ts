@@ -82,7 +82,7 @@ interface PickContextResult {
   context: string;
   /**
    * Slot - rookieRank. null when no rookieRank is available (player not in
-   * FantasyCalc, or not flagged as a rookie in Sleeper).
+   * FantasyCalc rookie values).
    */
   computedDelta: number | null;
 }
@@ -104,10 +104,8 @@ function buildPickContext(
 
   const playerInfo = playerMap[pick.player_id];
   const age = playerInfo?.age !== undefined ? `Age ${playerInfo.age}` : null;
-  const rookieFlag = playerInfo?.years_exp === 0
-    ? 'Rookie (no NFL snaps yet)'
-    : playerInfo?.years_exp !== undefined
-    ? `${playerInfo.years_exp} NFL years`
+  const rookieFlag = rookieValues.players[pick.player_id]
+    ? 'Rookie (in FantasyCalc rookie class)'
     : null;
 
   const teamName = getTeamName(pick.roster_id, rosters, users);
@@ -129,11 +127,7 @@ function buildPickContext(
   // FantasyCalc dynasty rank, with rookie-only re-ranking applied.
   //
   // CRITICAL: We use rookieRank (rank among rookies in this class) for the
-  // slot-value delta — NOT overallRank (rank across all dynasty assets, vets
-  // included). Example: Travis Hunter might be overallRank #25 but rookieRank
-  // #1. In a rookie-only draft, picking him at slot 1 is exactly right, not
-  // a 24-slot reach. overallRank is shown as supplementary color but is not
-  // used for delta math.
+  // slot-value delta. In a rookie-only draft we evaluate by rookie-class rank.
   const fcValue = rookieValues.players[pick.player_id];
   let computedDelta: number | null = null;
   let valueLine = '';
@@ -146,12 +140,11 @@ function buildPickContext(
     valueLine =
       `Rookie class rank: #${fcValue.rookieRank}${posRankStr}\n` +
       `Slot vs rookie rank: picked at #${pick.pick_no}, ranked #${fcValue.rookieRank} among rookies → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n` +
-      `(For dynasty context only — not used for slot evaluation: FantasyCalc overall rank #${fcValue.overallRank}, value ${fcValue.value}.)\n`;
+      `FantasyCalc value: ${fcValue.value}\n`;
   } else if (fcValue) {
-    // Player has FantasyCalc data but no rookieRank — likely a non-rookie
-    // accidentally in the draft, or rookie flag is missing in Sleeper.
+    // Player has FantasyCalc data but no rookieRank.
     valueLine =
-      `Dynasty rank: FantasyCalc has this player but they aren't flagged as a rookie. Skip slot-value commentary; focus on profile and team fit.\n`;
+      `Rookie rank: FantasyCalc has this player but no rookie class rank was available. Skip slot-value commentary; focus on profile and team fit.\n`;
   } else {
     valueLine =
       `Rookie rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
@@ -204,7 +197,7 @@ export async function generatePickAnalysis(
 Context:
 - This is a ${draftRounds}-round, ${draftRounds * draftTeams}-pick dynasty ROOKIE-ONLY draft. Every player taken is an incoming NFL rookie.
 - The pick details below include the player's "Rookie class rank" — their rank among the rookies in this class, derived from FantasyCalc dynasty values. THIS is the authoritative ADP for evaluating whether the pick was made at a fair slot. The slot vs rookie rank delta tells you exactly whether the pick was good value, fair, or a reach.
-- IGNORE the FantasyCalc overall rank for slot evaluation — that ranks across all dynasty assets including veterans, and would make every rookie look like a massive reach. It's shown only as supplementary dynasty context.
+- IGNORE veteran-inclusive dynasty ranking concepts for slot evaluation — this is a rookie-only draft, so slot value comes from rookie-class rank only.
 - If a player has no rookie rank (rare deep prospect or data issue), do NOT speculate about value. Focus only on player profile and team fit.
 
 What to discuss:
