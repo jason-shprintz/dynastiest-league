@@ -38,6 +38,8 @@ const PICK_ANALYSIS_SCHEMA = {
   required: ['grade', 'value_vs_adp', 'conversation', 'hot_take'],
 };
 
+const ALLOWED_CONVERSATION_SPEAKERS = new Set(['Mike', 'Jim']);
+
 function getTeamName(
   rosterId: number,
   rosters: SleeperRoster[],
@@ -92,7 +94,7 @@ function isConversationComplete(
   return conversation.every(
     (entry) =>
       typeof entry.speaker === 'string' &&
-      ['Mike', 'Jim'].includes(entry.speaker.trim()) &&
+      ALLOWED_CONVERSATION_SPEAKERS.has(entry.speaker.trim()) &&
       typeof entry.text === 'string' &&
       entry.text.trim().length > 0,
   );
