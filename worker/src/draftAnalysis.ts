@@ -23,6 +23,7 @@ const PICK_ANALYSIS_SCHEMA = {
     value_vs_adp: { type: 'string' },
     conversation: {
       type: 'array',
+      minItems: 2,
       items: {
         type: 'object',
         properties: {
@@ -76,6 +77,25 @@ function deltaLabel(delta: number): string {
   if (delta >= -3) return 'slight reach';
   if (delta >= -7) return 'reach — taken meaningfully early';
   return 'major reach — taken well above consensus';
+}
+
+/**
+ * Validate that a conversation array is non-empty and every entry has both
+ * a speaker and non-blank text. Returns true if valid, false otherwise.
+ * Used as a guard before persisting so partial/truncated model output gets
+ * retried on the next cron tick instead of saved as broken data.
+ */
+function isConversationComplete(
+  conversation: Array<{ speaker?: string; text?: string }> | undefined,
+): boolean {
+  if (!conversation || conversation.length === 0) return false;
+  return conversation.every(
+    (entry) =>
+      typeof entry.speaker === 'string' &&
+      entry.speaker.length > 0 &&
+      typeof entry.text === 'string' &&
+      entry.text.trim().length > 0,
+  );
 }
 
 interface PickContextResult {
@@ -222,7 +242,7 @@ ${context}
 Instructions:
 1. Letter grade (A+ through F) reflecting both player quality and slot value (per the rookie rank delta).
 2. value_vs_adp: short integer-string. Use the slot-vs-rookie-rank delta directly when available, "0" when no rookie rank.
-3. 2–3 short, punchy Mike & Jim exchanges.
+3. 2–3 short, punchy Mike & Jim exchanges. The conversation MUST contain at least 2 entries with non-empty text.
 4. One-sentence hot_take.`;
 
   const response = await anthropic.messages.create({
@@ -246,6 +266,21 @@ Instructions:
   }
 
   const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'pick_id' | 'draft_id' | 'pick_no'>;
+
+  // Validate completeness before returning. Empty conversations or missing
+  // hot_take indicate the model truncated or otherwise failed to populate
+  // the structured output. Throwing here lets the cron retry on the next
+  // tick instead of persisting a broken row.
+  if (!isConversationComplete(analysis.conversation)) {
+    throw new Error(
+      `Pick analysis for #${pick.pick_no} returned an empty or incomplete conversation; will retry next tick`,
+    );
+  }
+  if (!analysis.hot_take || analysis.hot_take.trim().length === 0) {
+    throw new Error(
+      `Pick analysis for #${pick.pick_no} returned an empty hot_take; will retry next tick`,
+    );
+  }
 
   // Always overwrite value_vs_adp with the computed delta (or "0" when we
   // have no rookie rank). The model's emitted value is unreliable; the
@@ -286,6 +321,7 @@ const TEAM_GRADE_SCHEMA = {
     summary: { type: 'string' },
     conversation: {
       type: 'array',
+      minItems: 2,
       items: {
         type: 'object',
         properties: {
@@ -296,7 +332,7 @@ const TEAM_GRADE_SCHEMA = {
       },
     },
   },
-  required: ['overall_grade', 'summary', 'conversation'],
+  required: ['overall_grade', 'best_pick', 'worst_pick', 'summary', 'conversation'],
 };
 
 function buildTeamGradeContext(
@@ -402,16 +438,21 @@ Grade based on:
 
 ${context}
 
-Instructions:
-1. Letter grade for the rookie class.
-2. Best pick + worst pick (by pick_no) with one-sentence reason each (cite the rookie rank when relevant).
-3. 2–3 sentence summary of the class.
-4. 2–3 exchanges between Mike and Jim about the team's strategy and execution.`;
+Instructions (ALL fields are required — none may be omitted):
+1. overall_grade: letter grade for the rookie class.
+2. best_pick: object with pick_no and one-sentence reason (cite rookie rank when relevant). REQUIRED — if every pick was strong, pick the strongest; if every pick was weak, pick the least weak.
+3. worst_pick: object with pick_no and one-sentence reason. REQUIRED — same logic in reverse.
+4. summary: 2–3 sentence summary of the class.
+5. conversation: 2–3 exchanges between Mike and Jim about the team's strategy and execution. MUST contain at least 2 entries with non-empty text.`;
 
+  // max_tokens raised from 1000 to 1500. The structured output (overall grade
+  // + two pick objects + summary + 2-3 conversation exchanges) was occasionally
+  // truncating under the 1000-token budget, producing empty conversation
+  // arrays. 1500 leaves comfortable headroom.
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1000,
-    system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using rookie-class-only rankings as the authoritative consensus, total class value, slot-vs-rookie-rank deltas, and roster fit.',
+    max_tokens: 1500,
+    system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using rookie-class-only rankings as the authoritative consensus, total class value, slot-vs-rookie-rank deltas, and roster fit. You always populate every field requested in the structured output.',
     tools: [
       {
         name: 'submit_team_grade',
@@ -429,11 +470,35 @@ Instructions:
   }
 
   const gradeOutput = toolUseBlock.input as Omit<TeamDraftGrade, 'draft_id' | 'roster_id'>;
+
+  // Validate completeness before returning. Even with the schema marking
+  // these fields required, the model can return empty strings or empty
+  // arrays under token pressure. Throwing here lets the cron retry on
+  // the next tick instead of persisting broken data.
+  if (!isConversationComplete(gradeOutput.conversation)) {
+    throw new Error(
+      `Team grade for roster ${rosterId} returned an empty or incomplete conversation; will retry next tick`,
+    );
+  }
+  if (!gradeOutput.summary || gradeOutput.summary.trim().length === 0) {
+    throw new Error(
+      `Team grade for roster ${rosterId} returned an empty summary; will retry next tick`,
+    );
+  }
+  if (!gradeOutput.best_pick || typeof gradeOutput.best_pick.pick_no !== 'number') {
+    throw new Error(
+      `Team grade for roster ${rosterId} returned an invalid best_pick; will retry next tick`,
+    );
+  }
+  if (!gradeOutput.worst_pick || typeof gradeOutput.worst_pick.pick_no !== 'number') {
+    throw new Error(
+      `Team grade for roster ${rosterId} returned an invalid worst_pick; will retry next tick`,
+    );
+  }
+
   return {
     ...gradeOutput,
     draft_id: draftId,
     roster_id: rosterId,
-    best_pick: gradeOutput.best_pick ?? null,
-    worst_pick: gradeOutput.worst_pick ?? null,
   };
 }
