@@ -192,6 +192,14 @@ The worker runs every 1 minute (`*/1 * * * *`) and:
 4. Generates or regenerates analysis for records that are missing or version-stale
 5. Stores the analysis in D1 via UPSERT
 
+### Rookie identification source for draft analysis
+
+Rookie ranking data comes from FantasyCalc dynasty values, but rookie identity is
+computed from the cached Sleeper player map using
+`parseInt(playerInfo.draft_year, 10) === parseInt(nflState.season, 10)`.
+`years_exp` is intentionally not used for rookie detection to avoid offseason rollover
+issues.
+
 ## Iterating on Prompts
 
 When you want to re-run analysis with an updated prompt, **bump the version string** in

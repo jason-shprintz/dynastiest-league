@@ -11,26 +11,23 @@
  */
 
 import type { PlayerInfo } from './types';
+import type { SleeperNflState } from './types';
 
 const FANTASYCALC_URL =
   'https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=1&numTeams=10&ppr=1';
 
-// Bumped from v1 → v2: RookieValue now carries rookieRank/rookiePositionRank,
-// computed from the player map. Old cached entries are missing those fields.
-const KV_KEY = 'fantasycalc_dynasty_v2';
+// Bumped from v2 → v3: rookie identity now uses nflState.season + Sleeper player-map draft_year.
+const KV_KEY = 'fantasycalc_dynasty_v3';
 const TTL_SECONDS = 86400; // 24 hours — values shift slowly
 
 export interface RookieValue {
   /** FantasyCalc dynasty value (roughly 0–10000 scale) */
   value: number;
-  /** Overall rank across ALL dynasty assets, vets and rookies. Lower = better. */
-  overallRank: number;
   /** Rank within the player's position across all dynasty assets. */
   positionRank?: number;
   /**
-   * Rank among ROOKIES ONLY in this class, by overallRank. 1 = best rookie.
-   * Undefined when the player isn't a rookie (years_exp !== 0) or when the
-   * player map wasn't available at fetch time. This is the authoritative
+   * Rank among ROOKIES ONLY in this class. 1 = best rookie.
+   * This is the authoritative
    * rank for rookie-draft slot evaluation — overallRank is misleading
    * because it counts veterans ahead of rookies.
    */
@@ -74,55 +71,33 @@ function parsePickName(name: string): { season: string; round: number } | null {
   return { season: match[1], round };
 }
 
-/**
- * Compute rookieRank and rookiePositionRank for each rookie player in the map.
- * A "rookie" is any player whose Sleeper years_exp === 0.
- *
- * Mutates the provided map in-place (annotates each rookie's RookieValue).
- */
-function annotateRookieRanks(
-  map: RookieValueMap,
-  playerMap: Record<string, PlayerInfo>,
-): void {
-  // Collect rookies along with their position, sorted by FantasyCalc overall rank
-  const rookies: Array<{ sleeperId: string; position: string; overallRank: number }> = [];
-
-  for (const [sleeperId, value] of Object.entries(map.players)) {
-    const info = playerMap[sleeperId];
-    if (!info || info.years_exp !== 0) continue;
-    rookies.push({
-      sleeperId,
-      position: info.position ?? 'UNK',
-      overallRank: value.overallRank,
-    });
+function isCurrentSeasonRookie(
+  playerInfo: PlayerInfo | undefined,
+  season: string,
+): boolean {
+  if (!playerInfo?.draft_year) return false;
+  if (!/^\d{4}$/.test(playerInfo.draft_year) || !/^\d{4}$/.test(season)) {
+    return false;
   }
-
-  rookies.sort((a, b) => a.overallRank - b.overallRank);
-
-  // Track running position-rank counter
-  const positionCounters: Record<string, number> = {};
-
-  rookies.forEach(({ sleeperId, position }, idx) => {
-    positionCounters[position] = (positionCounters[position] ?? 0) + 1;
-    map.players[sleeperId] = {
-      ...map.players[sleeperId],
-      rookieRank: idx + 1,
-      rookiePositionRank: positionCounters[position],
-    };
-  });
+  const draftYear = parseInt(playerInfo.draft_year, 10);
+  const currentSeason = parseInt(season, 10);
+  if (!Number.isFinite(draftYear) || !Number.isFinite(currentSeason)) return false;
+  return currentSeason === draftYear;
 }
 
 /**
  * Fetch (or return cached) the dynasty value map from FantasyCalc.
  * Returns an empty map on any error so callers can degrade gracefully.
  *
- * When playerMap is provided, each rookie's value is annotated with
- * `rookieRank` (rank among all rookies in the class) and
- * `rookiePositionRank` (rank among rookies of the same position).
+ * `playerMap` supplies Sleeper metadata (`draft_year`, position) used to
+ * identify current-season rookies and compute position-based rookie ranks.
+ * `nflState.season` is the authoritative current season used for the
+ * draft_year comparison.
  */
 export async function getRookieValueMap(
   kv: KVNamespace,
-  playerMap?: Record<string, PlayerInfo>,
+  playerMap: Record<string, PlayerInfo>,
+  nflState: SleeperNflState,
 ): Promise<RookieValueMap> {
   try {
     const cached = await kv.get(KV_KEY, 'json');
@@ -143,19 +118,25 @@ export async function getRookieValueMap(
     }
     const entries = (await response.json()) as FantasyCalcEntry[];
     const map: RookieValueMap = { players: {}, picks: {} };
+    let missingDraftYearCount = 0;
+    const rookieEntries: Array<{
+      sleeperId: string;
+      position: string;
+      value: number;
+      overallRank: number;
+      positionRank?: number;
+    }> = [];
 
     for (const entry of entries) {
       const player = entry.player;
       if (!player) continue;
       if (entry.value === undefined || entry.overallRank === undefined) continue;
 
-      const v: RookieValue = {
-        value: entry.value,
-        overallRank: entry.overallRank,
-        ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
-      };
-
       if (player.position === 'PICK') {
+        const v: RookieValue = {
+          value: entry.value,
+          ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
+        };
         const parsed = player.name ? parsePickName(player.name) : null;
         if (parsed) {
           map.picks[`${parsed.season}:${parsed.round}`] = v;
@@ -163,13 +144,41 @@ export async function getRookieValueMap(
         continue;
       }
 
-      if (player.sleeperId) {
-        map.players[player.sleeperId] = v;
+      const playerInfo = player.sleeperId ? playerMap[player.sleeperId] : undefined;
+      if (player.sleeperId && isCurrentSeasonRookie(playerInfo, nflState.season)) {
+        rookieEntries.push({
+          sleeperId: player.sleeperId,
+          position: playerInfo?.position ?? player.position ?? 'UNK',
+          value: entry.value,
+          overallRank: entry.overallRank,
+          ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
+        });
+      } else if (player.sleeperId && playerInfo && !playerInfo.draft_year) {
+        missingDraftYearCount++;
       }
     }
 
-    if (playerMap) {
-      annotateRookieRanks(map, playerMap);
+    rookieEntries.sort((a, b) => a.overallRank - b.overallRank);
+    const positionCounters: Record<string, number> = {};
+    rookieEntries.forEach((entry, idx) => {
+      positionCounters[entry.position] = (positionCounters[entry.position] ?? 0) + 1;
+      map.players[entry.sleeperId] = {
+        value: entry.value,
+        rookieRank: idx + 1,
+        rookiePositionRank: positionCounters[entry.position],
+        ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
+      };
+    });
+
+    if (Object.keys(map.players).length === 0) {
+      console.warn(
+        `No rookies identified by draft_year (season=${nflState.season}). Check Sleeper draft_year metadata and FantasyCalc payload.`,
+      );
+    }
+    if (missingDraftYearCount > 0) {
+      console.warn(
+        `FantasyCalc entries skipped due to missing Sleeper draft_year metadata: ${missingDraftYearCount}`,
+      );
     }
 
     try {
@@ -178,11 +187,8 @@ export async function getRookieValueMap(
       console.error('Failed to write rookie values to KV:', err);
     }
 
-    const rookieCount = Object.values(map.players).filter(
-      (v) => v.rookieRank !== undefined,
-    ).length;
     console.log(
-      `FantasyCalc loaded: ${Object.keys(map.players).length} players (${rookieCount} rookies ranked), ${Object.keys(map.picks).length} picks`,
+      `FantasyCalc loaded: ${Object.keys(map.players).length} rookies, ${Object.keys(map.picks).length} picks`,
     );
     return map;
   } catch (err) {

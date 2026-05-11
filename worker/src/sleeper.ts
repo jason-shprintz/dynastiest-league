@@ -78,8 +78,8 @@ export async function fetchNflState(): Promise<SleeperNflState> {
   return response.json();
 }
 
-// KV cache key — v2 stores enriched player info (team, age, years_exp, search_rank)
-const PLAYERS_KV_KEY = 'sleeper_players_v2';
+// KV cache key — v3 stores enriched player info (team, age, years_exp, draft_year, search_rank)
+const PLAYERS_KV_KEY = 'sleeper_players_v3';
 const PLAYERS_TTL_SECONDS = 86400; // 24 hours
 
 /**
@@ -108,17 +108,22 @@ export async function getPlayerMap(
           team?: string;
           age?: number;
           years_exp?: number;
+          metadata?: {
+            draft_year?: string | number;
+          };
           search_rank?: number;
         }
       >;
       for (const [id, p] of Object.entries(allPlayers)) {
         if (p.full_name) {
+          const draftYearRaw = p.metadata?.draft_year;
           playerMap[id] = {
             name: p.full_name,
             position: p.position ?? '?',
             team: p.team ?? undefined,
             age: p.age ?? undefined,
             years_exp: p.years_exp ?? undefined,
+            draft_year: draftYearRaw !== undefined ? String(draftYearRaw) : undefined,
             search_rank: p.search_rank ?? undefined,
           };
         }

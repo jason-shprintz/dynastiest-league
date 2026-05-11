@@ -24,6 +24,7 @@ export interface PlayerInfo {
   team?: string;
   age?: number;
   years_exp?: number;
+  draft_year?: string;
   search_rank?: number;
 }
 
