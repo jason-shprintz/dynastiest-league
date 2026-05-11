@@ -88,11 +88,11 @@ function deltaLabel(delta: number): string {
 function isConversationComplete(
   conversation: Array<{ speaker?: string; text?: string }> | undefined,
 ): boolean {
-  if (!conversation || conversation.length === 0) return false;
+  if (!conversation || conversation.length < 2) return false;
   return conversation.every(
     (entry) =>
       typeof entry.speaker === 'string' &&
-      entry.speaker.length > 0 &&
+      ['Mike', 'Jim'].includes(entry.speaker.trim()) &&
       typeof entry.text === 'string' &&
       entry.text.trim().length > 0,
   );
@@ -279,6 +279,11 @@ Instructions:
   if (!analysis.hot_take || analysis.hot_take.trim().length === 0) {
     throw new Error(
       `Pick analysis for #${pick.pick_no} returned an empty hot_take; will retry next tick`,
+    );
+  }
+  if (!analysis.grade || analysis.grade.trim().length === 0) {
+    throw new Error(
+      `Pick analysis for #${pick.pick_no} returned an empty grade; will retry next tick`,
     );
   }
 
@@ -485,12 +490,30 @@ Instructions (ALL fields are required — none may be omitted):
       `Team grade for roster ${rosterId} returned an empty summary; will retry next tick`,
     );
   }
-  if (!gradeOutput.best_pick || typeof gradeOutput.best_pick.pick_no !== 'number') {
+  if (
+    !gradeOutput.overall_grade ||
+    gradeOutput.overall_grade.trim().length === 0
+  ) {
+    throw new Error(
+      `Team grade for roster ${rosterId} returned an empty overall_grade; will retry next tick`,
+    );
+  }
+  if (
+    !gradeOutput.best_pick ||
+    !Number.isFinite(gradeOutput.best_pick.pick_no) ||
+    !gradeOutput.best_pick.reason ||
+    gradeOutput.best_pick.reason.trim().length === 0
+  ) {
     throw new Error(
       `Team grade for roster ${rosterId} returned an invalid best_pick; will retry next tick`,
     );
   }
-  if (!gradeOutput.worst_pick || typeof gradeOutput.worst_pick.pick_no !== 'number') {
+  if (
+    !gradeOutput.worst_pick ||
+    !Number.isFinite(gradeOutput.worst_pick.pick_no) ||
+    !gradeOutput.worst_pick.reason ||
+    gradeOutput.worst_pick.reason.trim().length === 0
+  ) {
     throw new Error(
       `Team grade for roster ${rosterId} returned an invalid worst_pick; will retry next tick`,
     );
