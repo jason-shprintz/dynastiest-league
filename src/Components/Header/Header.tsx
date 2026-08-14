@@ -84,10 +84,13 @@ const Header = ({ activeSection, setActiveSection }: IHeaderProps) => {
             src="/Hero-medium.webp"
             alt="The Dynastiest League fantasy football league banner"
             fetchPriority="high"
+            width={800}
+            height={533}
             style={{
               width: '50%',
               maxWidth: '300px',
               height: 'auto',
+              aspectRatio: '800 / 533',
               borderRadius: '12px',
             }}
           />

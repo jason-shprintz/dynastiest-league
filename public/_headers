@@ -1,0 +1,41 @@
+# Cloudflare Pages response headers.
+# https://developers.cloudflare.com/pages/configuration/headers/
+#
+# Lighthouse flagged four "High" severity findings under Trust and Safety:
+# no CSP in enforcement mode, no HSTS, no COOP, and no frame control policy.
+# The rules below address all four.
+#
+# NOTE FOR REVIEW: `connect-src` below allows `https://*.workers.dev`, which
+# covers the default Worker hostname from `VITE_WORKER_URL`. If the Worker is
+# served from a custom domain, add that origin to `connect-src` or the AI trade
+# and draft analysis requests will be blocked.
+
+/*
+  # Force HTTPS for a year, including subdomains. Start with a shorter
+  # max-age and raise it if you are not yet ready to submit for preload.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  # Isolate the browsing context from cross-origin openers.
+  Cross-Origin-Opener-Policy: same-origin
+
+  # Clickjacking protection. `frame-ancestors` in the CSP below is the modern
+  # equivalent; X-Frame-Options is kept for older browsers.
+  X-Frame-Options: DENY
+
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+
+  # 'unsafe-inline' is required on style-src because styled-components injects
+  # its stylesheet at runtime, and on script-src for the inline JSON-LD block in
+  # index.html. Cloudflare Web Analytics (static.cloudflareinsights.com) and the
+  # same-origin /cdn-cgi/ challenge platform are both allowed explicitly.
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.sleeper.app https://*.workers.dev https://cloudflareinsights.com https://static.cloudflareinsights.com; manifest-src 'self'; upgrade-insecure-requests
+
+# Hashed build assets are immutable, so they can be cached indefinitely.
+# Lighthouse reported a 4 hour TTL on first-party scripts.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
