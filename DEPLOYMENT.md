@@ -249,8 +249,8 @@ All within free tier for typical usage.
 ### Anthropic
 
 - **Model**: Claude Opus 4.7 (`claude-opus-4-7`)
-- **Cost per analysis**: ~$0.007 (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
-- **Monthly**: Depends on trade volume (typically 5-20 trades/month = $0.05-0.20)
+- **Cost per analysis**: ~$0.04 (~700 input tokens × $0.005/1K + ~1500 output tokens × $0.025/1K)
+- **Monthly**: Depends on trade volume (typically 5-20 trades/month = $0.20-0.82)
 
 ## Troubleshooting
 

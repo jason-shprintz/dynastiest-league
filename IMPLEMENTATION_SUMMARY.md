@@ -139,8 +139,8 @@ Configuration:
 ### Anthropic (Paid)
 
 - Model: Claude Opus 4.7 (`claude-opus-4-7`, higher quality)
-- ~$0.007 per analysis (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
-- Typical monthly cost: $0.05-0.20 (assuming 5-20 trades/month)
+- ~$0.04 per analysis (~700 input tokens × $0.005/1K + ~1500 output tokens × $0.025/1K)
+- Typical monthly cost: $0.20-0.82 (assuming 5-20 trades/month)
 
 ## **Total Monthly Cost: < $1.00**
 
