@@ -303,7 +303,7 @@ curl -X GET "https://your-worker.workers.dev/api/trade-analyses?ids=transaction_
 
 - **D1**: First 5GB storage free, first 5 million reads free
 - **Workers**: First 100,000 requests/day free
-- **Anthropic**: Costs per token (Claude Haiku 4.5 is cost-effective)
+- **Anthropic**: Costs per token (Claude Opus 4.7 improves output quality at higher cost)
 - **Cron**: Runs every 5 minutes = ~8,640 invocations/month
 
 Monitor your usage in the Cloudflare dashboard.

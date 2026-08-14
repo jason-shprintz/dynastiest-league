@@ -248,7 +248,7 @@ All within free tier for typical usage.
 
 ### Anthropic
 
-- **Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+- **Model**: Claude Opus 4.7 (`claude-opus-4-7`)
 - **Cost per analysis**: ~$0.007 (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
 - **Monthly**: Depends on trade volume (typically 5-20 trades/month = $0.05-0.20)
 
@@ -302,7 +302,7 @@ Edit `worker/src/anthropic.ts`:
 
 ```typescript
 const response = await anthropic.messages.create({
-  model: 'claude-opus-4-5', // Use Claude Opus for better quality (higher cost)
+  model: 'claude-opus-4-7', // Use Claude Opus for better quality (higher cost)
   // ...
 });
 ```

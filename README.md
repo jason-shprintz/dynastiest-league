@@ -19,7 +19,7 @@ The Breaking News page features AI-powered trade analysis using:
 
 - **Cloudflare Workers** - Serverless backend for API and scheduled jobs
 - **D1 Database** - Stores cached analyses (one per trade)
-- **Anthropic Claude Haiku 4.5** - Generates snarky, in-depth analysis as a conversation between two talking heads (Mike & Jim)
+- **Anthropic Claude Opus 4.7** - Generates snarky, in-depth analysis as a conversation between two talking heads (Mike & Jim)
 
 When a trade happens in your Sleeper league, the worker automatically:
 
@@ -67,6 +67,6 @@ npm run clean:appledouble
 - Styled Components
 - Cloudflare Workers (Serverless API)
 - Cloudflare D1 (SQLite Database)
-- Anthropic API (Claude Haiku 4.5)
+- Anthropic API (Claude Opus 4.7)
 - CSS3 with responsive design
 - ESLint for code quality

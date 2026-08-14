@@ -138,7 +138,7 @@ Configuration:
 
 ### Anthropic (Paid)
 
-- Model: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`, cost-effective)
+- Model: Claude Opus 4.7 (`claude-opus-4-7`, higher quality)
 - ~$0.007 per analysis (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
 - Typical monthly cost: $0.05-0.20 (assuming 5-20 trades/month)
 

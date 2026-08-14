@@ -12,6 +12,7 @@ import type {
   DraftPickAnalysis,
   TeamDraftGrade,
 } from './types';
+import { ANTHROPIC_CONTENT_MODEL } from './aiModel';
 import type { RookieValueMap } from './rookieValues';
 
 // ─── Per-pick analysis ────────────────────────────────────────────────────────
@@ -248,7 +249,7 @@ Instructions:
 4. One-sentence hot_take.`;
 
   const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: ANTHROPIC_CONTENT_MODEL,
     max_tokens: 800,
     system: 'You are Mike and Jim, dynasty fantasy football analysts. You evaluate rookie draft picks using rookie-class-only rankings as the authoritative consensus, supplemented by player profile and roster fit. You ignore overall dynasty rank for slot evaluation because rookie-only drafts are not measured against veterans.',
     tools: [
@@ -457,7 +458,7 @@ Instructions (ALL fields are required — none may be omitted):
   // truncating under the 1000-token budget, producing empty conversation
   // arrays. 1500 leaves comfortable headroom.
   const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: ANTHROPIC_CONTENT_MODEL,
     max_tokens: 1500,
     system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using rookie-class-only rankings as the authoritative consensus, total class value, slot-vs-rookie-rank deltas, and roster fit. You always populate every field requested in the structured output.',
     tools: [

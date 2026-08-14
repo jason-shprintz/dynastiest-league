@@ -12,6 +12,7 @@ import type {
   PlayerInfo,
   TradeAnalysis,
 } from './types';
+import { ANTHROPIC_CONTENT_MODEL } from './aiModel';
 
 /**
  * JSON schema for structured Claude tool output
@@ -286,7 +287,7 @@ IMPORTANT: Key the "teams" object by roster ID (as a string), not team name. For
 }`;
 
   const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: ANTHROPIC_CONTENT_MODEL,
     max_tokens: 2048,
     system:
       'You are a fantasy football analyst who provides entertaining, snarky trade analysis.',
