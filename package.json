@@ -1,13 +1,16 @@
 {
   "name": "dynastiest-league",
   "private": true,
-  "version": "2.4.4",
+  "version": "2.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "subset:fonts": "node scripts/subset-fonts.mjs",
+    "predev": "npm run subset:fonts",
+    "prebuild": "npm run subset:fonts",
     "clean:appledouble": "find . -type f -name '._*' -delete",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -32,6 +35,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "prettier": "^3.8.1",
+    "subset-font": "^2.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1",
     "vite": "^7.2.4"
