@@ -28,3 +28,18 @@ export const MainContent = styled.main`
     padding: 2rem;
   }
 `;
+
+/**
+ * Placeholder shown while a code-split section is fetched. It reserves a
+ * generous minimum height so swapping the spinner for real content does not
+ * introduce a layout shift.
+ */
+export const SectionFallback = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 60vh;
+  color: ${COLORS.textPrimary};
+`;
