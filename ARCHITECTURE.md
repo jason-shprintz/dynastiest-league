@@ -53,7 +53,7 @@
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    Anthropic API (Claude Haiku 4.5)                         │
+│                    Anthropic API (Claude Opus 4.7)                          │
 │                                                                     │
 │  Generates:                                                         │
 │  - Team grades (A+, B-, etc.)                                       │
@@ -172,9 +172,9 @@ Display in TradeCard components
 
 ### Anthropic (Paid)
 
-- Model: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
-- Cost per analysis: ~$0.007 (~700 input tokens × $0.0008/1K + ~1500 output tokens × $0.004/1K)
-- Typical monthly cost: $0.05-0.20 (5-20 trades/month)
+- Model: Claude Opus 4.7 (`claude-opus-4-7`)
+- Cost per analysis: ~$0.04 (~700 input tokens × $0.005/1K + ~1500 output tokens × $0.025/1K)
+- Typical monthly cost: $0.20-0.82 (5-20 trades/month)
 
 ## Deployment Checklist
 
@@ -242,7 +242,7 @@ wrangler d1 execute dynastiest-league-db --remote \
 
 - **Backend**: Cloudflare Workers (TypeScript)
 - **Database**: Cloudflare D1 (SQLite)
-- **AI**: Anthropic Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+- **AI**: Anthropic Claude Opus 4.7 (`claude-opus-4-7`)
 - **Frontend**: React 19, MobX 6, TypeScript 5
 - **API**: Sleeper Fantasy Football API
 
