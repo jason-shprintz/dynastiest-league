@@ -4,7 +4,7 @@ Cloudflare Worker that generates AI-powered trade analysis for Sleeper fantasy f
 
 ## Features
 
-- **Scheduled Cron Job**: Polls Sleeper API every 5 minutes for new trades
+- **Scheduled Cron Job**: Polls Sleeper API every minute for new trades
 - **AI Analysis**: Generates snarky, in-depth trade analysis using Anthropic Claude
 - **D1 Database**: Stores analyses to ensure one generation per trade
 - **HTTP API**: Provides endpoints for fetching cached analyses
@@ -304,6 +304,6 @@ curl -X GET "https://your-worker.workers.dev/api/trade-analyses?ids=transaction_
 - **D1**: First 5GB storage free, first 5 million reads free
 - **Workers**: First 100,000 requests/day free
 - **Anthropic**: Costs per token (Claude Opus 4.7 improves output quality at higher cost)
-- **Cron**: Runs every 5 minutes = ~8,640 invocations/month
+- **Cron**: Runs every minute = ~43,200 invocations/month
 
 Monitor your usage in the Cloudflare dashboard.

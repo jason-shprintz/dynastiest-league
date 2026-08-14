@@ -298,13 +298,10 @@ crons = ["*/15 * * * *"]  # Every 15 minutes instead of 5
 
 ### Change Anthropic Model
 
-Edit `worker/src/anthropic.ts`:
+Edit `worker/src/aiModel.ts`:
 
 ```typescript
-const response = await anthropic.messages.create({
-  model: 'claude-opus-4-7', // Use Claude Opus for better quality (higher cost)
-  // ...
-});
+export const ANTHROPIC_CONTENT_MODEL = 'claude-opus-4-7';
 ```
 
 ### Adjust Analysis Style
