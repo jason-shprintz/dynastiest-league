@@ -22,12 +22,17 @@ interface TeamDraftGradeCardProps {
   teamName: string;
 }
 
-export const TeamDraftGradeCard = ({ grade, teamName }: TeamDraftGradeCardProps) => {
+export const TeamDraftGradeCard = ({
+  grade,
+  teamName,
+}: TeamDraftGradeCardProps) => {
   return (
     <TeamGradeCardContainer>
       <TeamGradeHeader>
         <TeamGradeName>{teamName}</TeamGradeName>
-        <OverallGradePill $grade={grade.overall_grade}>{grade.overall_grade}</OverallGradePill>
+        <OverallGradePill $grade={grade.overall_grade}>
+          {grade.overall_grade}
+        </OverallGradePill>
       </TeamGradeHeader>
 
       <GradeSummary>{grade.summary}</GradeSummary>
@@ -36,12 +41,14 @@ export const TeamDraftGradeCard = ({ grade, teamName }: TeamDraftGradeCardProps)
         <BestWorstRow>
           {grade.best_pick && (
             <BestWorstItem $isBest={true}>
-              🏆 <span>Best:</span> Pick #{grade.best_pick.pick_no} — {grade.best_pick.reason}
+              🏆 <span>Best:</span> Pick #{grade.best_pick.pick_no} —{' '}
+              {grade.best_pick.reason}
             </BestWorstItem>
           )}
           {grade.worst_pick && (
             <BestWorstItem $isBest={false}>
-              📉 <span>Worst:</span> Pick #{grade.worst_pick.pick_no} — {grade.worst_pick.reason}
+              📉 <span>Worst:</span> Pick #{grade.worst_pick.pick_no} —{' '}
+              {grade.worst_pick.reason}
             </BestWorstItem>
           )}
         </BestWorstRow>

@@ -5,10 +5,10 @@
 This project is a continuously deployed web application. Only the currently
 deployed version is supported — there are no maintained release branches.
 
-| Version | Supported |
-| ------- | --------- |
+| Version                     | Supported          |
+| --------------------------- | ------------------ |
 | Current deployment (`main`) | :white_check_mark: |
-| Older commits / branches | :x: |
+| Older commits / branches    | :x:                |
 
 ## Scope
 

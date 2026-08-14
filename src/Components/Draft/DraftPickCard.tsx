@@ -38,11 +38,18 @@ function formatValueLabel(valueVsAdp: string): string {
   return 'fair value';
 }
 
-export const DraftPickCard = ({ pick, analysis, teamName }: DraftPickCardProps) => {
+export const DraftPickCard = ({
+  pick,
+  analysis,
+  teamName,
+}: DraftPickCardProps) => {
   const meta = pick.metadata ?? {};
   const firstName = meta.first_name ?? '';
   const lastName = meta.last_name ?? '';
-  const playerName = firstName || lastName ? `${firstName} ${lastName}`.trim() : `ID: ${pick.player_id}`;
+  const playerName =
+    firstName || lastName
+      ? `${firstName} ${lastName}`.trim()
+      : `ID: ${pick.player_id}`;
   const position = meta.position ?? '?';
   const nflTeam = meta.team ?? 'FA';
 
@@ -77,7 +84,9 @@ export const DraftPickCard = ({ pick, analysis, teamName }: DraftPickCardProps) 
           )}
         </>
       ) : (
-        <PlaceholderText>Mike &amp; Jim are watching the highlights...</PlaceholderText>
+        <PlaceholderText>
+          Mike &amp; Jim are watching the highlights...
+        </PlaceholderText>
       )}
     </PickCardContainer>
   );

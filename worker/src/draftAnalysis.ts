@@ -131,9 +131,10 @@ function buildPickContext(
   nflSeason: string,
 ): PickContextResult {
   const meta = pick.metadata ?? {};
-  const playerName = meta.first_name && meta.last_name
-    ? `${meta.first_name} ${meta.last_name}`
-    : `Player ID ${pick.player_id}`;
+  const playerName =
+    meta.first_name && meta.last_name
+      ? `${meta.first_name} ${meta.last_name}`
+      : `Player ID ${pick.player_id}`;
   const position = meta.position ?? 'Unknown';
   const nflTeam = meta.team ?? 'Free Agent';
 
@@ -154,7 +155,9 @@ function buildPickContext(
     .map(([pos, cnt]) => `${pos}: ${cnt}`)
     .join(', ');
 
-  const teamPriorPicks = priorPicks.filter((p) => p.roster_id === pick.roster_id);
+  const teamPriorPicks = priorPicks.filter(
+    (p) => p.roster_id === pick.roster_id,
+  );
   const teamPriorPositions = teamPriorPicks
     .map((p) => p.metadata?.position ?? '?')
     .join(', ');
@@ -169,16 +172,16 @@ function buildPickContext(
   if (fcValue && fcValue.rookieRank !== undefined) {
     computedDelta = pick.pick_no - fcValue.rookieRank;
     const deltaSign = computedDelta > 0 ? '+' : '';
-    const posRankStr = fcValue.rookiePositionRank !== undefined
-      ? ` (rookie ${position}${fcValue.rookiePositionRank} in this class)`
-      : '';
+    const posRankStr =
+      fcValue.rookiePositionRank !== undefined
+        ? ` (rookie ${position}${fcValue.rookiePositionRank} in this class)`
+        : '';
     valueLine =
       `Rookie class rank: #${fcValue.rookieRank}${posRankStr}\n` +
       `Slot vs rookie rank: picked at #${pick.pick_no}, ranked #${fcValue.rookieRank} among rookies → delta ${deltaSign}${computedDelta} (${deltaLabel(computedDelta)})\n` +
       `FantasyCalc value: ${fcValue.value}\n`;
   } else {
-    valueLine =
-      `Rookie rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
+    valueLine = `Rookie rank: unavailable (player not found in FantasyCalc or data failed to load). Do not speculate about value; comment on player profile and team fit instead.\n`;
   }
 
   let context = `Pick #${pick.pick_no} (Round ${pick.round})\n`;
@@ -251,7 +254,8 @@ Instructions:
   const response = await anthropic.messages.create({
     model: ANTHROPIC_CONTENT_MODEL,
     max_tokens: 800,
-    system: 'You are Mike and Jim, dynasty fantasy football analysts. You evaluate rookie draft picks using rookie-class-only rankings as the authoritative consensus, supplemented by player profile and roster fit. You ignore overall dynasty rank for slot evaluation because rookie-only drafts are not measured against veterans.',
+    system:
+      'You are Mike and Jim, dynasty fantasy football analysts. You evaluate rookie draft picks using rookie-class-only rankings as the authoritative consensus, supplemented by player profile and roster fit. You ignore overall dynasty rank for slot evaluation because rookie-only drafts are not measured against veterans.',
     tools: [
       {
         name: 'submit_pick_analysis',
@@ -263,12 +267,17 @@ Instructions:
     messages: [{ role: 'user', content: prompt }],
   });
 
-  const toolUseBlock = response.content.find((block) => block.type === 'tool_use');
+  const toolUseBlock = response.content.find(
+    (block) => block.type === 'tool_use',
+  );
   if (!toolUseBlock || toolUseBlock.type !== 'tool_use') {
     throw new Error('No tool use block in Claude response for pick analysis');
   }
 
-  const analysis = toolUseBlock.input as Omit<DraftPickAnalysis, 'pick_id' | 'draft_id' | 'pick_no'>;
+  const analysis = toolUseBlock.input as Omit<
+    DraftPickAnalysis,
+    'pick_id' | 'draft_id' | 'pick_no'
+  >;
 
   // Validate completeness before returning. Empty conversations or missing
   // hot_take indicate the model truncated or otherwise failed to populate
@@ -340,7 +349,13 @@ const TEAM_GRADE_SCHEMA = {
       },
     },
   },
-  required: ['overall_grade', 'best_pick', 'worst_pick', 'summary', 'conversation'],
+  required: [
+    'overall_grade',
+    'best_pick',
+    'worst_pick',
+    'summary',
+    'conversation',
+  ],
 };
 
 function buildTeamGradeContext(
@@ -374,9 +389,10 @@ function buildTeamGradeContext(
 
   for (const pick of teamPicks) {
     const meta = pick.metadata ?? {};
-    const playerName = meta.first_name && meta.last_name
-      ? `${meta.first_name} ${meta.last_name}`
-      : `Player ID ${pick.player_id}`;
+    const playerName =
+      meta.first_name && meta.last_name
+        ? `${meta.first_name} ${meta.last_name}`
+        : `Player ID ${pick.player_id}`;
     const position = meta.position ?? 'Unknown';
     const nflTeam = meta.team ?? 'FA';
     const playerInfo = playerMap[pick.player_id];
@@ -460,7 +476,8 @@ Instructions (ALL fields are required — none may be omitted):
   const response = await anthropic.messages.create({
     model: ANTHROPIC_CONTENT_MODEL,
     max_tokens: 1500,
-    system: 'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using rookie-class-only rankings as the authoritative consensus, total class value, slot-vs-rookie-rank deltas, and roster fit. You always populate every field requested in the structured output.',
+    system:
+      'You are Mike and Jim, dynasty fantasy football analysts. You grade rookie draft classes using rookie-class-only rankings as the authoritative consensus, total class value, slot-vs-rookie-rank deltas, and roster fit. You always populate every field requested in the structured output.',
     tools: [
       {
         name: 'submit_team_grade',
@@ -472,12 +489,17 @@ Instructions (ALL fields are required — none may be omitted):
     messages: [{ role: 'user', content: prompt }],
   });
 
-  const toolUseBlock = response.content.find((block) => block.type === 'tool_use');
+  const toolUseBlock = response.content.find(
+    (block) => block.type === 'tool_use',
+  );
   if (!toolUseBlock || toolUseBlock.type !== 'tool_use') {
     throw new Error('No tool use block in Claude response for team grade');
   }
 
-  const gradeOutput = toolUseBlock.input as Omit<TeamDraftGrade, 'draft_id' | 'roster_id'>;
+  const gradeOutput = toolUseBlock.input as Omit<
+    TeamDraftGrade,
+    'draft_id' | 'roster_id'
+  >;
 
   // Validate completeness before returning. Even with the schema marking
   // these fields required, the model can return empty strings or empty

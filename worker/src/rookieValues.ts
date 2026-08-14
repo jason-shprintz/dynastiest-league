@@ -81,7 +81,8 @@ function isCurrentSeasonRookie(
   }
   const draftYear = parseInt(playerInfo.draft_year, 10);
   const currentSeason = parseInt(season, 10);
-  if (!Number.isFinite(draftYear) || !Number.isFinite(currentSeason)) return false;
+  if (!Number.isFinite(draftYear) || !Number.isFinite(currentSeason))
+    return false;
   return currentSeason === draftYear;
 }
 
@@ -130,12 +131,15 @@ export async function getRookieValueMap(
     for (const entry of entries) {
       const player = entry.player;
       if (!player) continue;
-      if (entry.value === undefined || entry.overallRank === undefined) continue;
+      if (entry.value === undefined || entry.overallRank === undefined)
+        continue;
 
       if (player.position === 'PICK') {
         const v: RookieValue = {
           value: entry.value,
-          ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
+          ...(entry.positionRank !== undefined && {
+            positionRank: entry.positionRank,
+          }),
         };
         const parsed = player.name ? parsePickName(player.name) : null;
         if (parsed) {
@@ -144,14 +148,21 @@ export async function getRookieValueMap(
         continue;
       }
 
-      const playerInfo = player.sleeperId ? playerMap[player.sleeperId] : undefined;
-      if (player.sleeperId && isCurrentSeasonRookie(playerInfo, nflState.season)) {
+      const playerInfo = player.sleeperId
+        ? playerMap[player.sleeperId]
+        : undefined;
+      if (
+        player.sleeperId &&
+        isCurrentSeasonRookie(playerInfo, nflState.season)
+      ) {
         rookieEntries.push({
           sleeperId: player.sleeperId,
           position: playerInfo?.position ?? player.position ?? 'UNK',
           value: entry.value,
           overallRank: entry.overallRank,
-          ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
+          ...(entry.positionRank !== undefined && {
+            positionRank: entry.positionRank,
+          }),
         });
       } else if (player.sleeperId && playerInfo && !playerInfo.draft_year) {
         missingDraftYearCount++;
@@ -161,12 +172,15 @@ export async function getRookieValueMap(
     rookieEntries.sort((a, b) => a.overallRank - b.overallRank);
     const positionCounters: Record<string, number> = {};
     rookieEntries.forEach((entry, idx) => {
-      positionCounters[entry.position] = (positionCounters[entry.position] ?? 0) + 1;
+      positionCounters[entry.position] =
+        (positionCounters[entry.position] ?? 0) + 1;
       map.players[entry.sleeperId] = {
         value: entry.value,
         rookieRank: idx + 1,
         rookiePositionRank: positionCounters[entry.position],
-        ...(entry.positionRank !== undefined && { positionRank: entry.positionRank }),
+        ...(entry.positionRank !== undefined && {
+          positionRank: entry.positionRank,
+        }),
       };
     });
 

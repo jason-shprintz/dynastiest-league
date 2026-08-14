@@ -80,6 +80,7 @@ Update `SLEEPER_LEAGUE_ID` in `wrangler.toml` with your Sleeper league ID.
 Merging to `main` automatically deploys the worker via GitHub Actions (`.github/workflows/deploy-worker.yml`). No manual step is required after a successful merge.
 
 The workflow:
+
 1. Triggers on any push to `main` that touches `worker/**` (or the workflow file itself)
 2. Authenticates with Cloudflare using the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repo secrets
 3. Runs `wrangler d1 migrations apply DB --remote` to apply any unapplied migrations
@@ -105,9 +106,9 @@ This is an emergency path only. The standard path is automatic migration on depl
 
 ### Required Repo Secrets (one-time setup)
 
-| Secret | Description |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | API token with Workers Scripts, Workers KV, and D1 Edit permissions |
+| Secret                  | Description                                                                |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | API token with Workers Scripts, Workers KV, and D1 Edit permissions        |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (found in the dashboard URL or Workers sidebar) |
 
 The workflow can also be triggered manually from the Actions tab (via `workflow_dispatch`) without needing an empty commit.
@@ -270,7 +271,7 @@ Set in `wrangler.toml`:
 - `SLEEPER_LEAGUE_ID`: Your Sleeper league ID
 - `TRADE_ANALYSIS_VERSION`: Version string for trade analysis (e.g. `"v1"`). Bump to regenerate all existing trade analyses.
 - `DRAFT_ANALYSIS_VERSION`: Version string for draft pick/grade analysis (e.g. `"v1"`). Bump to regenerate all existing draft analyses.
-- `LEAGUE_DRAFT_ID` *(optional)*: Pin cron to a specific draft ID instead of auto-detecting
+- `LEAGUE_DRAFT_ID` _(optional)_: Pin cron to a specific draft ID instead of auto-detecting
 
 Set as secrets:
 

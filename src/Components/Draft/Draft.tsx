@@ -73,8 +73,12 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     teamDraftGradeStore,
   } = useStore();
 
-  const picksRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const analysesRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const picksRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const analysesRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
   const [isTabVisible, setIsTabVisible] = useState(
     () => typeof document === 'undefined' || !document.hidden,
   );
@@ -98,7 +102,8 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
       setIsTabVisible(!document.hidden);
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+    return () =>
+      document.removeEventListener('visibilitychange', onVisibilityChange);
   }, []);
 
   // Load picks + analyses once whenever draft changes
@@ -145,7 +150,9 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
         }
       };
       const loadAnalyses = async () => {
-        const didRefresh = await draftPickAnalysisStore.loadAnalyses(draftId, { force: true });
+        const didRefresh = await draftPickAnalysisStore.loadAnalyses(draftId, {
+          force: true,
+        });
         if (didRefresh) {
           setLastUpdatedAt(Date.now());
         }
@@ -210,10 +217,12 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
       <DraftSection>
         <h2>Draft</h2>
         <SectionDescription>
-          {draft.settings.teams}-team, {draft.settings.rounds}-round rookie draft
+          {draft.settings.teams}-team, {draft.settings.rounds}-round rookie
+          draft
         </SectionDescription>
         <EmptyState>
-          🏈 The draft hasn't started yet. Check back when picks start coming in!
+          🏈 The draft hasn't started yet. Check back when picks start coming
+          in!
         </EmptyState>
       </DraftSection>
     );
@@ -230,7 +239,8 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
     <DraftSection>
       <h2>Draft</h2>
       <SectionDescription>
-        {draft.settings.teams}-team · {draft.settings.rounds}-round rookie draft ·{' '}
+        {draft.settings.teams}-team · {draft.settings.rounds}-round rookie draft
+        ·{' '}
         {draft.status === 'complete' ? (
           '✅ Complete'
         ) : (
@@ -241,7 +251,8 @@ const Draft = observer(({ leagueId = DEFAULT_LEAGUE_ID }: DraftProps) => {
         {draft.status === 'drafting' && lastUpdatedAt && (
           <> · last updated {new Date(lastUpdatedAt).toLocaleTimeString()}</>
         )}
-        {draftPicksState.picks.length > 0 && ` · ${draftPicksState.picks.length} picks made`}
+        {draftPicksState.picks.length > 0 &&
+          ` · ${draftPicksState.picks.length} picks made`}
       </SectionDescription>
 
       {/* Final Grades panel — shown once draft completes */}

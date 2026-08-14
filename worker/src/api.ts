@@ -4,7 +4,12 @@
  */
 
 import type { Env } from './types';
-import { getAnalysis, getBatchAnalyses, getDraftPickAnalyses, getTeamDraftGrades } from './db';
+import {
+  getAnalysis,
+  getBatchAnalyses,
+  getDraftPickAnalyses,
+  getTeamDraftGrades,
+} from './db';
 
 const ALLOWED_ORIGINS = [
   'https://dynastiestleague.com',

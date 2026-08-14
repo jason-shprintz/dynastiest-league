@@ -1,7 +1,7 @@
 {
   "name": "dynastiest-league",
   "private": true,
-  "version": "2.3.0",
+  "version": "2.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "clean:appledouble": "find . -type f -name '._*' -delete",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "cleanup": "npm run format:check && npm run lint"
   },
   "dependencies": {
     "mobx": "^6.15.0",

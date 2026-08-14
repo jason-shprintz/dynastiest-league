@@ -71,10 +71,15 @@ export class TeamDraftGradeStore {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch team draft grades: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch team draft grades: ${response.statusText}`,
+        );
       }
 
-      const data = (await response.json()) as Record<string, TeamDraftGrade | null>;
+      const data = (await response.json()) as Record<
+        string,
+        TeamDraftGrade | null
+      >;
 
       runInAction(() => {
         const map = new Map<number, TeamDraftGrade | null>();
@@ -84,7 +89,10 @@ export class TeamDraftGradeStore {
         this.gradesByDraftId.set(draftId, map);
 
         if (map.size === 0) {
-          this.nextRetryAtByDraftId.set(draftId, Date.now() + this.RETRY_DELAY_MS);
+          this.nextRetryAtByDraftId.set(
+            draftId,
+            Date.now() + this.RETRY_DELAY_MS,
+          );
         } else {
           this.nextRetryAtByDraftId.delete(draftId);
         }
@@ -101,7 +109,10 @@ export class TeamDraftGradeStore {
   /**
    * Get grade for a specific team
    */
-  getGrade(draftId: string, rosterId: number): TeamDraftGrade | null | undefined {
+  getGrade(
+    draftId: string,
+    rosterId: number,
+  ): TeamDraftGrade | null | undefined {
     return this.gradesByDraftId.get(draftId)?.get(rosterId);
   }
 
