@@ -163,9 +163,7 @@ export const TradeCard = ({
                 <TeamName>
                   {teamName}
                   {teamAnalysis && (
-                    <GradeSpan>
-                      Grade: {teamAnalysis.grade}
-                    </GradeSpan>
+                    <GradeSpan>Grade: {teamAnalysis.grade}</GradeSpan>
                   )}
                 </TeamName>
                 <ItemsList>
@@ -202,16 +200,12 @@ export const TradeCard = ({
 
       {analysis && (
         <AnalysisContainer>
-          <AnalysisTitle>
-            📺 Mike &amp; Jim's Analysis
-          </AnalysisTitle>
+          <AnalysisTitle>📺 Mike &amp; Jim's Analysis</AnalysisTitle>
           <Conversation
             messages={analysis.conversation}
             speakers={MIKE_AND_JIM_SPEAKERS}
           />
-          <BottomLine>
-            Bottom Line: {analysis.overall_take}
-          </BottomLine>
+          <BottomLine>Bottom Line: {analysis.overall_take}</BottomLine>
         </AnalysisContainer>
       )}
     </TradeCardContainer>

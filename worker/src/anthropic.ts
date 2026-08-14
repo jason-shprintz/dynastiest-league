@@ -107,8 +107,7 @@ function buildTradeContext(
   rosterShapes: Record<number, Record<string, number>>,
   priorSeasonRecords: Record<string, PriorSeasonRecord>,
 ): string {
-  const isOffseason =
-    nflState.season_type === 'off' || nflState.week === 0;
+  const isOffseason = nflState.season_type === 'off' || nflState.week === 0;
 
   const getTeamName = (rosterId: number): string => {
     const roster = rosters.find((r) => r.roster_id === rosterId);
@@ -233,8 +232,7 @@ export async function generateTradeAnalysis(
 ): Promise<TradeAnalysis> {
   const anthropic = new Anthropic({ apiKey });
 
-  const isOffseason =
-    nflState.season_type === 'off' || nflState.week === 0;
+  const isOffseason = nflState.season_type === 'off' || nflState.week === 0;
 
   const context = buildTradeContext(
     trade,
@@ -266,8 +264,12 @@ Instructions:
 Keep the tone fun and engaging, but provide genuine fantasy football insights. Consider factors like:
 - Player age and career trajectory (use the age/years_exp/rank data provided)
 - Positional needs (use the roster shape data to identify surplus or need)
-- Dynasty league context (future value matters!)${isOffseason ? '' : `
-- Team records and whether they're contending or rebuilding`}
+- Dynasty league context (future value matters!)${
+    isOffseason
+      ? ''
+      : `
+- Team records and whether they're contending or rebuilding`
+  }
 - Draft pick value
 
 IMPORTANT: Key the "teams" object by roster ID (as a string), not team name. For example:

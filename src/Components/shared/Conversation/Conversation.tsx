@@ -87,7 +87,10 @@ export const Conversation = ({
         const isLeft = config.side === 'left';
 
         return (
-          <MessageGroupWrapper key={`${group.speaker}-${groupIdx}`} $isLeft={isLeft}>
+          <MessageGroupWrapper
+            key={`${group.speaker}-${groupIdx}`}
+            $isLeft={isLeft}
+          >
             <SpeakerLabel
               $nameColor={config.nameColor}
               $isLeft={isLeft}
@@ -99,7 +102,11 @@ export const Conversation = ({
             {group.messages.map((msg, msgIdx) => {
               const isFirst = msgIdx === 0;
               return (
-                <BubbleRow key={`${groupIdx}-${msgIdx}`} $isLeft={isLeft} $compact={compact}>
+                <BubbleRow
+                  key={`${groupIdx}-${msgIdx}`}
+                  $isLeft={isLeft}
+                  $compact={compact}
+                >
                   {isLeft &&
                     (isFirst ? (
                       <AvatarImg

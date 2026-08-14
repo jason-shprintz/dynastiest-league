@@ -42,14 +42,17 @@ export const SpeakerLabel = styled.div<{
 export const BubbleRow = styled.div<{ $isLeft: boolean; $compact: boolean }>`
   display: flex;
   align-items: flex-start;
-  gap: ${({ $compact }) => ($compact ? `${GAP_COMPACT}px` : `${GAP_DEFAULT}px`)};
+  gap: ${({ $compact }) =>
+    $compact ? `${GAP_COMPACT}px` : `${GAP_DEFAULT}px`};
   justify-content: ${({ $isLeft }) => ($isLeft ? 'flex-start' : 'flex-end')};
   width: 100%;
 `;
 
 export const AvatarImg = styled.img<{ $compact: boolean }>`
-  width: ${({ $compact }) => ($compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`)};
-  height: ${({ $compact }) => ($compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`)};
+  width: ${({ $compact }) =>
+    $compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`};
+  height: ${({ $compact }) =>
+    $compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`};
   border-radius: 50%;
   object-fit: cover;
   /* stylelint-disable-next-line property-no-unknown */
@@ -58,7 +61,8 @@ export const AvatarImg = styled.img<{ $compact: boolean }>`
 `;
 
 export const AvatarSpacer = styled.div<{ $compact: boolean }>`
-  width: ${({ $compact }) => ($compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`)};
+  width: ${({ $compact }) =>
+    $compact ? `${AVATAR_SIZE_COMPACT}px` : `${AVATAR_SIZE_DEFAULT}px`};
   flex-shrink: 0;
 `;
 
@@ -100,7 +104,7 @@ export const Bubble = styled.div<{
     }
   `
       : $isFirst && !$isLeft
-      ? `
+        ? `
     &::before {
       content: '';
       position: absolute;
@@ -113,7 +117,7 @@ export const Bubble = styled.div<{
       border-color: transparent transparent transparent ${$color};
     }
   `
-      : ''}
+        : ''}
 
   @media (max-width: 480px) {
     max-width: 80%;

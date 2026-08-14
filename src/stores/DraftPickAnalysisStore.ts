@@ -26,7 +26,8 @@ export interface DraftPickAnalysis {
  */
 export class DraftPickAnalysisStore {
   /** Map of draft_id → (pick_no → analysis | null) */
-  analysesByDraftId: Map<string, Map<number, DraftPickAnalysis | null>> = new Map();
+  analysesByDraftId: Map<string, Map<number, DraftPickAnalysis | null>> =
+    new Map();
   loadingDraftIds: Set<string> = new Set();
   nextRetryAtByDraftId: Map<string, number> = new Map();
   error: string | null = null;
@@ -56,12 +57,19 @@ export class DraftPickAnalysisStore {
   /**
    * Fetch all pick analyses for a draft
    */
-  async loadAnalyses(draftId: string, options?: { force?: boolean }): Promise<boolean> {
+  async loadAnalyses(
+    draftId: string,
+    options?: { force?: boolean },
+  ): Promise<boolean> {
     // Skip if already loading
     if (this.loadingDraftIds.has(draftId)) return false;
 
     // Check retry timer for drafts that returned empty
-    if (!options?.force && this.analysesByDraftId.has(draftId) && !this.shouldRetry(draftId)) {
+    if (
+      !options?.force &&
+      this.analysesByDraftId.has(draftId) &&
+      !this.shouldRetry(draftId)
+    ) {
       return false;
     }
 
@@ -76,10 +84,15 @@ export class DraftPickAnalysisStore {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch draft pick analyses: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch draft pick analyses: ${response.statusText}`,
+        );
       }
 
-      const data = (await response.json()) as Record<string, DraftPickAnalysis | null>;
+      const data = (await response.json()) as Record<
+        string,
+        DraftPickAnalysis | null
+      >;
 
       runInAction(() => {
         const map = new Map<number, DraftPickAnalysis | null>();
@@ -90,7 +103,10 @@ export class DraftPickAnalysisStore {
 
         // Schedule retry if no analyses exist yet (draft may not have started)
         if (map.size === 0) {
-          this.nextRetryAtByDraftId.set(draftId, Date.now() + this.RETRY_DELAY_MS);
+          this.nextRetryAtByDraftId.set(
+            draftId,
+            Date.now() + this.RETRY_DELAY_MS,
+          );
         } else {
           this.nextRetryAtByDraftId.delete(draftId);
         }
@@ -109,7 +125,10 @@ export class DraftPickAnalysisStore {
   /**
    * Get analysis for a specific pick
    */
-  getAnalysis(draftId: string, pickNo: number): DraftPickAnalysis | null | undefined {
+  getAnalysis(
+    draftId: string,
+    pickNo: number,
+  ): DraftPickAnalysis | null | undefined {
     return this.analysesByDraftId.get(draftId)?.get(pickNo);
   }
 

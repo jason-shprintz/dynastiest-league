@@ -22,7 +22,12 @@ interface DraftBoardProps {
   getTeamName: (rosterId: number) => string;
 }
 
-export const DraftBoard = ({ draft, picks, analyses, getTeamName }: DraftBoardProps) => {
+export const DraftBoard = ({
+  draft,
+  picks,
+  analyses,
+  getTeamName,
+}: DraftBoardProps) => {
   const numRounds = draft.settings.rounds;
   const numTeams = draft.settings.teams;
 

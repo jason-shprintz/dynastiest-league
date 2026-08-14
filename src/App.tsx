@@ -49,7 +49,8 @@ function App() {
   const { section: initialSectionValue, subsection: initialSubsection } =
     parseHash();
 
-  const [activeSection, setActiveSection] = useState<Section>(initialSectionValue);
+  const [activeSection, setActiveSection] =
+    useState<Section>(initialSectionValue);
   const [targetSubsection, setTargetSubsection] = useState<string | undefined>(
     initialSubsection,
   );

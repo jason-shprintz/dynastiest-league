@@ -3,7 +3,15 @@
  * Functions to interact with D1 database
  */
 
-import type { Env, TradeAnalysis, TradeAnalysisRecord, DraftPickAnalysis, DraftPickAnalysisRecord, TeamDraftGrade, TeamDraftGradeRecord } from './types';
+import type {
+  Env,
+  TradeAnalysis,
+  TradeAnalysisRecord,
+  DraftPickAnalysis,
+  DraftPickAnalysisRecord,
+  TeamDraftGrade,
+  TeamDraftGradeRecord,
+} from './types';
 
 /**
  * Get trade analysis by transaction ID
@@ -102,7 +110,9 @@ export async function getAnalysisVersion(
   transactionId: string,
 ): Promise<string | null> {
   const row = await db
-    .prepare('SELECT analysis_version FROM trade_analysis WHERE transaction_id = ? LIMIT 1')
+    .prepare(
+      'SELECT analysis_version FROM trade_analysis WHERE transaction_id = ? LIMIT 1',
+    )
     .bind(transactionId)
     .first<{ analysis_version: string }>();
   return row?.analysis_version ?? null;
@@ -139,7 +149,9 @@ export async function getPickAnalysisVersion(
   pickNo: number,
 ): Promise<string | null> {
   const row = await db
-    .prepare('SELECT analysis_version FROM draft_pick_analysis WHERE draft_id = ? AND pick_no = ? LIMIT 1')
+    .prepare(
+      'SELECT analysis_version FROM draft_pick_analysis WHERE draft_id = ? AND pick_no = ? LIMIT 1',
+    )
     .bind(draftId, pickNo)
     .first<{ analysis_version: string }>();
   return row?.analysis_version ?? null;
@@ -167,7 +179,15 @@ export async function savePickAnalysis(
        analysis_version = excluded.analysis_version,
        updated_at = excluded.updated_at`,
     )
-    .bind(draftId, pickNo, leagueId, now, JSON.stringify(analysis), version, now)
+    .bind(
+      draftId,
+      pickNo,
+      leagueId,
+      now,
+      JSON.stringify(analysis),
+      version,
+      now,
+    )
     .run();
 }
 
@@ -179,7 +199,9 @@ export async function getDraftPickAnalyses(
   draftId: string,
 ): Promise<Record<number, DraftPickAnalysis>> {
   const result = await db
-    .prepare('SELECT pick_no, analysis_json FROM draft_pick_analysis WHERE draft_id = ? ORDER BY pick_no ASC')
+    .prepare(
+      'SELECT pick_no, analysis_json FROM draft_pick_analysis WHERE draft_id = ? ORDER BY pick_no ASC',
+    )
     .bind(draftId)
     .all<DraftPickAnalysisRecord>();
 
@@ -201,7 +223,9 @@ export async function getTeamDraftGradeVersion(
   rosterId: number,
 ): Promise<string | null> {
   const row = await db
-    .prepare('SELECT analysis_version FROM team_draft_grade WHERE draft_id = ? AND roster_id = ? LIMIT 1')
+    .prepare(
+      'SELECT analysis_version FROM team_draft_grade WHERE draft_id = ? AND roster_id = ? LIMIT 1',
+    )
     .bind(draftId, rosterId)
     .first<{ analysis_version: string }>();
   return row?.analysis_version ?? null;
@@ -241,7 +265,9 @@ export async function getTeamDraftGrades(
   draftId: string,
 ): Promise<Record<number, TeamDraftGrade>> {
   const result = await db
-    .prepare('SELECT roster_id, grade_json FROM team_draft_grade WHERE draft_id = ? ORDER BY roster_id ASC')
+    .prepare(
+      'SELECT roster_id, grade_json FROM team_draft_grade WHERE draft_id = ? ORDER BY roster_id ASC',
+    )
     .bind(draftId)
     .all<TeamDraftGradeRecord>();
 

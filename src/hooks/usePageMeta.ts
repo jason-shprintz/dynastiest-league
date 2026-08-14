@@ -39,8 +39,7 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
   },
   trades: {
     title: 'Trades | The Dynastiest League',
-    description:
-      'Recent trade history and analysis for the Dynastiest League.',
+    description: 'Recent trade history and analysis for the Dynastiest League.',
   },
   draft: {
     title: 'Draft | The Dynastiest League',

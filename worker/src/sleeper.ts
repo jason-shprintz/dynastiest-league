@@ -123,7 +123,8 @@ export async function getPlayerMap(
             team: p.team ?? undefined,
             age: p.age ?? undefined,
             years_exp: p.years_exp ?? undefined,
-            draft_year: draftYearRaw !== undefined ? String(draftYearRaw) : undefined,
+            draft_year:
+              draftYearRaw !== undefined ? String(draftYearRaw) : undefined,
             search_rank: p.search_rank ?? undefined,
           };
         }
@@ -196,7 +197,9 @@ export async function fetchDraft(draftId: string): Promise<SleeperDraft> {
 /**
  * Fetch all picks for a specific draft from Sleeper
  */
-export async function fetchDraftPicks(draftId: string): Promise<SleeperDraftPick[]> {
+export async function fetchDraftPicks(
+  draftId: string,
+): Promise<SleeperDraftPick[]> {
   const response = await fetch(`${SLEEPER_API_BASE}/draft/${draftId}/picks`);
   if (!response.ok) {
     throw new Error(`Failed to fetch draft picks: ${response.statusText}`);
@@ -209,7 +212,9 @@ export async function fetchDraftPicks(draftId: string): Promise<SleeperDraftPick
  * Sleeper returns drafts in reverse chronological order (newest first).
  * Used by the cron to auto-detect the active draft when LEAGUE_DRAFT_ID is unset.
  */
-export async function fetchLeagueDrafts(leagueId: string): Promise<SleeperDraft[]> {
+export async function fetchLeagueDrafts(
+  leagueId: string,
+): Promise<SleeperDraft[]> {
   const response = await fetch(`${SLEEPER_API_BASE}/league/${leagueId}/drafts`);
   if (!response.ok) {
     throw new Error(`Failed to fetch league drafts: ${response.statusText}`);

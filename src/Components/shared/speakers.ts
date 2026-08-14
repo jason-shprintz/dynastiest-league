@@ -24,13 +24,13 @@ export const MIKE_AND_JIM_SPEAKERS: Record<string, SpeakerConfig> = {
   Mike: {
     avatar: '/MikeFantasy.webp',
     side: 'left',
-    color: '#1a4a80',            // deep steel blue — ~11:1 contrast with white
+    color: '#1a4a80', // deep steel blue — ~11:1 contrast with white
     nameColor: COLORS.textSecondary,
   },
   Jim: {
     avatar: '/JimFantasy.webp',
     side: 'right',
-    color: '#8b2500',            // dark burnt orange — ~8:1 contrast with white
+    color: '#8b2500', // dark burnt orange — ~8:1 contrast with white
     nameColor: COLORS.accent,
   },
 };
