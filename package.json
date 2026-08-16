@@ -14,7 +14,7 @@
     "clean:appledouble": "find . -type f -name '._*' -delete",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "cleanup": "npm run format:check && npm run lint"
+    "cleanup": "npm run format && npm run lint"
   },
   "dependencies": {
     "mobx": "^6.15.0",

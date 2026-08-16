@@ -31,7 +31,9 @@ const FONT_DIR = path.join(ROOT, 'public', 'fonts');
  */
 const LATIN_1 = [
   Array.from({ length: 0x7f - 0x20 }, (_, i) => String.fromCodePoint(0x20 + i)),
-  Array.from({ length: 0x100 - 0xa0 }, (_, i) => String.fromCodePoint(0xa0 + i)),
+  Array.from({ length: 0x100 - 0xa0 }, (_, i) =>
+    String.fromCodePoint(0xa0 + i),
+  ),
 ].join('');
 
 const EXTRA_PUNCTUATION = [
