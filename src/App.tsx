@@ -121,7 +121,7 @@ function App() {
           <Suspense
             fallback={
               <SectionFallback role="status" aria-live="polite">
-                <LoadingSpinner />
+                <LoadingSpinner aria-hidden="true" />
                 <span>Loading…</span>
               </SectionFallback>
             }

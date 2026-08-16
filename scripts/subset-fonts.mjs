@@ -29,9 +29,10 @@ const FONT_DIR = path.join(ROOT, 'public', 'fonts');
  * curly quotes, bullets, ellipses, the trademark and euro signs, and the
  * minus/multiplication signs used in stat tables).
  */
-const LATIN_1 = Array.from({ length: 0x100 - 0x20 }, (_, i) =>
-  String.fromCodePoint(0x20 + i),
-).join('');
+const LATIN_1 = [
+  Array.from({ length: 0x7f - 0x20 }, (_, i) => String.fromCodePoint(0x20 + i)),
+  Array.from({ length: 0x100 - 0xa0 }, (_, i) => String.fromCodePoint(0xa0 + i)),
+].join('');
 
 const EXTRA_PUNCTUATION = [
   '\u0131', // dotless i
@@ -84,7 +85,8 @@ async function isUpToDate(sourcePath, outputPath) {
       stat(sourcePath),
       stat(outputPath),
     ]);
-    return output.mtimeMs >= source.mtimeMs;
+    const script = await stat(fileURLToPath(import.meta.url));
+    return output.mtimeMs >= Math.max(source.mtimeMs, script.mtimeMs);
   } catch {
     return false;
   }
