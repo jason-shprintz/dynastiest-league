@@ -89,3 +89,6 @@ worker/dist/
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+# Generated font subsets (see scripts/subset-fonts.mjs)
+public/fonts/*-subset.woff2

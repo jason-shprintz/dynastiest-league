@@ -1,21 +1,36 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import GlobalStyles from './GlobalStyles';
-import { AppContainer, MainContent } from './App.styles';
-import AllTeams from './Components/AllTeams/AllTeams';
-import Blog from './Components/Blog/Blog';
-import Champion from './Components/Champion/Champion';
-import Constitution from './Components/Constitution/Constitution';
-import Draft from './Components/Draft/Draft';
+import { AppContainer, MainContent, SectionFallback } from './App.styles';
 import Footer from './Components/Footer/Footer';
-import HallOfRecords from './Components/HallOfRecords/HallOfRecords';
 import Header from './Components/Header/Header';
 import Home from './Components/MainContent/MainContent';
-import Scouting from './Components/Scouting/Scouting';
-import Trades from './Components/Trades/Trades';
-import PreviousSeasons from './Components/PreviousSeasons/PreviousSeasons';
+import { LoadingSpinner } from './theme/shared.styles';
 import { NavigationTarget, Section } from './types';
 import usePageMeta from './hooks/usePageMeta';
 import { isValidSection } from './constants';
+
+/**
+ * Every section other than the home page is code-split. Only one section is
+ * ever mounted at a time, so eagerly importing all ten pushed roughly 36 KiB of
+ * unused JavaScript into the initial bundle and blocked the main thread during
+ * startup. `Home` stays eager because it is the default route and contains the
+ * largest contentful paint.
+ */
+const AllTeams = lazy(() => import('./Components/AllTeams/AllTeams'));
+const Blog = lazy(() => import('./Components/Blog/Blog'));
+const Champion = lazy(() => import('./Components/Champion/Champion'));
+const Constitution = lazy(
+  () => import('./Components/Constitution/Constitution'),
+);
+const Draft = lazy(() => import('./Components/Draft/Draft'));
+const HallOfRecords = lazy(
+  () => import('./Components/HallOfRecords/HallOfRecords'),
+);
+const PreviousSeasons = lazy(
+  () => import('./Components/PreviousSeasons/PreviousSeasons'),
+);
+const Scouting = lazy(() => import('./Components/Scouting/Scouting'));
+const Trades = lazy(() => import('./Components/Trades/Trades'));
 
 /**
  * Root application component that manages navigation state and renders the main layout.
@@ -103,21 +118,30 @@ function App() {
         />
 
         <MainContent>
-          {activeSection === 'home' && <Home />}
-          {activeSection === 'records' && <HallOfRecords />}
-          {activeSection === 'champion' && <Champion />}
-          {activeSection === 'constitution' && (
-            <Constitution
-              targetSubsection={targetSubsection}
-              onSubsectionViewed={handleSubsectionViewed}
-            />
-          )}
-          {activeSection === 'scouting' && <Scouting />}
-          {activeSection === 'blog' && <Blog onNavigate={handleNavigate} />}
-          {activeSection === 'teams' && <AllTeams />}
-          {activeSection === 'trades' && <Trades />}
-          {activeSection === 'draft' && <Draft />}
-          {activeSection === 'previous-seasons' && <PreviousSeasons />}
+          <Suspense
+            fallback={
+              <SectionFallback role="status" aria-live="polite">
+                <LoadingSpinner aria-hidden="true" />
+                <span>Loading…</span>
+              </SectionFallback>
+            }
+          >
+            {activeSection === 'home' && <Home />}
+            {activeSection === 'records' && <HallOfRecords />}
+            {activeSection === 'champion' && <Champion />}
+            {activeSection === 'constitution' && (
+              <Constitution
+                targetSubsection={targetSubsection}
+                onSubsectionViewed={handleSubsectionViewed}
+              />
+            )}
+            {activeSection === 'scouting' && <Scouting />}
+            {activeSection === 'blog' && <Blog onNavigate={handleNavigate} />}
+            {activeSection === 'teams' && <AllTeams />}
+            {activeSection === 'trades' && <Trades />}
+            {activeSection === 'draft' && <Draft />}
+            {activeSection === 'previous-seasons' && <PreviousSeasons />}
+          </Suspense>
         </MainContent>
 
         <Footer />
