@@ -39,7 +39,13 @@ const Footer = ({ onNavigate }: IFooterProps) => {
         <FooterLink
           href="#privacy"
           onClick={(event) => {
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+            if (
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey ||
+              event.button !== 0
+            ) {
               return;
             }
             event.preventDefault();
