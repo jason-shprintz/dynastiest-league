@@ -41,6 +41,7 @@ const Footer = ({ onNavigate }: IFooterProps) => {
           onClick={(event) => {
             event.preventDefault();
             onNavigate('privacy');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
           Privacy

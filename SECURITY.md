@@ -37,7 +37,7 @@ Please do **not** open a public issue for security reports.
 Preferred: open a private report through
 [GitHub Security Advisories](https://github.com/jason-shprintz/dynastiest-league/security/advisories/new).
 
-Alternatively, email **support@toastbyte.studio**.
+Alternatively, email **<jshprintz@gmail.com>**.
 
 Include as much of the following as you can:
 

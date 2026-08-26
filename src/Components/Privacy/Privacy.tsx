@@ -30,8 +30,7 @@ const Privacy = () => {
           <p>
             There are no accounts, no sign-ups, no forms and no ads. Nothing is
             sold here, and no data is sold either. The site counts how many
-            people visit and which sections they open. That is the extent of
-            it.
+            people visit and which sections they open. That is the extent of it.
           </p>
         </PrivacyItem>
 
@@ -143,10 +142,7 @@ const Privacy = () => {
           <h3>Contact</h3>
           <p>
             Questions about any of this go to{' '}
-            <a href="mailto:support@toastbyte.studio">
-              support@toastbyte.studio
-            </a>
-            .
+            <a href="mailto:jshprintz@gmail.com">jshprintz@gmail.com</a>.
           </p>
         </PrivacyItem>
       </PrivacyContent>
