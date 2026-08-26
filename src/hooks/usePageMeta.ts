@@ -73,10 +73,10 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
  * the pageview has to fire after the title above has been applied — keeping
  * both in one effect makes that ordering impossible to break by accident.
  *
- * Bad routes are reported like any other section. The pageview carries the
- * "Page Not Found" title alongside the hash the visitor actually asked for,
- * which is what makes dead links findable in analytics rather than invisible.
- *
+ * Bad routes are reported like any other section on client-side navigations.
+ * The pageview carries the "Page Not Found" title alongside the hash the
+ * visitor actually asked for, which is what makes dead links findable in
+ * analytics rather than invisible.
  * @param activeSection - The currently active navigation section
  */
 const usePageMeta = (activeSection: Section): void => {
