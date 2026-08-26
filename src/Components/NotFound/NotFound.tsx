@@ -48,9 +48,9 @@ const NotFound = ({ onNavigate }: INotFoundProps) => {
       <Explanation>
         {attempted ? (
           <>
-            There is no section called <RequestedPath>{attempted}</RequestedPath>
-            . The link that brought you here may be out of date, or the address
-            may have a typo.
+            There is no section called{' '}
+            <RequestedPath>{attempted}</RequestedPath>. The link that brought
+            you here may be out of date, or the address may have a typo.
           </>
         ) : (
           <>
