@@ -9,6 +9,12 @@ export const DEFAULT_LEAGUE_ID = '1326434695138787328';
  *
  * `privacy` is routable and deep-linkable via `#privacy`, but is deliberately
  * absent from the header navigation — it is reached from the footer.
+ *
+ * `not-found` is deliberately NOT listed. This array answers "is this hash
+ * something a visitor can legitimately ask for?", and the not-found section is
+ * a destination the app chooses, never one a URL or a NavLink can request.
+ * Including it would make `#not-found` resolve as a valid route, which is
+ * circular, and would let blog content link straight to the error page.
  */
 export const VALID_SECTIONS: readonly Section[] = [
   'home',

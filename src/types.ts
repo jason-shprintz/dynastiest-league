@@ -9,7 +9,8 @@ type Section =
   | 'trades'
   | 'draft'
   | 'previous-seasons'
-  | 'privacy';
+  | 'privacy'
+  | 'not-found';
 
 // Navigation target that can include an optional subsection for deep linking
 interface NavigationTarget {
