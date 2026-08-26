@@ -28,7 +28,7 @@ export const trackPageview = (): void => {
   // `spaPageview` is not part of that stub, so a plain `if (window.zaraz)`
   // check can pass while the call still fails.
   if (typeof zaraz?.spaPageview !== 'function') {
-    if (isDev) {
+    if (isDev && typeof window !== 'undefined') {
       console.debug(
         '[analytics] pageview (no-op):',
         document.title,

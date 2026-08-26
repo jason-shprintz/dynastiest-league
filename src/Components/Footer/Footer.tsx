@@ -39,6 +39,9 @@ const Footer = ({ onNavigate }: IFooterProps) => {
         <FooterLink
           href="#privacy"
           onClick={(event) => {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+              return;
+            }
             event.preventDefault();
             onNavigate('privacy');
             window.scrollTo({ top: 0, behavior: 'smooth' });
