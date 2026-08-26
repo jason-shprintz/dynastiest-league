@@ -57,6 +57,10 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
     description:
       'What dynastiestleague.com collects, who receives it, and how to avoid it.',
   },
+  'not-found': {
+    title: 'Page Not Found | The Dynastiest League',
+    description: 'That address does not match anything on this site.',
+  },
 };
 
 /**
@@ -68,6 +72,10 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
  * `document.title` and the URL off the document at the moment it is called, so
  * the pageview has to fire after the title above has been applied — keeping
  * both in one effect makes that ordering impossible to break by accident.
+ *
+ * Bad routes are reported like any other section. The pageview carries the
+ * "Page Not Found" title alongside the hash the visitor actually asked for,
+ * which is what makes dead links findable in analytics rather than invisible.
  *
  * @param activeSection - The currently active navigation section
  */

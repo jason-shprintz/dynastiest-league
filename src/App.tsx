@@ -26,6 +26,7 @@ const Draft = lazy(() => import('./Components/Draft/Draft'));
 const HallOfRecords = lazy(
   () => import('./Components/HallOfRecords/HallOfRecords'),
 );
+const NotFound = lazy(() => import('./Components/NotFound/NotFound'));
 const PreviousSeasons = lazy(
   () => import('./Components/PreviousSeasons/PreviousSeasons'),
 );
@@ -53,11 +54,24 @@ const Trades = lazy(() => import('./Components/Trades/Trades'));
  * Parses `window.location.hash` into a validated section and an optional
  * subsection. Supports both plain hashes (`#blog`) and compound hashes
  * (`#constitution/unsportsmanlike-conduct`).
+ *
+ * An absent hash means the home page. A hash that is present but names no
+ * known section is an error rather than a synonym for home — previously both
+ * collapsed to `home`, so a mistyped or dead link silently rendered the
+ * landing page and looked like it had worked.
  */
 const parseHash = (): { section: Section; subsection?: string } => {
   const hash = window.location.hash.replace('#', '');
+
+  if (!hash) {
+    return { section: 'home' };
+  }
+
   const [sectionPart, subsectionPart] = hash.split('/');
-  const section = isValidSection(sectionPart) ? sectionPart : 'home';
+  const section: Section = isValidSection(sectionPart)
+    ? sectionPart
+    : 'not-found';
+
   return { section, subsection: subsectionPart || undefined };
 };
 
@@ -73,6 +87,14 @@ function App() {
 
   // Sync URL hash whenever the active section changes
   useEffect(() => {
+    // The not-found section has no hash of its own, and rewriting the address
+    // bar to `#not-found` would destroy the very thing the visitor needs to
+    // see: what they actually asked for. Leave the bad hash in place so it can
+    // be read, corrected, or reported.
+    if (activeSection === 'not-found') {
+      return;
+    }
+
     const newHash = activeSection === 'home' ? '' : `#${activeSection}`;
     if (window.location.hash !== newHash) {
       const newUrl = newHash
@@ -143,6 +165,9 @@ function App() {
             {activeSection === 'draft' && <Draft />}
             {activeSection === 'previous-seasons' && <PreviousSeasons />}
             {activeSection === 'privacy' && <Privacy />}
+            {activeSection === 'not-found' && (
+              <NotFound onNavigate={handleSectionChange} />
+            )}
           </Suspense>
         </MainContent>
 
