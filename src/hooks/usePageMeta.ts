@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Section } from '../types';
+import { trackPageview } from '../helper/analytics';
 
 const sectionMeta: Record<Section, { title: string; description: string }> = {
   home: {
@@ -51,15 +52,38 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
     description:
       'Historical season results and champion history for the Dynastiest League since 2020.',
   },
+  privacy: {
+    title: 'Privacy | The Dynastiest League',
+    description:
+      'What dynastiestleague.com collects, who receives it, and how to avoid it.',
+  },
 };
 
 /**
  * Custom hook that updates the document title and meta tags whenever the active
- * section changes, improving SEO and AI engine visibility for the SPA.
+ * section changes, improving SEO and AI engine visibility for the SPA, and
+ * reports the change to analytics as a pageview.
+ *
+ * Meta updates and pageview reporting live together deliberately. Zaraz reads
+ * `document.title` and the URL off the document at the moment it is called, so
+ * the pageview has to fire after the title above has been applied — keeping
+ * both in one effect makes that ordering impossible to break by accident.
  *
  * @param activeSection - The currently active navigation section
  */
 const usePageMeta = (activeSection: Section): void => {
+  /**
+   * Zaraz fires its own Pageview for the initial document load, and does so
+   * even with "Single Page Application support" disabled in Zaraz Settings.
+   * Reporting again on mount would double-count the first section of every
+   * session, so the first run of this effect only updates the meta tags.
+   *
+   * In development React StrictMode double-invokes effects, which flips this
+   * guard early and reports a spurious view. That is harmless: Zaraz is not
+   * present outside the production zone, so `trackPageview` is a no-op there.
+   */
+  const hasSeenInitialRender = useRef(false);
+
   useEffect(() => {
     const meta = sectionMeta[activeSection];
 
@@ -73,6 +97,15 @@ const usePageMeta = (activeSection: Section): void => {
     document
       .querySelector('meta[property="og:description"]')
       ?.setAttribute('content', meta.description);
+
+    // App.tsx declares its history.pushState effect before calling this hook,
+    // so effect ordering guarantees the hash is already current here.
+    if (hasSeenInitialRender.current) {
+      trackPageview();
+      return;
+    }
+
+    hasSeenInitialRender.current = true;
   }, [activeSection]);
 };
 

@@ -1,5 +1,15 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+
+/**
+ * The app version shown in the footer is read from package.json at build time
+ * and inlined as a constant, so the manifest itself never has to be imported
+ * into the client bundle just to surface one string.
+ */
+const { version: appVersion } = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf-8'),
+) as { version: string };
 
 /**
  * Vendor chunks are matched by module path rather than by package entry point.
@@ -38,6 +48,9 @@ const resolveVendorChunk = (id: string): string | undefined => {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   build: {
     rollupOptions: {
       output: {

@@ -8,3 +8,9 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * The `version` field from package.json, inlined at build time by the `define`
+ * block in vite.config.ts. Displayed in the footer.
+ */
+declare const __APP_VERSION__: string;

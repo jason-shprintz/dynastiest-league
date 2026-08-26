@@ -29,6 +29,7 @@ const HallOfRecords = lazy(
 const PreviousSeasons = lazy(
   () => import('./Components/PreviousSeasons/PreviousSeasons'),
 );
+const Privacy = lazy(() => import('./Components/Privacy/Privacy'));
 const Scouting = lazy(() => import('./Components/Scouting/Scouting'));
 const Trades = lazy(() => import('./Components/Trades/Trades'));
 
@@ -141,10 +142,11 @@ function App() {
             {activeSection === 'trades' && <Trades />}
             {activeSection === 'draft' && <Draft />}
             {activeSection === 'previous-seasons' && <PreviousSeasons />}
+            {activeSection === 'privacy' && <Privacy />}
           </Suspense>
         </MainContent>
 
-        <Footer />
+        <Footer onNavigate={handleSectionChange} />
       </AppContainer>
     </>
   );
