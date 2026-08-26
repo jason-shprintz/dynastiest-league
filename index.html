@@ -98,6 +98,23 @@
       crossorigin="anonymous"
     />
 
+    <!--
+      Analytics is loaded by Cloudflare Zaraz at the edge, not from this file.
+      Zaraz injects the GA4 tag into the response as it passes through the
+      proxy, so there is no snippet to maintain here and no measurement ID in
+      the bundle. Configured in the Cloudflare dashboard under Account → Tag
+      Management → Zaraz, for the dynastiestleague.com zone.
+
+      Zaraz covers the initial document load on its own. Because this is a
+      client-rendered SPA, hash navigation is reported separately from
+      src/hooks/usePageMeta.ts — see src/helper/analytics.ts. Zaraz's built-in
+      "Single Page Application support" setting is intentionally disabled; it
+      fires before the document title is updated and would mislabel every view.
+
+      Zaraz only runs on the proxied apex domain, so nothing is reported from
+      local dev or from *.pages.dev preview deployments.
+    -->
+
     <!-- Structured Data / JSON-LD -->
     <script type="application/ld+json">
       {
