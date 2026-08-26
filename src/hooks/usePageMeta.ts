@@ -52,6 +52,11 @@ const sectionMeta: Record<Section, { title: string; description: string }> = {
     description:
       'Historical season results and champion history for the Dynastiest League since 2020.',
   },
+  privacy: {
+    title: 'Privacy | The Dynastiest League',
+    description:
+      'What dynastiestleague.com collects, who receives it, and how to avoid it.',
+  },
 };
 
 /**
