@@ -12,6 +12,12 @@ import {
  * This component renders embedded widgets from Sleeper showing trending
  * player adds and drops to help league managers with their scouting decisions.
  *
+ * The iframes below depend on `frame-src` in `public/_headers` allowing the
+ * Sleeper origins. Vite's dev server does not apply that file, so a CSP that
+ * blocks these embeds will look fine locally and only fail once deployed.
+ * If these widgets ever render as "This content is blocked", check the CSP
+ * before assuming Sleeper changed something.
+ *
  * @returns A React component containing scouting tools and trending player data
  */
 const Scouting = () => {
