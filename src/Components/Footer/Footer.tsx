@@ -1,5 +1,5 @@
 import { Section } from '../../types';
-import { isConsentRequired } from '../../helper/consent';
+import { isAnalyticsConsentRequired } from '../../helper/analytics-consent';
 import { CONSENT_REOPEN_EVENT } from '../ConsentBanner/ConsentBanner';
 import {
   FooterContainer,
@@ -62,7 +62,7 @@ const Footer = ({ onNavigate }: IFooterProps) => {
           Hidden entirely when consent is not required, rather than rendered
           as a control that opens nothing.
         */}
-        {isConsentRequired() && (
+        {isAnalyticsConsentRequired() && (
           <>
             <Separator aria-hidden="true">·</Separator>
             <FooterButton

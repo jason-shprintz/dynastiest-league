@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { isAnalyticsConsentRequired } from '../../helper/analytics-consent';
 import {
   hasZarazConsentRecord,
-  isConsentRequired,
-  readConsent,
-  writeConsent,
-} from '../../helper/consent';
+  readAnalyticsConsent,
+  setAnalyticsConsent,
+} from '../../helper/analytics';
 import {
   BannerContainer,
   BannerInner,
@@ -30,7 +30,7 @@ export const CONSENT_REOPEN_EVENT = 'consent:reopen';
  * Replaces the stock Cloudflare Zaraz consent modal.
  *
  * Requires "Show consent modal" to be DISABLED in the Zaraz dashboard while
- * "Enable Consent Management" stays ENABLED — otherwise this banner and the
+ * "Enable Consent Management" stays ENABLED, otherwise this banner and the
  * Zaraz modal both appear.
  *
  * Opens only when the visitor has not answered. A recorded refusal is an
@@ -40,15 +40,15 @@ export const CONSENT_REOPEN_EVENT = 'consent:reopen';
  * @returns The consent banner, or null when there is nothing to ask
  */
 const ConsentBanner = () => {
-  const [isOpen, setIsOpen] = useState(() => readConsent() === null);
+  const [isOpen, setIsOpen] = useState(() => readAnalyticsConsent() === null);
 
   const choose = useCallback((granted: boolean) => {
-    writeConsent(granted);
+    setAnalyticsConsent(granted);
     setIsOpen(false);
   }, []);
 
   useEffect(() => {
-    if (!isConsentRequired()) return;
+    if (!isAnalyticsConsentRequired()) return;
 
     const open = () => setIsOpen(true);
 
@@ -57,12 +57,12 @@ const ConsentBanner = () => {
      * banner shipped, or who answered in another tab.
      *
      * Checks for Zaraz's consent COOKIE rather than counting the keys of
-     * `zaraz.consent.getAll()` — getAll() returns an entry for every
+     * `zaraz.consent.getAll()` - getAll() returns an entry for every
      * configured purpose whether or not the visitor answered, so counting its
      * keys hides the banner from everybody.
      */
     const closeIfAnswered = () => {
-      if (readConsent() !== null || hasZarazConsentRecord()) {
+      if (readAnalyticsConsent() !== null || hasZarazConsentRecord()) {
         setIsOpen(false);
       }
     };
@@ -87,7 +87,8 @@ const ConsentBanner = () => {
 
   return (
     <BannerContainer
-      role="region"
+      role="dialog"
+      aria-modal="false"
       aria-labelledby="consent-banner-title"
       aria-describedby="consent-banner-body"
     >
