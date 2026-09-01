@@ -1,4 +1,4 @@
-name: Tag and Draft Release
+name: Tag and Release
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
             git push origin "${{ steps.version.outputs.version }}"
           fi
 
-      - name: Draft GitHub release
+      - name: GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -43,6 +43,5 @@ jobs:
           else
             gh release create "${{ steps.version.outputs.version }}" \
               --title "${{ steps.version.outputs.version }}" \
-              --draft \
               --generate-notes
           fi
