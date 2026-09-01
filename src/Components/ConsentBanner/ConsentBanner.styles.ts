@@ -106,16 +106,3 @@ export const ConsentButton = styled.button`
   }
 `;
 
-export const ButtonRow = styled.div`
-  display: contents;
-
-  @media (max-width: 480px) {
-    display: flex;
-    flex: 1 1 100%;
-    gap: 0.6rem;
-
-    ${ConsentButton} {
-      flex: 1;
-    }
-  }
-`;

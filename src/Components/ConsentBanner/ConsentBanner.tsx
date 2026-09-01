@@ -87,8 +87,7 @@ const ConsentBanner = () => {
 
   return (
     <BannerContainer
-      role="dialog"
-      aria-modal="false"
+      role="region"
       aria-labelledby="consent-banner-title"
       aria-describedby="consent-banner-body"
     >
