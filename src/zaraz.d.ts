@@ -16,6 +16,23 @@ interface ZarazEventProperties {
   [key: string]: string | number | boolean | null | undefined;
 }
 
+interface ZarazConsent {
+  /** True once Zaraz's consent API has finished initialising. */
+  APIReady?: boolean;
+  /** Grants or denies every configured purpose at once. */
+  setAll?: (value: boolean) => void;
+  /**
+   * Consent status of every CONFIGURED purpose.
+   *
+   * Note this reports configuration, not whether the visitor has answered: on
+   * a fresh session with one purpose it returns `{ <purposeId>: false }`. See
+   * `hasZarazConsentRecord` in src/helper/consent.ts for why that matters.
+   */
+  getAll?: () => Record<string, boolean>;
+  /** Delivers events Zaraz withheld while consent was unanswered. */
+  sendQueuedEvents?: () => void;
+}
+
 interface Zaraz {
   /** Sends a custom event to every tool with a matching trigger. */
   track: (eventName: string, properties?: ZarazEventProperties) => void;
@@ -27,6 +44,8 @@ interface Zaraz {
     value: unknown,
     options?: { scope?: 'page' | 'session' | 'persist' },
   ) => void;
+  /** Present only when Consent Management is enabled on the zone. */
+  consent?: ZarazConsent;
 }
 
 interface Window {
