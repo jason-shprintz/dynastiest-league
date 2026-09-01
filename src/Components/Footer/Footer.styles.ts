@@ -18,11 +18,12 @@ export const FooterMeta = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 0.6rem;
   font-size: 0.85rem;
 `;
 
-export const FooterLink = styled.a`
+const footerLinkStyles = `
   color: ${COLORS.textMuted};
   text-decoration: none;
   border-bottom: 1px solid transparent;
@@ -35,6 +36,24 @@ export const FooterLink = styled.a`
     color: ${COLORS.accent};
     border-bottom-color: ${COLORS.accent};
   }
+`;
+
+export const FooterLink = styled.a`
+  ${footerLinkStyles}
+`;
+
+/**
+ * Visually identical to FooterLink but a real button, because re-opening the
+ * consent banner is an action rather than a destination — there is no URL to
+ * put in an href.
+ */
+export const FooterButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  ${footerLinkStyles}
 `;
 
 export const Separator = styled.span`

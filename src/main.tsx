@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
+import ConsentBanner from './Components/ConsentBanner/ConsentBanner';
 import { RootStore, StoreProvider } from './stores';
 import { DEFAULT_LEAGUE_ID } from './constants';
 
@@ -16,6 +17,12 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StoreProvider value={rootStore}>
       <App />
+      {/*
+        A fixed-position overlay that is not part of any section, mounted as a
+        sibling of <App /> so it does not have to be threaded through the
+        routing tree. The footer re-opens it with a DOM event.
+      */}
+      <ConsentBanner />
     </StoreProvider>
   </StrictMode>,
 );
