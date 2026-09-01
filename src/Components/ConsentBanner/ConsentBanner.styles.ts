@@ -105,4 +105,3 @@ export const ConsentButton = styled.button`
     outline-offset: 2px;
   }
 `;
-
