@@ -6,7 +6,7 @@ import {
   PrivacyItem,
 } from './Privacy.styles';
 
-const UPDATED = 'August 26, 2026';
+const UPDATED = 'August 27, 2026';
 
 /**
  * Privacy policy for dynastiestleague.com.
@@ -30,7 +30,8 @@ const Privacy = () => {
           <p>
             There are no accounts, no sign-ups, no forms and no ads. Nothing is
             sold here, and no data is sold either. The site counts how many
-            people visit and which sections they open. That is the extent of it.
+            people visit and which sections they open, and it asks first. That
+            is the extent of it.
           </p>
         </PrivacyItem>
 
@@ -42,7 +43,11 @@ const Privacy = () => {
             script in the page, so the requests are first-party, but the data
             still goes to Google.
           </p>
-          <p>What that records on a visit:</p>
+          <p>
+            None of it loads until you accept. Decline and no analytics cookie
+            is set and nothing is sent to Google.
+          </p>
+          <p>If you accept, here is what a visit records:</p>
           <ul>
             <li>which sections you opened, when, and how long you stayed</li>
             <li>the page or search that referred you</li>
@@ -59,6 +64,21 @@ const Privacy = () => {
           </p>
           <p>
             None of this identifies you. It is counts and patterns, not people.
+          </p>
+        </PrivacyItem>
+
+        <PrivacyItem>
+          <h3>Your choice, and changing it</h3>
+          <p>
+            The banner records your answer in a cookie called{' '}
+            <strong>analytics-consent</strong>, which lasts a year. That cookie
+            is the only thing stored if you decline — it exists so you are not
+            asked again on every visit.
+          </p>
+          <p>
+            <strong>Cookie settings</strong> at the bottom of any page re-opens
+            the banner. Accepting and declining are equally easy, deliberately;
+            you can change your mind in either direction at any time.
           </p>
         </PrivacyItem>
 
@@ -87,7 +107,8 @@ const Privacy = () => {
             which involves handling your IP address and may involve setting its
             own cookies for bot detection. That happens at the network level,
             before anything this site controls, and is governed by
-            Cloudflare&apos;s own privacy terms.
+            Cloudflare&apos;s own privacy terms. Declining analytics does not
+            affect it.
           </p>
         </PrivacyItem>
 
@@ -96,7 +117,8 @@ const Privacy = () => {
           <p>
             League data is fetched by your browser rather than by a server, so
             these services see your IP address as a consequence of answering the
-            request:
+            request. This happens whatever you choose above, because it is how
+            the site gets its content:
           </p>
           <ul>
             <li>
@@ -118,15 +140,17 @@ const Privacy = () => {
         <PrivacyItem>
           <h3>Avoiding the analytics</h3>
           <p>
-            Any content blocker or privacy-focused browser will stop the
-            analytics from loading, as will Google&apos;s official opt-out
-            browser add-on. The site works normally without it.
+            Declining is the straightforward route. Beyond that, any content
+            blocker or privacy-focused browser will stop the analytics from
+            loading, as will Google&apos;s official opt-out browser add-on. The
+            site works normally without it.
           </p>
           <p>
-            Worth being straight about the limits of asking instead: the
-            analytics data is not linked to a name or an email, so there is no
-            reliable way to find your records and delete them on request.
-            Blocking it is the remedy that actually works.
+            Worth being straight about the limits of asking after the fact: if
+            you accepted and later want that data removed, it is not linked to a
+            name or an email, so there is no reliable way to find your records
+            and delete them on request. Declining up front is the remedy that
+            actually works.
           </p>
         </PrivacyItem>
 

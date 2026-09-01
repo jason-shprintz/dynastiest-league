@@ -2,6 +2,11 @@
 
 interface ImportMetaEnv {
   readonly VITE_WORKER_URL?: string;
+  /**
+   * Set to '1' to require analytics consent before Zaraz may load GA4.
+   * Anything else — including unset — means no banner and no gating.
+   */
+  readonly VITE_ANALYTICS_REQUIRE_CONSENT?: string;
   // Add more env variables as needed
 }
 

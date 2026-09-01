@@ -1,9 +1,12 @@
 import { Section } from '../../types';
+import { isAnalyticsConsentRequired } from '../../helper/analytics-consent';
+import { CONSENT_REOPEN_EVENT } from '../ConsentBanner/ConsentBanner';
 import {
   FooterContainer,
   Copyright,
   FooterMeta,
   FooterLink,
+  FooterButton,
   Separator,
   AppVersion,
 } from './Footer.styles';
@@ -14,7 +17,7 @@ interface IFooterProps {
 
 /**
  * Renders the site footer with a copyright notice, a link to the privacy
- * policy, and the current app version.
+ * policy, a control to revisit the cookie choice, and the current app version.
  *
  * The ending year is computed dynamically from the current date, producing a
  * range like `2020-YYYY`.
@@ -55,6 +58,23 @@ const Footer = ({ onNavigate }: IFooterProps) => {
         >
           Privacy
         </FooterLink>
+        {/*
+          Hidden entirely when consent is not required, rather than rendered
+          as a control that opens nothing.
+        */}
+        {isAnalyticsConsentRequired() && (
+          <>
+            <Separator aria-hidden="true">·</Separator>
+            <FooterButton
+              type="button"
+              onClick={() => {
+                document.dispatchEvent(new CustomEvent(CONSENT_REOPEN_EVENT));
+              }}
+            >
+              Cookie settings
+            </FooterButton>
+          </>
+        )}
         <Separator aria-hidden="true">·</Separator>
         <AppVersion title="App version">v{__APP_VERSION__}</AppVersion>
       </FooterMeta>
