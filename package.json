@@ -1,7 +1,7 @@
 {
   "name": "dynastiest-league",
   "private": true,
-  "version": "2.8.4",
+  "version": "2.8.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -38,6 +38,6 @@
     "subset-font": "^2.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1",
-    "vite": "^7.2.4"
+    "vite": "^7.3.7"
   }
 }
