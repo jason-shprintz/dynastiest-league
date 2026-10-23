@@ -1,0 +1,151 @@
+name: Bump version on Dependabot PRs
+
+# Dependabot can't bump package.json's version, so require-version-bump.yml
+# fails every Dependabot PR. This workflow pushes the bump for it:
+#
+# - When a Dependabot PR is opened or updated, it sets the version to main's
+#   version + 1 patch (e.g. 0.14.0 -> 0.14.1) and pushes that commit to the PR.
+# - On every eligible run, it re-checks all open Dependabot PRs. If two were
+#   both bumped to 0.14.1 and one merged, the other is updated to main and
+#   bumped to 0.14.2.
+#
+# Safety: this uses pull_request_target (so the token can push), but it never
+# runs code from the PR. It only reads and edits the version field in
+# package.json and package-lock.json, and it only acts on PRs opened by
+# Dependabot from branches in this repo.
+#
+# Once this workflow has pushed to a PR, Dependabot stops rebasing that PR
+# itself. If a PR can't be updated automatically, the workflow comments on it.
+# Commenting `@dependabot recreate` then rebuilds the PR, and this workflow
+# bumps it again.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.user.login == 'dependabot[bot]' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    concurrency:
+      group: dependabot-version-bump
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out main (trusted code), never the PR's code.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Bump Dependabot PRs whose version doesn't beat main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          # The node -e snippets use JS template literals, not shell expansion.
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --base "$BASE" --state open \
+            --author 'app/dependabot' --json number --jq '.[].number')
+          if [ -z "$prs" ]; then
+            echo 'No open Dependabot PRs.'
+            exit 0
+          fi
+
+          MARKER='<!-- dependabot-version-bump:conflict -->'
+
+          for pr in $prs; do
+            echo "::group::PR #$pr"
+            branch=$(gh pr view "$pr" --repo "$GITHUB_REPOSITORY" --json headRefName --jq .headRefName)
+            git fetch --quiet origin "$BASE" "+refs/heads/$branch:refs/remotes/origin/$branch"
+            git checkout --quiet -B "$branch" "origin/$branch"
+
+            base_version=$(git show "origin/$BASE:package.json" | node -e \
+              'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).version))')
+
+            # Exit 0 = already ahead of main, nothing to do; 1 = needs a bump.
+            if
+              # shellcheck disable=SC2016
+              node -e '
+              const parse = (v) => {
+                const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(v);
+                if (!m) throw new Error(`Unsupported version "${v}" (expected x.y.z)`);
+                return m.slice(1).map(Number);
+              };
+              const head = parse(require("./package.json").version);
+              const base = parse(process.argv[1]);
+              const cmp = head[0] - base[0] || head[1] - base[1] || head[2] - base[2];
+              process.exit(cmp > 0 ? 0 : 1);
+            ' "$base_version"; then
+              echo "Already ahead of $BASE ($base_version); nothing to do."
+              echo '::endgroup::'
+              continue
+            fi
+
+            # Bring the PR up to date with main first, so the version line
+            # (and anything else main changed) merges cleanly.
+            if ! git merge-base --is-ancestor "origin/$BASE" HEAD; then
+              if ! git merge --no-edit --quiet "origin/$BASE"; then
+                git merge --abort
+                echo "::warning::PR #$pr conflicts with $BASE; asking for @dependabot recreate."
+                already=$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" --paginate \
+                  --jq '.[].body' | grep -cF "$MARKER" || true)
+                if [ "${already:-0}" -eq 0 ]; then
+                  gh pr comment "$pr" --repo "$GITHUB_REPOSITORY" --body "$MARKER
+          This PR conflicts with \`$BASE\`, so its version couldn't be bumped automatically. Comment \`@dependabot recreate\` to rebuild it; the version will be bumped again once it's recreated."
+                fi
+                echo '::endgroup::'
+                continue
+              fi
+            fi
+
+            # shellcheck disable=SC2016
+            next=$(node -e '
+              const [maj, min, pat] = process.argv[1].split(".").map(Number);
+              console.log(`${maj}.${min}.${pat + 1}`);
+            ' "$base_version")
+
+            # Edit the version fields in place so the file formatting is untouched.
+            # shellcheck disable=SC2016
+            node -e '
+              const fs = require("fs");
+              const next = process.argv[1];
+              const pkg = fs.readFileSync("package.json", "utf8");
+              const field = /("version"\s*:\s*")[^"]*(")/;
+              fs.writeFileSync("package.json", pkg.replace(field, `$1${next}$2`));
+              if (fs.existsSync("package-lock.json")) {
+                let lock = fs.readFileSync("package-lock.json", "utf8");
+                const parsed = JSON.parse(lock);
+                const lockOld = parsed.version;
+                // The first two "version" keys in a lockfile are the root
+                // package and packages[""]. Set both, even if they had drifted
+                // from package.json, but only if they agree with each other.
+                if (typeof lockOld === "string" && parsed.packages?.[""]?.version === lockOld) {
+                  lock = lock.replace(field, `$1${next}$2`).replace(
+                    new RegExp(`("version"\\s*:\\s*")${lockOld.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(")`),
+                    `$1${next}$2`,
+                  );
+                  fs.writeFileSync("package-lock.json", lock);
+                }
+              }
+            ' "$next"
+
+            git add package.json package-lock.json 2>/dev/null || git add package.json
+            git commit --quiet -m "chore: bump version to $next"
+            git push --quiet origin "HEAD:refs/heads/$branch"
+            echo "Bumped PR #$pr: $base_version -> $next"
+            echo '::endgroup::'
+          done
