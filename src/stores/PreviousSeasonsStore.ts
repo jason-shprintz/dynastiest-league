@@ -23,6 +23,17 @@ import { DEFAULT_LEAGUE_ID } from '../constants';
 
 const REGULAR_SEASON_WEEKS = 18;
 
+/**
+ * League statuses for which the current season has results worth counting
+ * in all-time aggregations. Pre-draft and drafting leagues are excluded so
+ * empty 0-0 rows don't appear before the season starts.
+ */
+const ACTIVE_SEASON_STATUSES = new Set([
+  'in_season',
+  'post_season',
+  'complete',
+]);
+
 export interface SeasonInfo {
   year: string;
   leagueId: string;
@@ -61,6 +72,11 @@ export interface SeasonData {
  */
 export class PreviousSeasonsStore {
   seasons: SeasonInfo[] = [];
+  /**
+   * The current season, set only once it has results (in season or later).
+   * Kept separate from `seasons` so the Previous Seasons picker is unaffected.
+   */
+  currentSeason: SeasonInfo | null = null;
   selectedLeagueId: string = '';
   seasonData: SeasonData | null = null;
   allSeasonsData: AllSeasonEntry[] = [];
@@ -72,12 +88,14 @@ export class PreviousSeasonsStore {
   constructor() {
     makeAutoObservable(this, {
       selectedYear: computed,
+      allTimeSeasons: computed,
     });
   }
 
   /**
    * Build the chain of previous seasons by traversing `previous_league_id`.
-   * Automatically selects the most recent previous season.
+   * Automatically selects the most recent previous season. Also records the
+   * current season (when it has started) for all-time aggregations.
    */
   async buildSeasonChain(): Promise<void> {
     this.isLoadingSeasons = true;
@@ -94,8 +112,15 @@ export class PreviousSeasonsStore {
         prevId = league.previous_league_id;
       }
 
+      const currentSeason: SeasonInfo | null = ACTIVE_SEASON_STATUSES.has(
+        currentLeague.status,
+      )
+        ? { year: currentLeague.season, leagueId: DEFAULT_LEAGUE_ID }
+        : null;
+
       runInAction(() => {
         this.seasons = chain;
+        this.currentSeason = currentSeason;
         if (chain.length > 0) this.selectedLeagueId = chain[0].leagueId;
         this.isLoadingSeasons = false;
       });
@@ -186,19 +211,31 @@ export class PreviousSeasonsStore {
   }
 
   /**
-   * Load rosters and users for all seasons in the chain and store them for
-   * all-time aggregations (e.g. all-time standings on the Hall of Records).
+   * Every season that counts toward all-time aggregations: the current
+   * season (once it has started) followed by all previous seasons.
+   */
+  get allTimeSeasons(): SeasonInfo[] {
+    return this.currentSeason
+      ? [this.currentSeason, ...this.seasons]
+      : this.seasons;
+  }
+
+  /**
+   * Load rosters and users for every season in `allTimeSeasons` and store
+   * them for all-time aggregations (e.g. all-time standings on the Hall of
+   * Records). Includes the in-progress season, so totals update weekly.
    * Uses per-season error handling so one failed season doesn't block the rest.
    */
   async loadAllSeasonsData(): Promise<void> {
-    if (this.seasons.length === 0) return;
+    const seasonsToLoad = this.allTimeSeasons;
+    if (seasonsToLoad.length === 0) return;
 
     this.isLoadingAllSeasons = true;
     this.error = null;
 
     try {
       const settled = await Promise.allSettled(
-        this.seasons.map(async ({ leagueId, year }) => {
+        seasonsToLoad.map(async ({ leagueId, year }) => {
           const [rosters, users] = await Promise.all([
             fetchRosters(leagueId),
             fetchUsers(leagueId),
@@ -233,6 +270,7 @@ export class PreviousSeasonsStore {
 
   reset(): void {
     this.seasons = [];
+    this.currentSeason = null;
     this.selectedLeagueId = '';
     this.seasonData = null;
     this.allSeasonsData = [];

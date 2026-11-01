@@ -64,16 +64,17 @@ const HallOfRecords = observer(() => {
     }
   }, [previousSeasonsStore]);
 
-  // Once seasons are available, load all-seasons data for standings aggregation
+  // Once seasons are available, load all-seasons data (including the current
+  // season) for standings aggregation
   useEffect(() => {
     if (
-      previousSeasonsStore.seasons.length > 0 &&
+      previousSeasonsStore.allTimeSeasons.length > 0 &&
       previousSeasonsStore.allSeasonsData.length === 0 &&
       !previousSeasonsStore.isLoadingAllSeasons
     ) {
       previousSeasonsStore.loadAllSeasonsData();
     }
-  }, [previousSeasonsStore, previousSeasonsStore.seasons.length]);
+  }, [previousSeasonsStore, previousSeasonsStore.allTimeSeasons.length]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -99,7 +100,7 @@ const HallOfRecords = observer(() => {
     [rostersStore.rosters],
   );
 
-  // Aggregate all-time standings from all historical seasons.
+  // Aggregate all-time standings from all seasons, including the current one.
   // All owners are included; isFormer flags those no longer in the current season.
   const allTimeStandings = useMemo(() => {
     const map = new Map<
